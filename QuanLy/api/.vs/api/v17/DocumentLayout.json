@@ -76,7 +76,7 @@
               "RelativeDocumentMoniker": "Services\\Login\\LoginService.cs",
               "ToolTip": "E:\\MSF\\QuanLy\\api\\Services\\Login\\LoginService.cs",
               "RelativeToolTip": "Services\\Login\\LoginService.cs",
-              "ViewState": "AgIAABgAAAAAAAAAAAA1wBIAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-27T08:37:30.63Z",
               "EditorCaption": ""
@@ -91,8 +91,7 @@
               "RelativeToolTip": "Services\\SignUp\\SignUpService.cs",
               "ViewState": "AgIAADkAAAAAAAAAAAAAABsAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-27T07:32:07.158Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-27T07:32:07.158Z"
             },
             {
               "$type": "Document",
@@ -104,8 +103,7 @@
               "RelativeToolTip": "MoHinhDuLieu\\User.cs",
               "ViewState": "AgIAAAkAAAAAAAAAAAA1wBMAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-27T07:26:30.533Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-27T07:26:30.533Z"
             },
             {
               "$type": "Document",
@@ -117,8 +115,7 @@
               "RelativeToolTip": "DTO\\SignUp\\SignUpInputDto.cs",
               "ViewState": "AgIAAAUAAAAAAAAAAAAAwBAAAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-27T06:45:37.039Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-27T06:45:37.039Z"
             },
             {
               "$type": "Document",
@@ -130,8 +127,7 @@
               "RelativeToolTip": "Program.cs",
               "ViewState": "AgIAADQAAAAAAAAAAAAQwFEAAAAgAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-25T07:27:20.21Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T07:27:20.21Z"
             },
             {
               "$type": "Document",
@@ -143,8 +139,7 @@
               "RelativeToolTip": "Services\\Auth\\TokenService.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAAwB8AAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-25T09:48:17.636Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-25T09:48:17.636Z"
             },
             {
               "$type": "Document",

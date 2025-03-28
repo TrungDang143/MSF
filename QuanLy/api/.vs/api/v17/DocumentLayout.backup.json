@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "E:\\MSF\\QuanLy\\api\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\services\\login\\loginservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:services\\login\\loginservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\services\\signup\\signupservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:services\\signup\\signupservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -67,19 +71,32 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "LoginService.cs",
+              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Services\\Login\\LoginService.cs",
+              "RelativeDocumentMoniker": "Services\\Login\\LoginService.cs",
+              "ToolTip": "E:\\MSF\\QuanLy\\api\\Services\\Login\\LoginService.cs",
+              "RelativeToolTip": "Services\\Login\\LoginService.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAA1wBIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-27T08:37:30.63Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "SignUpService.cs",
               "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Services\\SignUp\\SignUpService.cs",
               "RelativeDocumentMoniker": "Services\\SignUp\\SignUpService.cs",
-              "ToolTip": "E:\\MSF\\QuanLy\\api\\Services\\SignUp\\SignUpService.cs*",
-              "RelativeToolTip": "Services\\SignUp\\SignUpService.cs*",
-              "ViewState": "AgIAAB4AAAAAAAAAAAAAACAAAACmAAAAAAAAAA==",
+              "ToolTip": "E:\\MSF\\QuanLy\\api\\Services\\SignUp\\SignUpService.cs",
+              "RelativeToolTip": "Services\\SignUp\\SignUpService.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAAABsAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-27T07:32:07.158Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "User.cs",
               "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\MoHinhDuLieu\\User.cs",
               "RelativeDocumentMoniker": "MoHinhDuLieu\\User.cs",
@@ -92,7 +109,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "SignUpInputDto.cs",
               "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\DTO\\SignUp\\SignUpInputDto.cs",
               "RelativeDocumentMoniker": "DTO\\SignUp\\SignUpInputDto.cs",
@@ -105,7 +122,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Program.cs",
               "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -118,7 +135,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "TokenService.cs",
               "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Services\\Auth\\TokenService.cs",
               "RelativeDocumentMoniker": "Services\\Auth\\TokenService.cs",
@@ -131,7 +148,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "appsettings.json",
               "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
@@ -143,7 +160,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "BaseResponse.cs",
               "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Interface\\BaseResponse.cs",
               "RelativeDocumentMoniker": "Interface\\BaseResponse.cs",

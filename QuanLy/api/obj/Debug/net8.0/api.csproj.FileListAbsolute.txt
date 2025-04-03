@@ -168,3 +168,11 @@ E:\MSF\QuanLy\api\obj\Debug\net8.0\api.pdb
 E:\MSF\QuanLy\api\obj\Debug\net8.0\api.genruntimeconfig.cache
 E:\MSF\QuanLy\api\obj\Debug\net8.0\ref\api.dll
 E:\MSF\QuanLy\api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+E:\MSF\QuanLy\api\obj\Debug\net8.0\api.sourcelink.json
+E:\MSF\QuanLy\api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.Facebook.dll
+E:\MSF\QuanLy\api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.Google.dll
+E:\MSF\QuanLy\api\bin\Debug\net8.0\Google.Apis.dll
+E:\MSF\QuanLy\api\bin\Debug\net8.0\Google.Apis.Auth.dll
+E:\MSF\QuanLy\api\bin\Debug\net8.0\Google.Apis.Core.dll
+E:\MSF\QuanLy\api\bin\Debug\net8.0\System.Management.dll
+E:\MSF\QuanLy\api\bin\Debug\net8.0\runtimes\win\lib\net7.0\System.Management.dll

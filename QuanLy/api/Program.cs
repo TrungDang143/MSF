@@ -1,9 +1,5 @@
-using api.Interface.Login;
-using api.Interface.SignUp;
-using api.MoHinhDuLieu;
-using api.Services.Auth;
-using api.Services.Login;
-using api.Services.SignUp;
+using api.Interface;
+using api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -18,10 +14,6 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-IConfigurationRoot cf = new ConfigurationBuilder().SetBasePath(AppDomain.CurrentDomain.BaseDirectory).
-    AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).Build();
-builder.Services.AddDbContext<EntryTestQlyContext>(opt => opt.UseSqlServer(cf.GetConnectionString("conn")));
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
@@ -41,12 +33,25 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    })
+    .AddFacebook(options =>
+    {
+        options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
+        options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+    });
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<IToken, TokenService>();
 builder.Services.AddScoped<ILogin, LoginService>();
 builder.Services.AddScoped<ISignUp, SignUpService>();
+builder.Services.AddScoped<IForgot, ForgotService>();
+builder.Services.AddScoped<IHome, HomeService>();
 
 
 builder.Services.AddCors(options =>

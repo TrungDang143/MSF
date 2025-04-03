@@ -1,6 +1,110 @@
 [
   {
-    "ContainingType": "api.Controllers.Login.LoginController",
+    "ContainingType": "api.Controllers.ForgotController",
+    "Method": "ChangePassword",
+    "RelativePath": "api/Forgot/ChangePassword",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inputDto",
+        "Type": "api.DTO.Forgot.ChangePasswordInputDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.ForgotController",
+    "Method": "SendOTP",
+    "RelativePath": "api/Forgot/SendOTP",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inputDto",
+        "Type": "api.DTO.Forgot.GetOTPInputDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.ForgotController",
+    "Method": "VerifyOTP",
+    "RelativePath": "api/Forgot/VerifyOTP",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inputDto",
+        "Type": "api.DTO.Forgot.VerifyOTPInputDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.HomeController",
+    "Method": "GetFullName",
+    "RelativePath": "api/Home/GetFullName",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "UsernameOrEmail",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.LoginController",
     "Method": "Login",
     "RelativePath": "api/Login",
     "HttpMethod": "POST",
@@ -26,7 +130,59 @@
     ]
   },
   {
-    "ContainingType": "api.Controllers.SignUp.SignUpController",
+    "ContainingType": "api.Controllers.LoginController",
+    "Method": "FBLogin",
+    "RelativePath": "api/Login/login-with-facebook",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inputDto",
+        "Type": "api.DTO.Account.FindUserByFBIDDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.LoginController",
+    "Method": "GGLogin",
+    "RelativePath": "api/Login/login-with-google",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inputDto",
+        "Type": "api.DTO.Account.FindUserByGGIDDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.SignUpController",
     "Method": "SignUp",
     "RelativePath": "api/SignUp",
     "HttpMethod": "POST",
@@ -50,5 +206,31 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "api.Controllers.TokenController",
+    "Method": "ValidateToken",
+    "RelativePath": "api/Token/validate-token",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "api.Controllers.TokenController",
+    "Method": "VerifyRecaptcha",
+    "RelativePath": "api/Token/verify-recaptcha",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "api.DTO.Token.RecaptchaRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]

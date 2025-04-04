@@ -43,7 +43,7 @@ export class LoginComponent implements AfterViewInit, OnInit {
   ) {}
 
   ngOnInit(): void {
-
+    this.auth.logout();
     //callback
     (window as any).handleCredentialResponse = (response: any) => {
       this.loginWithGoogle(response.credential)
@@ -181,7 +181,6 @@ export class LoginComponent implements AfterViewInit, OnInit {
       .signInWithFacebook()
       .then((response) => {
         token = response.authToken;
-
         if (!token) {
           this.pop.showOkPopup('Lỗi', 'Có lỗi khi lấy token Facebook!');
           return;
@@ -192,9 +191,9 @@ export class LoginComponent implements AfterViewInit, OnInit {
             if (res.result == '1') {
               console.log('✅ Đăng nhập thành công! (Facebook)', res);
               this.auth.saveUserData(
-                response.data.token,
-                this.loginForm.get('UsernameOrEmail')?.value,
-                response.data.roleID,
+                res.data.token,
+                res.data.username,
+                res.data.roleID,
                 true);
               this.router.navigate(['/home']);
             } 
@@ -223,7 +222,7 @@ export class LoginComponent implements AfterViewInit, OnInit {
           console.log('✅ Đăng nhập thành công! (Google)', res);
           this.auth.saveUserData(
             res.data.token,
-            this.loginForm.get('UsernameOrEmail')?.value,
+            res.data.username,
             res.data.roleID,
             true
           );

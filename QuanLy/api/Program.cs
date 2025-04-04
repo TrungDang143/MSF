@@ -1,4 +1,4 @@
-using api.Interface;
+﻿using api.Interface;
 using api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -52,16 +52,18 @@ builder.Services.AddScoped<ILogin, LoginService>();
 builder.Services.AddScoped<ISignUp, SignUpService>();
 builder.Services.AddScoped<IForgot, ForgotService>();
 builder.Services.AddScoped<IHome, HomeService>();
+builder.Services.AddScoped<IAccount, AccountService>();
 
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
+    options.AddPolicy("AllowLocalhost",
         policy =>
         {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
+            policy.WithOrigins("https://localhost:4200")  // Chỉ cho phép origin của frontend
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();  // Cho phép sử dụng cookies, headers Authorization
         });
 });
 
@@ -76,13 +78,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowLocalhost");
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.UseCors("AllowAll");
 
 app.UseDeveloperExceptionPage();
 

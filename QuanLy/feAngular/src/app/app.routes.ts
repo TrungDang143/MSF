@@ -10,9 +10,14 @@ import { AccountComponent } from './page/home/account/account.component';
 import { DashboardComponent } from './page/home/dashboard/dashboard.component';
 import { SettingComponent } from './page/home/setting/setting.component';
 import { LogComponent } from './page/home/log/log.component';
+import { ListAccountsComponent } from './page/home/account/list-accounts/list-accounts.component';
+import { AddAccountComponent } from './page/home/account/add-account/add-account.component';
+import { MyAccountComponent } from './page/home/account/my-account/my-account.component';
+import { Page404Component } from './page/page-404/page-404.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'page-404', component: Page404Component },
   { path: 'sign-up', component: SignUpComponent },
   { path: 'forgot', component: ForgotComponent },
   { path: 'validate-code', component: ValidateCodeComponent },
@@ -26,9 +31,12 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'setting', component: SettingComponent },
       { path: 'log', component: LogComponent },
+      { path: 'list-accounts', component: ListAccountsComponent },
+      { path: 'add-account', component: AddAccountComponent },
+      { path: 'my-account', component: MyAccountComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: '**', redirectTo: '/login' },
+  { path: '**', redirectTo: '/page-404' },
 ];

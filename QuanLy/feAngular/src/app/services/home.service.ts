@@ -11,8 +11,6 @@ export class HomeService {
 
   getFullName(): Observable<any> {
     var username = localStorage.getItem('user') ?? sessionStorage.getItem('user');
-    
-    console.log(localStorage.getItem('user'))
     const params = new HttpParams()
     .set('UsernameOrEmail', username!)
     return this.http.get(environment.baseUrl + 'Home/GetFullName', {params});

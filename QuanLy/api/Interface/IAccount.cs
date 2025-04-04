@@ -8,7 +8,7 @@ namespace api.Interface
         public BaseResponse GetAllUserAccounts();
         public BaseResponse GetAllAdminAccounts();
         public BaseResponse GetAllSubAdminAccounts();
-        public BaseResponse GetUserInfo();
+        public BaseResponse GetUserInfo(GetUserInfoInDto inputDto);
 
         public BaseResponse UpdateUser(UpdateUserDto inputDto);
         public BaseResponse DeleteUser(DeleteUserDto inputDto);

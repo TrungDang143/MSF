@@ -420,12 +420,12 @@ begin
 end
 
 ----------------------------------------------------------------------------------------------------
-create procedure sp_FindUserByUsernameOrEmail
+create procedure sp_GetUserByUsernameOrEmail
     @UsernameOrEmail VARCHAR(100)
 AS
 BEGIN
 
-   SELECT 1 FROM Users WHERE (Username = @UsernameOrEmail OR Email = @UsernameOrEmail)
+   SELECT top 1 * FROM Users WHERE (Username = @UsernameOrEmail OR Email = @UsernameOrEmail)
 
 END;
 ----------------------------------------------------------------------------------------------------

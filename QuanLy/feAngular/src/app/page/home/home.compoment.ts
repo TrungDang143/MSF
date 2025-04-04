@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
 export class HomeComponent implements OnInit {
 
   constructor(private auth: AuthService, private apiHome: HomeService, private router: Router) {}
-
+ 
   username: string = '###';
   ngOnInit(): void {
     this.getFullName();

@@ -11,18 +11,18 @@
             <td>Trang chủ</td>
             <td><i class="pi pi-home" style="font-size: 1.5rem"></i></td>
           </tr>
-          <tr (click)="goToPage('/account')" id="menu1">
+          <tr  id="menu1">
             <td>Quản lý tài khoản</td>
             <td><i class="pi pi-users" style="font-size: 1.5rem"></i></td>
             <ul id="menu2">
-              <li>
+              <li (click)="goToPage('/list-accounts')">
                   Danh sách tài khoản
               </li>
-              <li>
+              <li (click)="goToPage('/add-account')">
                   Thêm mới tài khoản
               </li>
-              <li>
-                  ###
+              <li (click)="goToPage('/my-account')">
+                  Thông tin cá nhân
               </li>
           </ul>
           </tr>

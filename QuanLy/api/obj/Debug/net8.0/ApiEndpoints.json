@@ -1,5 +1,31 @@
 [
   {
+    "ContainingType": "api.Controllers.AccountController",
+    "Method": "GetUserInfo",
+    "RelativePath": "api/Account/userInfo",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Username",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "api.Controllers.ForgotController",
     "Method": "ChangePassword",
     "RelativePath": "api/Forgot/ChangePassword",

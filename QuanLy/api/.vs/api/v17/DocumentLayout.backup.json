@@ -3,8 +3,16 @@
   "WorkspaceRootPath": "E:\\MSF\\QuanLy\\api\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\interface\\iaccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:interface\\iaccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\services\\accountservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -15,20 +23,12 @@
       "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:services\\tokenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\services\\loginservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:services\\loginservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\services\\homeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:services\\homeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\interface\\itoken.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:interface\\itoken.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\controllers\\tokencontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:controllers\\tokencontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|e:\\msf\\quanly\\api\\interface\\iaccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6F42EACE-1543-4903-8FC4-300A420A1C8E}|api.csproj|solutionrelative:interface\\iaccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,22 +38,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 11,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "TokenController.cs",
-              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Controllers\\TokenController.cs",
-              "RelativeDocumentMoniker": "Controllers\\TokenController.cs",
-              "ToolTip": "E:\\MSF\\QuanLy\\api\\Controllers\\TokenController.cs",
-              "RelativeToolTip": "Controllers\\TokenController.cs",
-              "ViewState": "AgIAABIAAAAAAAAAAAAmwCIAAAAuAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-01T04:38:28.788Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
@@ -80,80 +66,93 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "IToken.cs",
-              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Interface\\IToken.cs",
-              "RelativeDocumentMoniker": "Interface\\IToken.cs",
-              "ToolTip": "E:\\MSF\\QuanLy\\api\\Interface\\IToken.cs",
-              "RelativeToolTip": "Interface\\IToken.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAuwA4AAAASAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "E:\\MSF\\QuanLy\\api\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAEQAAAAAAAAAAAAmwD4AAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T12:11:35.491Z",
+              "WhenOpened": "2025-04-04T09:19:45.06Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "IAccount.cs",
-              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Interface\\IAccount.cs",
-              "RelativeDocumentMoniker": "Interface\\IAccount.cs",
-              "ToolTip": "E:\\MSF\\QuanLy\\api\\Interface\\IAccount.cs",
-              "RelativeToolTip": "Interface\\IAccount.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAuwAoAAAAqAAAAAAAAAA==",
+              "DocumentIndex": 5,
+              "Title": "HomeService.cs",
+              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Services\\HomeService.cs",
+              "RelativeDocumentMoniker": "Services\\HomeService.cs",
+              "ToolTip": "E:\\MSF\\QuanLy\\api\\Services\\HomeService.cs",
+              "RelativeToolTip": "Services\\HomeService.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAwwCIAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T11:53:31.331Z",
+              "WhenOpened": "2025-04-04T04:58:31.93Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "LoginController.cs",
+              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Controllers\\LoginController.cs",
+              "RelativeDocumentMoniker": "Controllers\\LoginController.cs",
+              "ToolTip": "E:\\MSF\\QuanLy\\api\\Controllers\\LoginController.cs",
+              "RelativeToolTip": "Controllers\\LoginController.cs",
+              "ViewState": "AgIAADUAAAAAAAAAAAAgwEYAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-04T03:53:40.69Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TokenService.cs",
+              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Services\\TokenService.cs",
+              "RelativeDocumentMoniker": "Services\\TokenService.cs",
+              "ToolTip": "E:\\MSF\\QuanLy\\api\\Services\\TokenService.cs",
+              "RelativeToolTip": "Services\\TokenService.cs",
+              "ViewState": "AgIAAG4AAAAAAAAAAAAjwLcAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-04T01:54:11.605Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "AccountService.cs",
               "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Services\\AccountService.cs",
               "RelativeDocumentMoniker": "Services\\AccountService.cs",
               "ToolTip": "E:\\MSF\\QuanLy\\api\\Services\\AccountService.cs",
               "RelativeToolTip": "Services\\AccountService.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAYwCgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAADsAAAAAAAAAAAAWwDwAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-03T11:48:09.95Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "LoginService.cs",
-              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Services\\LoginService.cs",
-              "RelativeDocumentMoniker": "Services\\LoginService.cs",
-              "ToolTip": "E:\\MSF\\QuanLy\\api\\Services\\LoginService.cs",
-              "RelativeToolTip": "Services\\LoginService.cs",
-              "ViewState": "AgIAADQAAAAAAAAAAAAQwEAAAAAXAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AccountController.cs",
+              "ToolTip": "E:\\MSF\\QuanLy\\api\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "Controllers\\AccountController.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAD4vx4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-02T01:32:49.796Z",
+              "WhenOpened": "2025-04-04T01:58:12.607Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "TokenService.cs",
-              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Services\\TokenService.cs",
-              "RelativeDocumentMoniker": "Services\\TokenService.cs",
-              "ToolTip": "E:\\MSF\\QuanLy\\api\\Services\\TokenService.cs",
-              "RelativeToolTip": "Services\\TokenService.cs",
-              "ViewState": "AgIAAEUAAAAAAAAAAAAtwEgAAAAxAAAAAAAAAA==",
+              "DocumentIndex": 6,
+              "Title": "IAccount.cs",
+              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Interface\\IAccount.cs",
+              "RelativeDocumentMoniker": "Interface\\IAccount.cs",
+              "ToolTip": "E:\\MSF\\QuanLy\\api\\Interface\\IAccount.cs",
+              "RelativeToolTip": "Interface\\IAccount.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-01T08:58:41.903Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "LoginController.cs",
-              "DocumentMoniker": "E:\\MSF\\QuanLy\\api\\Controllers\\LoginController.cs",
-              "RelativeDocumentMoniker": "Controllers\\LoginController.cs",
-              "ToolTip": "E:\\MSF\\QuanLy\\api\\Controllers\\LoginController.cs",
-              "RelativeToolTip": "Controllers\\LoginController.cs",
-              "ViewState": "AgIAABQAAAAAAAAAAAApwB0AAAAQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-02T07:15:19.05Z",
+              "WhenOpened": "2025-04-03T11:53:31.331Z",
               "EditorCaption": ""
             }
           ]

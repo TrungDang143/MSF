@@ -63,7 +63,7 @@ namespace api.Services
                 return false;
             }
         }
-        public string GenerateToken(string username)
+        public string GenerateToken(string username, int roleID)
         {
             var jwtSettings = _config.GetSection("Jwt");
             var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
@@ -71,6 +71,7 @@ namespace api.Services
             var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.Role, roleID.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
@@ -162,7 +163,7 @@ namespace api.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Invalid Token: " + ex.Message);
+                Console.WriteLine("Invalid GG Token: " + ex.Message);
             }
             return res;
 

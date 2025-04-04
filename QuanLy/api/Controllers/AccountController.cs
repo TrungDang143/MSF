@@ -2,6 +2,7 @@
 using api.DTO.Account;
 using api.DTO.Login;
 using api.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +20,11 @@ namespace api.Controllers
             _tokenService = tokenService;
         }
 
-        
+        [Authorize(Roles = "1")]
+        [HttpGet("userInfo")]
+        public BaseResponse GetUserInfo([FromQuery] GetUserInfoInDto inputDto)
+        {
+            return _account.GetUserInfo(inputDto);
+        }
     }
 }

@@ -26,8 +26,8 @@ namespace api.Controllers
             var res =  _login.Login(inputDto);
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
-                var token = _tokenService.GenerateToken(inputDto.UsernameOrEmail);
                 var roleID = _tokenService.GetUserRoleID(inputDto.UsernameOrEmail);
+                var token = _tokenService.GenerateToken(inputDto.UsernameOrEmail, roleID);
                 res.Data = new
                 {
                     token,
@@ -44,11 +44,13 @@ namespace api.Controllers
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
                 string username = res.Data.ToString();
-                string token = _tokenService.GenerateToken(username);
+                var roleID = _tokenService.GetUserRoleID(username);
+                string token = _tokenService.GenerateToken(username, roleID);
                 res.Data = new
                 {
-                    token = token,
-                    username = username
+                    token,
+                    username,
+                    roleID
                 };
             }
             return res;
@@ -61,11 +63,13 @@ namespace api.Controllers
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
                 string username = res.Data.ToString();
-                string token = _tokenService.GenerateToken(username);
+                var roleID = _tokenService.GetUserRoleID(username);
+                string token = _tokenService.GenerateToken(username, roleID);
                 res.Data = new
                 {
-                    token = token,
-                    username = username
+                    token,
+                    username,
+                    roleID
                 };
             }
             return res;

@@ -1,0 +1,78 @@
+<div class="bg">
+  <div class="container">
+    <div class="validate">
+      <div class="title">Nhập mã khôi phục</div>
+      <form action method="post" [formGroup]="validateForm">
+        <table class="formValidate">
+          <tbody>
+            <tr>
+              <td>
+                <div class="otp-container">
+                  <input
+                    type="text"
+                    maxlength="1"
+                    class="otp-input"
+                    formControlName="digit1"
+                    (input)="moveNext($event, 'digit2')"
+                  />
+                  <input
+                    type="text"
+                    maxlength="1"
+                    class="otp-input"
+                    formControlName="digit2"
+                    (input)="moveNext($event, 'digit3')"
+                    (keydown.backspace)="movePrev($event, 'digit1')"
+                  />
+                  <input
+                    type="text"
+                    maxlength="1"
+                    class="otp-input"
+                    formControlName="digit3"
+                    (input)="moveNext($event, 'digit4')"
+                    (keydown.backspace)="movePrev($event, 'digit2')"
+                  />
+                  <input
+                    type="text"
+                    maxlength="1"
+                    class="otp-input"
+                    formControlName="digit4"
+                    (keydown.backspace)="movePrev($event, 'digit3')"
+                  />
+                </div>
+                <div
+                  class="errMsg"
+                  *ngIf="validateForm.invalid && validateForm.touched"
+                >
+                  <small>Nhập mã khôi khục gồm 4 chữ số.</small>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="reSend">
+                  <a (click)="reSend()" [class.disabled]="isDisabled">
+                    Gửi lại OTP <span *ngIf="countdown > 0">({{ countdown }}s)</span>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="btn">
+                  <button
+                    type="submit"
+                    class="rounded-button"
+                    (click)="validate()"
+                    [disabled]="disableBtn"
+                  >
+                    Xác nhận
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+    </div>
+  </div>
+</div>

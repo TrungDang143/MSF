@@ -1,0 +1,89 @@
+<div class="bg">
+  <div class="container">
+    <div class="forgot">
+      <div class="title">Lấy lại mật khẩu</div>
+      <form action method="post" [formGroup]="forgotForm">
+        <table class="formForgot">
+          <tbody>
+            <tr style="height: 50px;">
+              <td>
+                <input
+                  type="text"
+                  id="username"
+                  formControlName="username"
+                  placeholder="Tên đăng nhập"
+                />
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    forgotForm['controls']['username'].dirty &&
+                    forgotForm['controls']['username'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      forgotForm['controls']['username'].errors['required']
+                    "
+                    >Nhập tên đăng nhập.</small
+                  >
+                  <small
+                    *ngIf="
+                      forgotForm['controls']['username'].errors['minlength']
+                    "
+                    >Tên đăng nhập tối thiểu 5 ký tự.</small
+                  >
+                  <small
+                    *ngIf="
+                      forgotForm['controls']['username'].errors['maxlength']
+                    "
+                    >Tên đăng nhập tối thiểu 40 ký tự</small
+                  >
+                </div>
+              </td>
+            </tr>
+
+            <tr style="height: 50px;">
+              <td>
+                <input
+                  type="text"
+                  id="email"
+                  formControlName="email"
+                  placeholder="Email"
+                />
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    forgotForm['controls']['email'].dirty &&
+                    forgotForm['controls']['email'].errors
+                  "
+                >
+                  <small
+                    *ngIf="forgotForm['controls']['email'].errors['required']"
+                    >Nhập email.</small
+                  >
+                  <small *ngIf="forgotForm['controls']['email'].errors['email']"
+                    >Nhập email đúng định dạng.</small
+                  >
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="btn">
+                  <button
+                    type="submit"
+                    class="rounded-button"
+                    (click)="send()"
+                    [disabled]="disableBtn"
+                  >
+                    Gửi mã
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+    </div>
+  </div>
+</div>

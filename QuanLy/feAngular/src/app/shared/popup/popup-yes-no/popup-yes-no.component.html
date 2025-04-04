@@ -1,0 +1,8 @@
+<h2 mat-dialog-title>{{ data.caption }}</h2>
+<mat-dialog-content>
+  <p>{{ data.message }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="choose(true)">Yes</button>
+  <button mat-button (click)="choose(false)">No</button>
+</mat-dialog-actions>

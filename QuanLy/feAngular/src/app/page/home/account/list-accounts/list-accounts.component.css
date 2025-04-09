@@ -162,8 +162,8 @@ th {
   display: flex;
   gap: 1rem;
 }
-  .google-btn {
-    background-color: #db4437;
+.google-btn {
+    background-color: #db4437 !important;
     border: none;
     color: white;
 
@@ -172,13 +172,21 @@ th {
     }
   }
 
-  .facebook-btn {
-    background-color: #4267B2;
+.facebook-btn {
+    background-color: #4267B2 !important;
     border: none;
     color: white;
 
     &:hover {
       background-color: #37589b;
     }
+  }
+
+  .popup-cell{
+    padding: 5px;
+  }
+
+  .popup-cell p-select{
+    width: 200px;
   }
 

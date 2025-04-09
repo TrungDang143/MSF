@@ -61,7 +61,7 @@ export class ListAccountsComponent implements OnInit {
   displayDetail: boolean = false;
 
   detailAccountForm: FormGroup = new FormGroup({
-    userID: new FormControl(0),
+    userID: new FormControl({value: 0, disabled: true}),
     username: new FormControl(''),
     email: new FormControl(''),
     fullName: new FormControl(null),
@@ -82,7 +82,6 @@ export class ListAccountsComponent implements OnInit {
   });
 
   viewDetail(id: any) {
-    console.log('iddd', id);
     this.apiAccount.GetDetailUserInfo(id).subscribe({
       next: (res) => {
         this.displayDetail = true;

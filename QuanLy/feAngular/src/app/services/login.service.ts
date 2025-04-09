@@ -4,28 +4,36 @@ import { Observable } from 'rxjs';
 import { environment } from '../shared/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class LoginService {
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) { }
-
-  login(userInfo: any): Observable<any>{
+  login(userInfo: any): Observable<any> {
     const url = environment.baseUrl + 'Login';
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
     return this.http.post(url, userInfo, { headers });
   }
 
-  loginWithFB(userInfo: string): Observable<any>{
-    const url = environment.baseUrl + "Login/login-with-facebook"
+  loginWithFB(userInfo: any): Observable<any> {
+    const url = environment.baseUrl + 'Login/login-with-facebook';
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post(url, {token: userInfo}, { headers });
+    return this.http.post(
+      url,
+      {
+        ID: userInfo.ID,
+        Fullname: userInfo.Fullname,
+        Email: userInfo.Email,
+        Avatar: userInfo.Avatar,
+      },
+      { headers }
+    );
   }
 
-  loginWithGG(userInfo: string): Observable<any>{
-    const url = environment.baseUrl + "Login/login-with-google"
+  loginWithGG(userInfo: string): Observable<any> {
+    const url = environment.baseUrl + 'Login/login-with-google';
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post(url, {token: userInfo}, { headers });
+    return this.http.post(url, { token: userInfo }, { headers });
   }
 }

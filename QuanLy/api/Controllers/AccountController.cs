@@ -20,11 +20,25 @@ namespace api.Controllers
             _tokenService = tokenService;
         }
 
-        [Authorize(Roles = "1")]
+        //[Authorize(Roles = "2")]
         [HttpGet("userInfo")]
         public BaseResponse GetUserInfo([FromQuery] GetUserInfoInDto inputDto)
         {
             return _account.GetUserInfo(inputDto);
+        }
+
+        [Authorize(Roles = "1, 3")]
+        [HttpGet("GetAllUserAccounts")]
+        public BaseResponse GetAllUserAccounts()
+        {
+            return _account.GetAllUserAccounts();
+        }
+
+        [Authorize(Roles = "1, 3")]
+        [HttpGet("GetDetailUserInfo")]
+        public BaseResponse GetDetailUserInfo([FromQuery] GetDetailUserInfoInDto inputDto)
+        {
+            return _account.GetDetailUserInfo(inputDto);
         }
     }
 }

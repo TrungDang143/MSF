@@ -1,1 +1,321 @@
-<p>list-accounts works!</p>
+<div class="title">
+  <h2>Danh sách tài khoản</h2>
+</div>
+<div class="content">
+  <div class="list-admin">
+    <p class="sub-title">Tài khoản Admin</p>
+    <table>
+      <tr>
+        <th style="width: 160px; text-align: center">Avatar</th>
+        <th style="width: 180px">Fullname</th>
+        <th style="width: 180px">Username</th>
+        <th style="width: 280px">Email</th>
+        <th style="width: 80px; text-align: center">Status</th>
+        <th style="width: 200px; text-align: center">Action</th>
+      </tr>
+      <tr *ngIf="!listAdmin || listAdmin.length === 0">
+        <td colspan="6" style="text-align: center; color: rgb(255, 57, 57)">
+          Danh sách trống
+        </td>
+      </tr>
+      <tr *ngFor="let item of listAdmin">
+        <td style="text-align: center">
+          <img src="{{ item.avatar }}" alt="avatar" width="100px" />
+        </td>
+        <td>{{ item.fullname }}</td>
+        <td>{{ item.username }}</td>
+        <td>{{ item.email }}</td>
+        <td [ngClass]="item.status === 1 ? 'active' : 'inactive'">
+          {{ item.status === 1 ? "Active" : "Inactive" }}
+        </td>
+        <td style="text-align: center">
+          <p-button
+            label="Detail"
+            severity="info"
+            (click)="viewDetail(item.userID)"
+          />
+          <p-button
+            [label]="item.status === 1 ? 'Disable' : 'Active'"
+            [severity]="item.status === 1 ? 'danger' : 'success'"
+            (click)="changeStatus(item.status)"
+          />
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="list-sub-admin">
+    <p class="sub-title">Tài khoản Sub-Admin</p>
+    <table>
+      <tr>
+        <th style="width: 160px; text-align: center">Avatar</th>
+        <th style="width: 200px">Fullname</th>
+        <th style="width: 200px">Username</th>
+        <th style="width: 280px">Email</th>
+        <th style="width: 80px; text-align: center">Status</th>
+        <th style="width: 150px; text-align: center">Action</th>
+      </tr>
+      <tr *ngIf="!listSubAdmin || listSubAdmin.length === 0">
+        <td colspan="6" style="text-align: center; color: rgb(255, 57, 57)">
+          Danh sách trống
+        </td>
+      </tr>
+      <tr *ngFor="let item of listSubAdmin">
+        <td style="text-align: center">
+          <img src="{{ item.avatar }}" alt="avatar" width="100px" />
+        </td>
+        <td>{{ item.fullname }}</td>
+        <td>{{ item.username }}</td>
+        <td>{{ item.email }}</td>
+        <td [ngClass]="item.status === 1 ? 'active' : 'inactive'">
+          {{ item.status === 1 ? "Active" : "Inactive" }}
+        </td>
+        <td style="text-align: center">
+          <button (click)="viewDetail(item.userID)">Detail</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="list-user">
+    <p class="sub-title">Tài khoản User</p>
+    <table>
+      <tr>
+        <th style="width: 160px; text-align: center">Avatar</th>
+        <th style="width: 200px">Fullname</th>
+        <th style="width: 200px">Username</th>
+        <th style="width: 280px">Email</th>
+        <th style="width: 80px; text-align: center">Status</th>
+        <th style="width: 150px; text-align: center">Action</th>
+      </tr>
+      <tr *ngIf="!listUser || listUser.length === 0">
+        <td colspan="6" style="text-align: center; color: rgb(255, 57, 57)">
+          Danh sách trống
+        </td>
+      </tr>
+      <tr *ngFor="let item of listUser">
+        <td style="text-align: center">
+          <img src="{{ item.avatar }}" alt="avatar" width="100px" />
+        </td>
+        <td>{{ item.fullname }}</td>
+        <td>{{ item.username }}</td>
+        <td>{{ item.email }}</td>
+        <td [ngClass]="item.status === 1 ? 'active' : 'inactive'">
+          {{ item.status === 1 ? "Active" : "Inactive" }}
+        </td>
+        <td style="text-align: center">
+          <button (click)="viewDetail(item.userID)">Detail</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<p-dialog
+  header="Chi tiết tài khoản"
+  [(visible)]="displayDetail"
+  [modal]="true"
+  [style]="{ width: '90%' }"
+>
+  <form action method="post" [formGroup]="detailAccountForm">
+    <div *ngIf="!detailAccountForm">
+      <p style="color: red">Vui lòng thử lại</p>
+    </div>
+    <div *ngIf="detailAccountForm">
+      <div class="popup-detail">
+        <div class="popup-cell userID">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_userID"
+              formControlName="userID"
+              autocomplete="off"
+              [disabled]="true"
+            />
+            <label for="input_userID">UserID</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell fullname">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_fullname"
+              formControlName="fullName"
+              autocomplete="off"
+            />
+            <label for="input_fullname">Fullname</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell username">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_username"
+              formControlName="username"
+              autocomplete="off"
+            />
+            <label for="input_username">Username</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell email">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_email"
+              formControlName="email"
+              autocomplete="off"
+            />
+            <label for="input_email">Email</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell date">
+          <p-floatlabel variant="on">
+            <p-datepicker
+              formControlName="dateOfBirth"
+              inputId="input_date"
+              showIcon
+              iconDisplay="input"
+            />
+            <label for="input_date">Date of birth</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell gender">
+          <p-floatlabel variant="on">
+            <p-select
+              inputId="input_gender"
+              [options]="genders"
+              styleClass="w-full"
+              formControlName="gender"
+            />
+            <label for="input_gender">Gender</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell address">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_address"
+              formControlName="address"
+              autocomplete="off"
+            />
+            <label for="input_address">Address</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell phone">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_phone"
+              formControlName="phoneNumber"
+              autocomplete="off"
+            />
+            <label for="input_phone">Phone number</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell avatar">
+          <p-image
+            src="{{ detailAccountForm.value.avatar }}"
+            alt="Image"
+            width="250"
+            [preview]="true"
+          />
+        </div>
+        <div class="popup-cell create-update">
+          <p-message severity="success"
+            >Create time: {{ detailAccountForm.value.createdAt }}</p-message
+          >
+          <p-message severity="success"
+            >Last update: {{ detailAccountForm.value.updatedAt }}</p-message
+          >
+        </div>
+        <div class="popup-cell otp">
+          <p-message severity="secondary"
+            >OTP: {{ detailAccountForm.value.otp || "-" }}</p-message
+          >
+        </div>
+        <div class="popup-cell gg">
+          Liên kết với Google:
+          <p-inplace *ngIf="detailAccountForm.value.googleID; else btnGG">
+            <ng-template #display>
+              <span>Đã liên kết</span>
+            </ng-template>
+            <ng-template #content>
+              <p class="m-0">
+                {{ detailAccountForm.value.googleID }}
+              </p>
+            </ng-template>
+          </p-inplace>
+          <ng-template #btnGG>
+            <div class="social-login">
+              <p-button
+                label="Liên kết với Google"
+                icon="pi pi-google"
+                class="p-button-rounded p-button-secondary google-btn"
+              >
+              </p-button>
+            </div>
+          </ng-template>
+        </div>
+        <div class="popup-cell fb">
+          Liên kết với Facebook:
+          <p-inplace *ngIf="detailAccountForm.value.facebookID; else btnFF">
+            <ng-template #display>
+              <span>Đã liên kết</span>
+            </ng-template>
+            <ng-template #content>
+              <p class="m-0">
+                {{ detailAccountForm.value.facebookID }}
+              </p>
+            </ng-template>
+          </p-inplace>
+          <ng-template #btnFF>
+            <div class="social-login">
+              <p-button
+                label="Liên kết với Facebook"
+                icon="pi pi-facebook"
+                class="p-button-rounded p-button-secondary facebook-btn"
+              >
+              </p-button>
+            </div>
+          </ng-template>
+        </div>
+        <div class="popup-cell locktime">
+          <p-message severity="warn" variant="outlined"
+            >Last lock time:
+            {{ detailAccountForm.value.lockTime || "-" }}</p-message
+          >
+        </div>
+        <div class="popup-cell remaintime">
+          <p-message severity="warn" variant="outlined"
+            >Remaining Login Attempts:
+            {{ detailAccountForm.value.remainTime || "-" }}</p-message
+          >
+        </div>
+        <div class="popup-cell role">
+          <p-floatlabel variant="on">
+            <p-select
+              inputId="input_role"
+              [options]="roles"
+              styleClass="w-full"
+              formControlName="roleID"
+            />
+            <label for="input_role">Role</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell status">
+          <p-floatlabel variant="on">
+            <p-select
+              inputId="input_status"
+              [options]="status"
+              styleClass="w-full"
+              formControlName="status"
+            />
+            <label for="input_status">Status</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell action-btn">
+          <p-button label="Save" icon="pi pi-check" iconPos="right" />
+          <p-button label="Cancel" icon="pi pi-times" iconPos="right" />
+        </div>
+      </div>
+    </div>
+  </form>
+</p-dialog>

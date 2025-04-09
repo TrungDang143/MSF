@@ -40,7 +40,7 @@ namespace api.Controllers
         [HttpPost("login-with-facebook")]
         public BaseResponse FBLogin([FromBody] FindUserByFBIDDto inputDto)
         {
-            var res = _login.FindUserByFBID(inputDto).Result;
+            var res = _login.FindUserByFBID(inputDto);
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
                 string username = res.Data.ToString();

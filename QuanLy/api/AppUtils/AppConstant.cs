@@ -27,5 +27,18 @@
                 return config.GetSection("Default")["Password"];
             } 
         }
+
+        public static string DEFAULT_KEYCAPTCHA
+        {
+            get
+            {
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .Build();
+
+                return config.GetSection("Default")["KeyCaptcha"]!;
+            }
+        }
     }
 }

@@ -1,6 +1,52 @@
 [
   {
     "ContainingType": "api.Controllers.AccountController",
+    "Method": "GetAllUserAccounts",
+    "RelativePath": "api/Account/GetAllUserAccounts",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.AccountController",
+    "Method": "GetDetailUserInfo",
+    "RelativePath": "api/Account/GetDetailUserInfo",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "UserID",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.AccountController",
     "Method": "GetUserInfo",
     "RelativePath": "api/Account/userInfo",
     "HttpMethod": "GET",
@@ -24,6 +70,32 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "CaptchaController",
+    "Method": "GenerateCaptcha",
+    "RelativePath": "api/Captcha/generate",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CaptchaController",
+    "Method": "VerifyCaptcha",
+    "RelativePath": "api/Captcha/verify",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "CaptchaVerificationRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "api.Controllers.ForgotController",

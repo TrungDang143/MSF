@@ -341,6 +341,10 @@ begin
     BEGIN
 		set @rtnValue = @email
 		SET @status = 1;
+
+		update users
+		set avatar = @Avatar, fullname = @Fullname
+		where FacebookID = @FBID
 	END
     ELSE
     BEGIN
@@ -391,6 +395,11 @@ begin
     BEGIN
 		set @rtnValue = @email
 		SET @status = 1;
+
+		
+		update users
+		set avatar = @Avatar, fullname = @Fullname
+		where GoogleID = @GGID
 	END
     ELSE
     BEGIN
@@ -447,11 +456,22 @@ create procedure sp_GetUsersByRoleID
 AS
 BEGIN
 
-  SELECT * FROM Users WHERE (roleID =@RoleID)
+  SELECT * FROM Users WHERE (roleID = @RoleID)
 
 END;
 declare @rtnValue int;
 exec sp_GetRoleIDByUsernameOrEmail 'dtrung', @rtnValue output
+select @rtnValue
+----------------------------------------------------------------------------------------------------
+create procedure sp_GetAllAccount
+AS
+BEGIN
+
+  SELECT * FROM Users
+
+END;
+declare @rtnValue int;
+exec sp_GetAllAccount 'dtrung', @rtnValue output
 select @rtnValue
 ----------------------------------------------------------------------------------------------------
 DECLARE @ReturnValue VARCHAR(100);

@@ -1,0 +1,184 @@
+
+
+th, td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+th {
+  background-color: #a24bfa;
+  color: white;
+}
+
+.active {
+  color: green;
+  font-weight: bold;
+  text-align: center;
+}
+
+.inactive {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+
+}
+
+.sub-title{
+    padding-top: 20px;
+}
+
+
+.popup-detail {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 5px;
+  width: 1300px;
+  height: 500px;
+}
+  
+
+.popup-detail .userID {
+  grid-column: span 3 / span 3;
+  grid-row-start: 1;
+}
+
+.popup-detail .fullname {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 1;
+}
+
+.popup-detail .username {
+  grid-column: span 3 / span 3;
+  grid-column-start: 1;
+  grid-row-start: 3;
+}
+
+.popup-detail .email {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 3;
+}
+
+.popup-detail .date {
+  grid-column: span 3 / span 3;
+  grid-column-start: 1;
+  grid-row-start: 4;
+}
+
+.popup-detail .gender {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 4;
+}
+
+.popup-detail .address {
+  grid-column: span 3 / span 3;
+  grid-column-start: 1;
+  grid-row-start: 5;
+}
+
+.popup-detail .phone {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 5;
+}
+
+.popup-detail .avatar {
+  grid-column: span 2 / span 2;
+  grid-row: span 2 / span 2;
+  grid-column-start: 7;
+  grid-row-start: 1;
+}
+
+.popup-detail .create-update {
+  grid-column: span 2 / span 2;
+  grid-column-start: 7;
+  grid-row-start: 4;
+}
+
+.popup-detail .otp {
+  grid-column: span 2 / span 2;
+  grid-column-start: 7;
+  grid-row-start: 5;
+}
+
+.popup-detail .gg {
+  grid-column: span 3 / span 3;
+  grid-row-start: 6;
+}
+
+.popup-detail .fb {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 6;
+}
+
+.popup-detail .locktime {
+  grid-column: span 2 / span 2;
+  grid-column-start: 7;
+  grid-row-start: 6;
+}
+
+.popup-detail .remaintime {
+  grid-column: span 2 / span 2;
+  grid-column-start: 7;
+  grid-row-start: 7;
+}
+
+.popup-detail .role {
+  grid-column: span 3 / span 3;
+  grid-column-start: 1;
+  grid-row-start: 7;
+}
+
+.popup-detail .status {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 7;
+}
+
+.popup-detail .action-btn {
+  grid-column: span 8 / span 8;
+  grid-row-start: 8;
+}
+      
+.popup-detail input {
+  width: 400px;
+
+}
+
+.popup-detail .popup-cell{
+  padding: 10px;
+}
+
+.social-login {
+  display: flex;
+  gap: 1rem;
+}
+  .google-btn {
+    background-color: #db4437;
+    border: none;
+    color: white;
+
+    &:hover {
+      background-color: #c23321;
+    }
+  }
+
+  .facebook-btn {
+    background-color: #4267B2;
+    border: none;
+    color: white;
+
+    &:hover {
+      background-color: #37589b;
+    }
+  }
+

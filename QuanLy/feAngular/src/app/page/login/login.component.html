@@ -94,12 +94,31 @@
                   </label>
                 </td>
               </tr>
-              <tr style="height: 80px">
-                <div
+              <tr >
+                <!-- <div
                   class="g-recaptcha"
                   data-sitekey="6Le83QQrAAAAALhsRbqrCJVGkM4U1kt-eLirmyM0 "
                   style="padding-left: 5px"
-                ></div>
+                ></div> -->
+                <p-inputgroup class="w-full md:!w-[30rem]">
+                  <input id="inputCaptcha" type="text" pInputText formControlName="Captcha" placeholder="Nhập CAPTCHA..." style="padding: 5px;">
+                  <p-inputgroup-addon>
+                    <img [src]="captchaImage" alt="Captcha" style="height: 50px; border:1px solid #ccc;">
+                  </p-inputgroup-addon>
+                  <p-inputgroup-addon>
+                    <i class="pi pi-undo" (click)="loadCaptcha()"></i>
+                  </p-inputgroup-addon>
+              </p-inputgroup>
+
+                <!-- <div style="text-align:center;">
+                  <img [src]="captchaImage" alt="Captcha" style="margin-bottom: 10px; border:1px solid #ccc;"><br>
+                  <input type="text" formControlName="Captcha" placeholder="Nhập CAPTCHA..." style="padding: 5px;">
+                  <button (click)="verifyCaptcha()">Xác minh</button>
+                  <button (click)="loadCaptcha()">Tải lại</button>
+                  <p>{{ resultMessage }}</p>
+                </div> -->
+                
+
               </tr>
               <tr style="height: 56px">
                 <td>

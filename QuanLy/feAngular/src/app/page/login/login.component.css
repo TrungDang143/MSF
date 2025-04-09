@@ -51,7 +51,7 @@
   text-align: left;
 }
 
-input[type="text"],
+input[type="text"]:not(#inputCaptcha),
 input[type="password"] {
   font-size: 20px;
   border: 0px;
@@ -59,7 +59,7 @@ input[type="password"] {
   border-radius: 10px;
   border: 1px solid black;
   justify-content: center;
-  height: 35px;
+  height: 40px;
   padding: 5px;
   width: 100%;
 }

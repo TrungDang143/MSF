@@ -29,6 +29,7 @@
             "styles": [
               "@angular/material/prebuilt-themes/rose-red.css",
               "src/styles.css",
+              "node_modules/primeng/resources/themes/aura-light-blue/theme.css",
               "node_modules/primeicons/primeicons.css"
             ],
             "scripts": []
@@ -94,6 +95,7 @@
             "styles": [
               "@angular/material/prebuilt-themes/rose-red.css",
               "src/styles.css",
+              "node_modules/primeng/resources/themes/aura-light-blue/theme.css",
               "node_modules/primeicons/primeicons.css"
             ],
             "scripts": []

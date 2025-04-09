@@ -13,7 +13,6 @@ namespace api.Services
 {
     public class LoginService : ILogin
     {
-
         public BaseResponse Login(LoginInputDto inputDto)
         {
             var res = new BaseResponse();
@@ -31,6 +30,10 @@ namespace api.Services
                     {
                         Direction = ParameterDirection.Output
                     };
+                    var rtnValueParam = new SqlParameter("@ReturnRemainTime", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
 
                     using (SqlCommand cmd = new SqlCommand("sp_LoginUser", conn))
                     {
@@ -38,6 +41,7 @@ namespace api.Services
                         cmd.Parameters.Add(usernameParam);
                         cmd.Parameters.Add(passwordParam);
                         cmd.Parameters.Add(resultParam);
+                        cmd.Parameters.Add(rtnValueParam);
 
                         cmd.ExecuteNonQuery();
 
@@ -48,9 +52,19 @@ namespace api.Services
                             res.Message = "Success!";
                             res.Result = AppConstant.RESULT_SUCCESS;
                         }
-                        else
+                        else if ((int)resultParam.Value == 0)
                         {
-                            res.Message = "Sai thông tin đăng nhập!";
+                            res.Message = "Tài khoản bị khoá hoặc không tồn tại!";
+                            res.Result = AppConstant.RESULT_ERROR;
+                        }
+                        else if ((int)resultParam.Value == 2)
+                        {
+                            res.Message = "Tài khoản bị khoá do nhập sai mật khẩu quá số lần quy định.\nVui lòng thử lại trong ít phút.";
+                            res.Result = AppConstant.RESULT_ERROR;
+                        }
+                        else if ((int)resultParam.Value == 3)
+                        {
+                            res.Message = $"Sai mật khẩu!\nBạn còn lại {(int)rtnValueParam.Value} lần thử.";
                             res.Result = AppConstant.RESULT_ERROR;
                         }
                     }
@@ -65,7 +79,7 @@ namespace api.Services
             return res;
         }
 
-        public async Task<BaseResponse> FindUserByFBID(FindUserByFBIDDto inputDto)
+        public BaseResponse FindUserByFBID(FindUserByFBIDDto inputDto)
         {
             var res = new BaseResponse();
 
@@ -73,7 +87,13 @@ namespace api.Services
             {
                 var password = HashPassword.Encrypt(AppConstant.DEFAULT_PASSWORD);
 
-                PayloadFBDto payload = await TokenService.DecodeFBToken(inputDto.Token);
+                PayloadFBDto payload = new PayloadFBDto()
+                {
+                    ID = inputDto.ID,
+                    name = inputDto.Fullname,
+                    email = inputDto.Email,
+                    picture = inputDto.Avatar,
+                };
 
                 using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
                 using (SqlCommand cmd = new SqlCommand("sp_FindUserByFBID", conn))

@@ -8,13 +8,23 @@ import { AccountService } from '../../../../services/account.service';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { FormControl, FormGroup, FormsModule, NgModel, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  NgModel,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SelectModule } from 'primeng/select';
 import { ImageModule } from 'primeng/image';
 import { MessageModule } from 'primeng/message';
 import { InplaceModule } from 'primeng/inplace';
+import { FileUploadModule } from 'primeng/fileupload';
+import { PopupService } from '../../../../shared/popup/popup.service';
+
 
 @Component({
   selector: 'app-list-accounts',
@@ -32,23 +42,28 @@ import { InplaceModule } from 'primeng/inplace';
     ImageModule,
     MessageModule,
     InplaceModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FileUploadModule,
   ],
   templateUrl: './list-accounts.component.html',
   styleUrl: './list-accounts.component.css',
 })
 export class ListAccountsComponent implements OnInit {
-  constructor(private apiAccount: AccountService) {}
+  constructor(private apiAccount: AccountService, private pop: PopupService) {}
 
   listAdmin: Account[] = [];
   listSubAdmin: Account[] = [];
   listUser: Account[] = [];
 
-  genders = ['Male', 'Female', 'No tell'];
-  roles = ['Admin', 'Sub-Admin', 'User', 'Guest'];
-  status = ['Active', 'Disable'];
+  genders = [];
+  roles = [];
+  status = [];
 
   ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(){
     this.apiAccount.GetAllUserAccount().subscribe((res) => {
       console.log(res);
       this.listAdmin = res.data.admins;
@@ -56,20 +71,18 @@ export class ListAccountsComponent implements OnInit {
       this.listUser = res.data.users;
     });
   }
-
-  detailAccount: AccountDetail | null = null;
   displayDetail: boolean = false;
 
   detailAccountForm: FormGroup = new FormGroup({
-    userID: new FormControl({value: 0, disabled: true}),
-    username: new FormControl(''),
-    email: new FormControl(''),
-    fullName: new FormControl(null),
-    phoneNumber: new FormControl(null),
+    userID: new FormControl({ value: 0, disabled: true }),
+    username: new FormControl({ value: '', disabled: true }),
+    email: new FormControl({ value: '', disabled: true }),
+    fullName: new FormControl(null, [Validators.maxLength(100)]),
+    phoneNumber: new FormControl(null, [Validators.maxLength(15)]),
     avatar: new FormControl(null),
     dateOfBirth: new FormControl(null),
     gender: new FormControl(null),
-    address: new FormControl(null),
+    address: new FormControl(null, [Validators.maxLength(100)]),
     status: new FormControl(null),
     createdAt: new FormControl(null),
     updatedAt: new FormControl(null),
@@ -86,36 +99,87 @@ export class ListAccountsComponent implements OnInit {
       next: (res) => {
         this.displayDetail = true;
         const data = res.data;
-
-        // Chuyển đổi ngày tháng sang yyyy-MM-dd nếu cần (để binding vào input date)
-        if (data.dateOfBirth) {
-          data.dateOfBirth = new Date(data.dateOfBirth)
-            .toISOString()
-            .substring(0, 10);
-        }
-        // if (data.createdAt) {
-        //   data.createdAt = new Date(data.createdAt)
-        //     .toISOString()
-        //     .substring(0, 10);
-        // }
-        // if (data.updatedAt) {
-        //   data.updatedAt = new Date(data.updatedAt)
-        //     .toISOString()
-        //     .substring(0, 10);
-        // }
-        // if (data.lockTime) {
-        //   data.lockTime = new Date(data.lockTime)
-        //     .toISOString()
-        //     .substring(0, 10);
-        // }
-
+        this.genders = data.listGender;
+        this.roles = data.listRole;
+        this.status = data.listStatus;
         this.detailAccountForm.patchValue(data);
-        console.log(this.detailAccountForm)
+
+        var dateOfBirth: Date | null;
+        if (data.dateOfBirth) {
+          dateOfBirth = this.parseDateFromString(data.dateOfBirth);
+          this.detailAccountForm.patchValue({ dateOfBirth: dateOfBirth });
+        }
       },
       error: (err) => {
         console.log(err);
       },
     });
+  }
+
+  parseDateFromString(dateStr: string): Date {
+    const [day, month, year] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  formatDateToString(date: Date): string {
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  newAvatarBase64: string = '';
+
+  selectAvatar(event: any) {
+    const file: File = event.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(file); // Chuyển file sang base64
+    reader.onload = () => {
+      this.newAvatarBase64 = reader.result as string;
+      this.detailAccountForm.patchValue({ avatar: this.newAvatarBase64 });
+    };
+  }
+
+  disabledBtnSave = false;
+
+  save(fileUpload: any) {
+    if(!this.detailAccountForm.valid){
+      //this.pop.showOkPopup('Thông báo', 'Vui lòng kiểm tra lại thông tin user!')
+      return;
+    }
+
+    if(this.disabledBtnSave) return;
+    this.disabledBtnSave = true;
+
+    const birht = this.detailAccountForm.get('dateOfBirth');
+    if(birht && birht.value){
+      let convertDate = this.formatDateToString(birht.value);
+      this.detailAccountForm.patchValue({ dateOfBirth: convertDate });
+    }
+    this.apiAccount.UpdateUser(this.detailAccountForm.getRawValue()).subscribe({
+      next: res=>{
+        if(res.result == '1'){
+          //this.pop.showOkPopup('Thông báo', 'Cập nhật thành công!')
+          this.disabledBtnSave = false;
+          this.displayDetail = false;
+          this.loadData();
+        }else{
+          //this.pop.showOkPopup('Thông báo', 'Lỗi cập nhật thông tin!')
+          this.disabledBtnSave = false;
+        }
+      },
+      error: err =>{
+        //this.pop.showOkPopup('Lỗi', 'Không thể kết nối với server!');
+        this.disabledBtnSave = false;
+        console.log(err.message)
+      }
+    })
+    fileUpload.clear();
+  }
+
+  closeDialog(fileUpload: any) {
+    fileUpload.clear();
+    this.displayDetail = false;
   }
 
   changeStatus(status: number) {}

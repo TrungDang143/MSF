@@ -47,3 +47,8 @@ button{
   margin-top: 5px;
   width: 70px;
 }
+
+.cdk-overlay-container,
+.cdk-overlay-pane {
+  z-index: 1100 !important;
+}

@@ -95,7 +95,8 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddSession();
 builder.Services.AddDistributedMemoryCache();
-
+builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<IToken, TokenService>();
 builder.Services.AddScoped<ILogin, LoginService>();
@@ -112,6 +113,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseStaticFiles();
 
 app.UseSession();
 

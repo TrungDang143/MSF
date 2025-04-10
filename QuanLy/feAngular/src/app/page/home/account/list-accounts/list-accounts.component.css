@@ -34,12 +34,13 @@ th {
 
 
 .popup-detail {
+  overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
   gap: 5px;
   width: 1300px;
-  height: 500px;
+  max-height: 500px;
 }
   
 
@@ -95,14 +96,20 @@ th {
   grid-row: span 2 / span 2;
   grid-column-start: 7;
   grid-row-start: 1;
+  grid-row-end: 2;
+  justify-content: center;
+  background: #a24bfa;
 }
 
-.popup-detail .create-update {
+.popup-detail .avatar img{
+  border-radius: 50%;
+}
+
+.popup-detail .create-update{
   grid-column: span 2 / span 2;
   grid-column-start: 7;
-  grid-row-start: 4;
+  grid-row-start: 2;
 }
-
 .popup-detail .otp {
   grid-column: span 2 / span 2;
   grid-column-start: 7;
@@ -150,7 +157,7 @@ th {
 }
       
 .popup-detail input {
-  width: 400px;
+  width: 350px;
 
 }
 

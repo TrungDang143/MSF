@@ -40,5 +40,11 @@ namespace api.Controllers
         {
             return _account.GetDetailUserInfo(inputDto);
         }
+
+        [HttpPost("UpdateUser")]
+        public BaseResponse UpdateUser([FromBody] UpdateUserDto inputDto)
+        {
+            return _account.UpdateUser(inputDto);
+        }
     }
 }

@@ -114,6 +114,7 @@
   [(visible)]="displayDetail"
   [modal]="true"
   [style]="{ width: '90%' }"
+  
 >
   <form action method="post" [formGroup]="detailAccountForm">
     <div *ngIf="!detailAccountForm">
@@ -128,7 +129,6 @@
               id="input_userID"
               formControlName="userID"
               autocomplete="off"
-              [disabled]="true"
             />
             <label for="input_userID">UserID</label>
           </p-floatlabel>
@@ -173,6 +173,7 @@
               inputId="input_date"
               showIcon
               iconDisplay="input"
+              dateFormat="dd/mm/yy"
             />
             <label for="input_date">Date of birth</label>
           </p-floatlabel>
@@ -184,6 +185,8 @@
               [options]="genders"
               styleClass="w-full"
               formControlName="gender"
+              optionLabel="genderName"
+              optionValue="genderID"
             />
             <label for="input_gender">Gender</label>
           </p-floatlabel>
@@ -211,12 +214,10 @@
           </p-floatlabel>
         </div>
         <div class="popup-cell avatar">
-          <p-image
-            src="{{ detailAccountForm.value.avatar }}"
-            alt="Image"
-            width="250"
-            [preview]="true"
-          />
+          <img src="{{ detailAccountForm.value.avatar }}" alt="Image" width="100px" height="100px"/>
+          <p-fileupload #fileUpload mode="basic" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" 
+          (onSelect)="selectAvatar($event)" chooseLabel="Chọn ảnh"/>
+      
         </div>
         <div class="popup-cell create-update">
           <p-message severity="success"
@@ -228,7 +229,7 @@
         </div>
         <div class="popup-cell otp">
           <p-message severity="secondary"
-            >OTP: {{ detailAccountForm.value.otp || "-" }}</p-message
+            >OTP: {{ detailAccountForm.value.otp || "###" }}</p-message
           >
         </div>
         <div class="popup-cell gg">
@@ -271,7 +272,8 @@
               <p-button
                 label="Liên kết với Facebook"
                 icon="pi pi-facebook"
-                class="p-button-rounded p-button-secondary facebook-btn">
+                class="p-button-rounded p-button-secondary facebook-btn"
+              >
               </p-button>
             </div>
           </ng-template>
@@ -285,7 +287,7 @@
         <div class="popup-cell remaintime">
           <p-message severity="warn" variant="outlined"
             >Remaining Login Attempts:
-            {{ detailAccountForm.value.remainTime || "-" }}</p-message
+            {{ detailAccountForm.value.remainTime || "###" }}</p-message
           >
         </div>
         <div class="popup-cell role">
@@ -295,6 +297,8 @@
               [options]="roles"
               styleClass="w-full"
               formControlName="roleID"
+              optionLabel="roleName"
+              optionValue="roleID"
             />
             <label for="input_role">Role</label>
           </p-floatlabel>
@@ -306,13 +310,21 @@
               [options]="status"
               styleClass="w-full"
               formControlName="status"
+              optionLabel="statusName"
+              optionValue="statusID"
             />
             <label for="input_status">Status</label>
           </p-floatlabel>
         </div>
         <div class="popup-cell action-btn">
-          <p-button label="Save" icon="pi pi-check" iconPos="right" />
-          <p-button label="Cancel" icon="pi pi-times" iconPos="right" />
+          <p-button
+            label="Save"
+            icon="pi pi-check"
+            iconPos="right"
+            (onClick)="save(fileUpload)"
+            [disabled]="disabledBtnSave"
+          />
+          <p-button label="Cancel" icon="pi pi-times" iconPos="right" (onClick)="closeDialog(fileUpload)"/>
         </div>
       </div>
     </div>

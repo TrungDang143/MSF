@@ -14,16 +14,16 @@ export interface AccountDetail {
   fullName: string | null;
   phoneNumber: string | null;
   avatar: string | null;
-  dateOfBirth: Date | null;
+  dateOfBirth: string | null;
   gender: number | null;
   address: string | null;
   status: number;
-  createdAt: Date | null;
-  updatedAt: Date | null;
+  createdAt: string | null;
+  updatedAt: string | null;
   googleID: string | null;
   facebookID: string | null;
   otp: string | null;
   roleID: number | null;
-  lockTime: Date | null;
+  lockTime: string | null;
   remainTime: number | null;
 }

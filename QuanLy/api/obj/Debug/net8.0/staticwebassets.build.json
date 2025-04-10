@@ -1,11 +1,19 @@
 {
   "Version": 1,
-  "Hash": "pyaMSCEWRZ4nvKCja2XnniyJFEBxfxA7VVvbHvFd6MQ=",
+  "Hash": "K3U469vZ8RuMuQ8cQuLW5ugawkg9e2dkq8duHv5FEL8=",
   "Source": "api",
   "BasePath": "_content/api",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "api\\wwwroot",
+      "Source": "api",
+      "ContentRoot": "E:\\MSF\\QuanLy\\api\\wwwroot\\",
+      "BasePath": "_content/api",
+      "Pattern": "**"
+    }
+  ],
   "Assets": []
 }

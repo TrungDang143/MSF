@@ -47,6 +47,32 @@
   },
   {
     "ContainingType": "api.Controllers.AccountController",
+    "Method": "UpdateUser",
+    "RelativePath": "api/Account/UpdateUser",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inputDto",
+        "Type": "api.DTO.Account.UpdateUserDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.AccountController",
     "Method": "GetUserInfo",
     "RelativePath": "api/Account/userInfo",
     "HttpMethod": "GET",

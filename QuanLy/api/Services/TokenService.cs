@@ -63,7 +63,7 @@ namespace api.Services
                 return false;
             }
         }
-        public string GenerateToken(string username, int roleID)
+        public string GenerateToken(string username, string roleName, List<string> permissionNames)
         {
             var jwtSettings = _config.GetSection("Jwt");
             var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
@@ -71,7 +71,8 @@ namespace api.Services
             var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, roleID.ToString()),
+            new Claim(ClaimTypes.Role, roleName),
+            new Claim("permissions", string.Join(",", permissionNames)),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
@@ -181,6 +182,45 @@ namespace api.Services
             return username;
         }
 
+        public string GetUserRoleName(string username)
+        {
+            string rolename = string.Empty;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                {
+                    conn.Open();
+
+                    var usernameParam = new SqlParameter("@UsernameOrEmail", username);
+                    var resultParam = new SqlParameter("@rtnvalue", SqlDbType.VarChar, 50)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    using (SqlCommand cmd = new SqlCommand("sp_GetRoleNameByUsernameOrEmail", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.Add(usernameParam);
+                        cmd.Parameters.Add(resultParam);
+
+                        cmd.ExecuteNonQuery();
+
+                        //int status = (int)cmd.Parameters["@Result"].Value;
+
+                        if (!string.IsNullOrEmpty(resultParam.Value.ToString()))
+                        {
+                            rolename = resultParam.Value.ToString();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return rolename;
+        }
+
         public int GetUserRoleID(string username)
         {
             int roleID = 4;
@@ -246,6 +286,40 @@ namespace api.Services
             {
                 return null; // Token không hợp lệ
             }
+        }
+
+        public List<string> GetPermissionName(int roleID)
+        {
+            List<string> listPermission = new List<string>();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                {
+                    conn.Open();
+
+                    var roleIDParam = new SqlParameter("@RoleID", roleID);
+
+                    using (SqlCommand cmd = new SqlCommand("sp_GetPermissionByRoleID", conn))
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.Add(roleIDParam);
+
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+
+                        foreach (DataRow dr in dt.Rows)
+                        {
+                            listPermission.Add(dr[1].ToString());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return listPermission;
         }
     }
 }

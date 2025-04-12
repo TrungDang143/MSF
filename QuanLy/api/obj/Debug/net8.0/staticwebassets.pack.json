@@ -1,0 +1,53 @@
+{
+  "Files": [
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\1af15624-5abf-45d1-8ddd-0d777f3ad082.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\1af15624-5abf-45d1-8ddd-0d777f3ad082.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\43f18e45-4663-43f8-b1b9-0d2cea44cca0.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\43f18e45-4663-43f8-b1b9-0d2cea44cca0.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\683a95d1-321c-4e0d-8a9c-6c9c0d8a1615.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\683a95d1-321c-4e0d-8a9c-6c9c0d8a1615.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\7f7a60b2-bc34-4412-932f-cb874e3b120b.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\7f7a60b2-bc34-4412-932f-cb874e3b120b.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\9e39783d-a30b-421e-9577-bf7235365193.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\9e39783d-a30b-421e-9577-bf7235365193.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\ce6a5202-c220-4c01-b7df-7a2e0812f7b5.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\ce6a5202-c220-4c01-b7df-7a2e0812f7b5.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\d9bd9743-5429-4ef7-9287-cd8b40e74e0b.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\d9bd9743-5429-4ef7-9287-cd8b40e74e0b.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\df8de905-ec2a-4850-b320-c22358a32816.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\df8de905-ec2a-4850-b320-c22358a32816.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.api.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.api.props",
+      "PackagePath": "build\\api.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.api.props",
+      "PackagePath": "buildMultiTargeting\\api.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.api.props",
+      "PackagePath": "buildTransitive\\api.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

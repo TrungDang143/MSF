@@ -27,11 +27,12 @@ namespace api.Controllers
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
                 var roleID = _tokenService.GetUserRoleID(inputDto.UsernameOrEmail);
-                var token = _tokenService.GenerateToken(inputDto.UsernameOrEmail, roleID);
+                var rolename = _tokenService.GetUserRoleName(inputDto.UsernameOrEmail);
+                var permissions = _tokenService.GetPermissionName(roleID);
+                string token = _tokenService.GenerateToken(inputDto.UsernameOrEmail, rolename, permissions);
                 res.Data = new
                 {
-                    token,
-                    roleID
+                    token
                 };
             }
             return res;
@@ -45,12 +46,12 @@ namespace api.Controllers
             {
                 string username = res.Data.ToString();
                 var roleID = _tokenService.GetUserRoleID(username);
-                string token = _tokenService.GenerateToken(username, roleID);
+                var rolename = _tokenService.GetUserRoleName(username);
+                var permissions = _tokenService.GetPermissionName(roleID);
+                string token = _tokenService.GenerateToken(username, rolename, permissions);
                 res.Data = new
                 {
-                    token,
-                    username,
-                    roleID
+                    token
                 };
             }
             return res;
@@ -64,12 +65,12 @@ namespace api.Controllers
             {
                 string username = res.Data.ToString();
                 var roleID = _tokenService.GetUserRoleID(username);
-                string token = _tokenService.GenerateToken(username, roleID);
+                var rolename = _tokenService.GetUserRoleName(username);
+                var permissions = _tokenService.GetPermissionName(roleID);
+                string token = _tokenService.GenerateToken(username, rolename, permissions);
                 res.Data = new
                 {
-                    token,
-                    username,
-                    roleID
+                    token
                 };
             }
             return res;

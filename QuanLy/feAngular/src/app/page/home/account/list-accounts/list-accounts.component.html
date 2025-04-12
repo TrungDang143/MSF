@@ -11,7 +11,7 @@
         <th style="width: 180px">Username</th>
         <th style="width: 280px">Email</th>
         <th style="width: 80px; text-align: center">Status</th>
-        <th style="width: 200px; text-align: center">Action</th>
+        <th style="width: 150px; text-align: center">Action</th>
       </tr>
       <tr *ngIf="!listAdmin || listAdmin.length === 0">
         <td colspan="6" style="text-align: center; color: rgb(255, 57, 57)">
@@ -20,7 +20,7 @@
       </tr>
       <tr *ngFor="let item of listAdmin">
         <td style="text-align: center">
-          <img src="{{ item.avatar }}" alt="avatar" width="100px" />
+          <img src="{{ item.avatar }}" alt="avatar" width="100px" height="100px" />
         </td>
         <td>{{ item.fullname }}</td>
         <td>{{ item.username }}</td>
@@ -34,11 +34,6 @@
             severity="info"
             (click)="viewDetail(item.userID)"
           />
-          <p-button
-            [label]="item.status === 1 ? 'Disable' : 'Active'"
-            [severity]="item.status === 1 ? 'danger' : 'success'"
-            (click)="changeStatus(item.status)"
-          />
         </td>
       </tr>
     </table>
@@ -48,8 +43,8 @@
     <table>
       <tr>
         <th style="width: 160px; text-align: center">Avatar</th>
-        <th style="width: 200px">Fullname</th>
-        <th style="width: 200px">Username</th>
+        <th style="width: 180px">Fullname</th>
+        <th style="width: 180px">Username</th>
         <th style="width: 280px">Email</th>
         <th style="width: 80px; text-align: center">Status</th>
         <th style="width: 150px; text-align: center">Action</th>
@@ -70,7 +65,11 @@
           {{ item.status === 1 ? "Active" : "Inactive" }}
         </td>
         <td style="text-align: center">
-          <button (click)="viewDetail(item.userID)">Detail</button>
+          <p-button
+            label="Detail"
+            severity="info"
+            (click)="viewDetail(item.userID)"
+          />
         </td>
       </tr>
     </table>
@@ -80,8 +79,8 @@
     <table>
       <tr>
         <th style="width: 160px; text-align: center">Avatar</th>
-        <th style="width: 200px">Fullname</th>
-        <th style="width: 200px">Username</th>
+        <th style="width: 180px">Fullname</th>
+        <th style="width: 180px">Username</th>
         <th style="width: 280px">Email</th>
         <th style="width: 80px; text-align: center">Status</th>
         <th style="width: 150px; text-align: center">Action</th>
@@ -102,7 +101,11 @@
           {{ item.status === 1 ? "Active" : "Inactive" }}
         </td>
         <td style="text-align: center">
-          <button (click)="viewDetail(item.userID)">Detail</button>
+          <p-button
+            label="Detail"
+            severity="info"
+            (click)="viewDetail(item.userID)"
+          />
         </td>
       </tr>
     </table>
@@ -215,9 +218,9 @@
         </div>
         <div class="popup-cell avatar">
           <img src="{{ detailAccountForm.value.avatar }}" alt="Image" width="100px" height="100px"/>
-          <p-fileupload #fileUpload mode="basic" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" 
-          (onSelect)="selectAvatar($event)" chooseLabel="Chọn ảnh"/>
-      
+          <!-- <p-fileupload #fileUpload mode="basic" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" 
+          (onSelect)="selectAvatar($event)" chooseLabel="Chọn ảnh"/> -->
+          <p-button label="Thay thế" (onClick)="changeAvatar()"></p-button>
         </div>
         <div class="popup-cell create-update">
           <p-message severity="success"
@@ -272,7 +275,7 @@
               <p-button
                 label="Liên kết với Facebook"
                 icon="pi pi-facebook"
-                class="p-button-rounded p-button-secondary facebook-btn"
+                class="facebook-btn"
               >
               </p-button>
             </div>
@@ -309,7 +312,7 @@
               inputId="input_status"
               [options]="status"
               styleClass="w-full"
-              formControlName="status"
+              formControlName="statusID"
               optionLabel="statusName"
               optionValue="statusID"
             />
@@ -321,12 +324,44 @@
             label="Save"
             icon="pi pi-check"
             iconPos="right"
-            (onClick)="save(fileUpload)"
-            [disabled]="disabledBtnSave"
+            (onClick)="save()"
+            [disabled]="!hasPermission('edit_users')"
+            
           />
-          <p-button label="Cancel" icon="pi pi-times" iconPos="right" (onClick)="closeDialog(fileUpload)"/>
+          <p-button label="Cancel" icon="pi pi-times" iconPos="right" (onClick)="closeDialog()"/>
+          <p-button [disabled]="!hasPermission('delete_users')"  label="Delete" icon="pi pi-trash" iconPos="right" (onClick)="deleteUser(detailAccountForm.get('userID')?.value)" severity="danger"/>
         </div>
       </div>
     </div>
   </form>
+</p-dialog>
+<p-dialog
+  header="Thay đổi avatar"
+  [(visible)]="displayPopupAvatar"
+  [modal]="true"
+  [style]="{ width: '800px', height: '600px' }" 
+>
+<div class="popup-avatar" style="display: flex;">
+    <input type="file" (change)="fileChangeEvent($event)" />
+    
+    <image-cropper
+      [imageChangedEvent]="imageChangedEvent"
+      [maintainAspectRatio]="true"
+      [aspectRatio]="1/1"
+      [resizeToWidth]="200"
+      [roundCropper]="true"
+      [output]="'base64'" 
+      format="png"
+      (imageCropped)="imageCropped($event)"
+      (imageLoaded)="imageLoaded()"
+      (cropperReady)="cropperReady()"
+      (loadImageFailed)="loadImageFailed()"
+      style="height: 500px;"
+    ></image-cropper>
+    
+    <img *ngIf="croppedImage" [src]="croppedImage" class="preview" width="100px" height="100px"/>
+    
+    <button (click)="submitToServer()">Xác nhận</button>
+</div>
+
 </p-dialog>

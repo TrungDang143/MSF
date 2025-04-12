@@ -5,6 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { Router } from '@angular/router';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { PopupService } from '../../shared/popup/popup.service';
 
 @Component({
   selector: 'app-home',
@@ -15,7 +16,7 @@ import { CommonModule } from '@angular/common';
 })
 export class HomeComponent implements OnInit {
 
-  constructor(private auth: AuthService, private apiHome: HomeService, private router: Router) {}
+  constructor(private auth: AuthService, private apiHome: HomeService, private router: Router, private pop: PopupService ) {}
  
   username: string = '###';
   ngOnInit(): void {
@@ -41,9 +42,13 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  goToPage(url: string) {
-    console.log('Navigating to:', url);
-    this.router.navigate(['/home' + url]);
+  goToPage(url: string, permission: string) {
+    if(permission && !this.auth.hasPermission(permission)){
+      this.pop.showOkPopup({message: 'Bạn không có quyền truy cập chức năng này!'});
+    }
+    else{
+      console.log('Navigating to:', url);
+      this.router.navigate(['/home' + url]);
+    }
   }
-
 }

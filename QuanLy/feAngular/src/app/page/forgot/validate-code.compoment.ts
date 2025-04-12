@@ -35,7 +35,7 @@ export class ValidateCodeComponent implements OnInit {
     if (this.dataService.isUserInfoWithOutOTPValid()) {
       this.userInfo = this.dataService.getCurrentUserInfo() as { username: string; email: string; otp: string };
     } else {
-      this.pop.showOkPopup('Thông báo', 'Vui lòng thử lại!');
+      this.pop.showOkPopup({message: 'Vui lòng thử lại!'});
       this.router.navigate(['/forgot']);
     }
   }
@@ -102,7 +102,7 @@ export class ValidateCodeComponent implements OnInit {
 
   validate() {
     if (this.validateForm.invalid){
-      this.pop.showOkPopup('Thông báo', 'Kiểm tra lại thông tin: ' + this.getInvalidControl())
+      this.pop.showOkPopup({message: 'Kiểm tra lại thông tin: ' + this.getInvalidControl()})
       return;
     }
 
@@ -119,12 +119,12 @@ export class ValidateCodeComponent implements OnInit {
           this.router.navigate(['/new-password'])
         }else{
           this.disableBtn = false;
-          this.pop.showOkPopup('Thông báo', res.message)
+          this.pop.showOkPopup({message: res.message})
         }
       },
       error: (err) =>{
         this.disableBtn = false;
-        this.pop.showOkPopup('Thông báo', 'Lỗi hệ thống vui lòng thử lại sau!')
+        this.pop.showOkPopup({message: 'Lỗi hệ thống vui lòng thử lại sau!'})
         console.log(err.message);
       }
     })
@@ -141,13 +141,13 @@ export class ValidateCodeComponent implements OnInit {
       next: (res) =>{
         if(res.result == '1')
         {
-          this.pop.showOkPopup('Thông báo', 'Đã gửi mã OTP đến địa chỉ: ' + this.userInfo.email)
+          this.pop.showOkPopup({message: 'Đã gửi mã OTP đến địa chỉ: ' + this.userInfo.email})
         }else{
-          this.pop.showOkPopup('Thông báo', res.message)
+          this.pop.showOkPopup( {message: res.message})
         }
       },
       error: (err) =>{
-        this.pop.showOkPopup('Thông báo', 'Lỗi hệ thống vui lòng thử lại sau!')
+        this.pop.showOkPopup({message: 'Lỗi hệ thống vui lòng thử lại sau!'})
         console.log(err.message);
       }
     })

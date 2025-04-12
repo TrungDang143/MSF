@@ -2,6 +2,6 @@
 {
     public class DeleteUserDto
     {
-        public string Username { get; set; }
+        public int UserID { get; set; }
     }
 }

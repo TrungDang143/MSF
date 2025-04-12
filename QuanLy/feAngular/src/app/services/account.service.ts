@@ -27,4 +27,10 @@ export class AccountService {
     const url = environment.baseUrl + "Account/UpdateUser";
     return this.http.post(url, userInfo);
   }
+
+  DeleteUser(userID: number): Observable<any>{
+    const url = environment.baseUrl + "Account/DeleteUser";
+    const params = new HttpParams().set('userID', userID)
+    return this.http.get(url, {params})
+  }
 }

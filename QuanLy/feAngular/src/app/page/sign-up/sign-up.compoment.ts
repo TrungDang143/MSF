@@ -66,7 +66,7 @@ export class SignUpComponent {
 
   signup() {
     if (this.signUpForm.invalid){
-      this.pop.showOkPopup('Thông báo', 'Kiểm tra lại thông tin tài khoản: ' + this.getInvalidControl())
+      this.pop.showOkPopup({message: 'Kiểm tra lại thông tin tài khoản: ' + this.getInvalidControl()})
       return;
     }
 
@@ -76,19 +76,24 @@ export class SignUpComponent {
     this.apiSignUp.signUp(this.signUpForm.value).subscribe({
       next: response =>{
         if (response.result == '1'){
-          this.pop.showOkPopup("Thông báo","Đăng ký thành công!");
+          this.pop.showOkPopup({
+            message:"Đăng ký thành công!"}
+          );
           this.disableBtn = false;
           this.router.navigate(['/login']);
         }else {
           console.warn('⚠️ Có lỗi logic trong API:', response.message);
           this.disableBtn = false;
-          this.pop.showOkPopup("Thông báo", response.message);
+          this.pop.showOkPopup({
+            header: "Thông báo",
+            message : response.message
+        });
         }
       },
       error: error =>{
         console.error('❌ Gọi API thất bại!', error);
         this.disableBtn = false;
-        this.pop.showOkPopup("Thông báo", "Không thể kết nối đến server. Vui lòng thử lại sau!");
+        this.pop.showOkPopup({message: "Không thể kết nối đến server. Vui lòng thử lại sau!"});
       }
     })
   }

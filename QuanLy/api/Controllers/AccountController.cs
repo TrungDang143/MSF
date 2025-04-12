@@ -20,31 +20,38 @@ namespace api.Controllers
             _tokenService = tokenService;
         }
 
-        //[Authorize(Roles = "2")]
         [HttpGet("userInfo")]
         public BaseResponse GetUserInfo([FromQuery] GetUserInfoInDto inputDto)
         {
             return _account.GetUserInfo(inputDto);
         }
 
-        [Authorize(Roles = "1, 3")]
+        [HasPermission("view_users")]
         [HttpGet("GetAllUserAccounts")]
         public BaseResponse GetAllUserAccounts()
         {
             return _account.GetAllUserAccounts();
         }
 
-        [Authorize(Roles = "1, 3")]
+        [HasPermission("edit_users")]
         [HttpGet("GetDetailUserInfo")]
         public BaseResponse GetDetailUserInfo([FromQuery] GetDetailUserInfoInDto inputDto)
         {
             return _account.GetDetailUserInfo(inputDto);
         }
 
+        [HasPermission("edit_users")]
         [HttpPost("UpdateUser")]
         public BaseResponse UpdateUser([FromBody] UpdateUserDto inputDto)
         {
             return _account.UpdateUser(inputDto);
+        }
+
+        [HasPermission("delete_users")]
+        [HttpGet("DeleteUser")]
+        public BaseResponse DeleteUser([FromQuery] DeleteUserDto inputDto)
+        {
+            return _account.DeleteUser(inputDto);
         }
     }
 }

@@ -11,7 +11,7 @@
         public string? Address { get; set; }
         public string? GoogleID { get; set; }
         public string? FacebookID { get; set; }
-        public int statusID { get; set; }
-        public int roleID { get; set; }
+        public int? statusID { get; set; }
+        public int? roleID { get; set; }
     }
 }

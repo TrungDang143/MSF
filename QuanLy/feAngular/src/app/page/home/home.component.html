@@ -7,7 +7,7 @@
     <div class="catelory">
       <table>
         <tbody>
-          <tr (click)="goToPage('/dashboard')">
+          <tr (click)="goToPage('/dashboard', '')">
             <td>Trang chủ</td>
             <td><i class="pi pi-home" style="font-size: 1.5rem"></i></td>
           </tr>
@@ -15,22 +15,19 @@
             <td>Quản lý tài khoản</td>
             <td><i class="pi pi-users" style="font-size: 1.5rem"></i></td>
             <ul id="menu2">
-              <li (click)="goToPage('/list-accounts')">
+              <li (click)="goToPage('/list-accounts', 'view_users')">
                   Danh sách tài khoản
               </li>
-              <li (click)="goToPage('/add-account')">
-                  Thêm mới tài khoản
-              </li>
-              <li (click)="goToPage('/my-account')">
+              <li (click)="goToPage('/my-account', '')">
                   Thông tin cá nhân
               </li>
           </ul>
           </tr>
-          <tr (click)="goToPage('/setting')">
+          <tr (click)="goToPage('/setting', '')">
             <td>Cài đặt</td>
             <td><i class="pi pi-cog" style="font-size: 1.5rem"></i></td>
           </tr>
-          <tr (click)="goToPage('/log')">
+          <tr (click)="goToPage('/log', 'view_logs')">
               <td>Nhật ký hệ thống</td>
               <td>
                 <i class="pi pi-address-book" style="font-size: 1.5rem"></i>

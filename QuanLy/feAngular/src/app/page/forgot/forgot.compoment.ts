@@ -62,8 +62,7 @@ export class ForgotComponent {
   async send() {
     if (this.forgotForm.invalid) {
       this.pop.showOkPopup(
-        'Thông báo',
-        'Kiểm tra lại thông tin: ' + this.getInvalidControl()
+        {message: 'Kiểm tra lại thông tin: ' + this.getInvalidControl()}
       );
       return;
     }
@@ -78,18 +77,17 @@ export class ForgotComponent {
 
       if (res.result == '1') {
         this.pop.showOkPopup(
-          'Thông báo',
-          'Đã gửi mã OTP đến địa chỉ: ' + this.forgotForm.get('email')?.value
+          {message: 'Đã gửi mã OTP đến địa chỉ: ' + this.forgotForm.get('email')?.value}
         );
         this.dataService.setEmail(this.forgotForm.get('email')?.value);
         this.dataService.setUserName(this.forgotForm.get('username')?.value);
         this.router.navigate(['/validate-code']);
       } 
       else {
-        this.pop.showOkPopup('Thông báo', res.message);
+        this.pop.showOkPopup({message: res.message});
       }
     } catch (err: any) {
-      this.pop.showOkPopup('Thông báo', 'Lỗi hệ thống vui lòng thử lại sau!');
+      this.pop.showOkPopup({message: 'Lỗi hệ thống vui lòng thử lại sau!'});
       console.log(err.message);
     } finally {
       this.disableBtn = false;

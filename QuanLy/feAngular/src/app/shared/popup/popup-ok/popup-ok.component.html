@@ -1,7 +1,26 @@
-<h3 mat-dialog-title>{{ data.caption }}</h3>
-<mat-dialog-content>
-  <p>{{ data.message }}</p>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button (click)="close()">Đóng</button>
-</mat-dialog-actions>
+<p-dialog
+  [(visible)]="visible"
+  [header]="data?.header || 'Thông báo'"
+  [modal]="true"
+  [closable]="false"
+  [dismissableMask]="true"
+  [style]="{ width: '400px' }"
+  [baseZIndex]="10000"
+>
+  <div
+    class="p-d-flex p-ai-start"
+    style="gap: 1rem; padding: 1rem 0;"
+    *ngIf="data?.icon"
+  >
+    <i [class]="data?.icon" style="font-size: 2rem; color: #f39c12"></i>
+    <div style="flex: 1;">{{ data?.message }}</div>
+  </div>
+
+  <div *ngIf="!data?.icon" style="padding: 1rem 0;">{{ data?.message }}</div>
+
+  <ng-template pTemplate="footer">
+    <div class="p-d-flex p-jc-end">
+      <p-button  label="{{ data?.okLabel || 'Đóng' }}" (click)="handleOk()" />
+    </div>
+  </ng-template>
+</p-dialog>

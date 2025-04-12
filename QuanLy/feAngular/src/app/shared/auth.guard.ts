@@ -15,7 +15,10 @@ export class AuthGuard implements CanActivate {
     return this.authService.checkToken().pipe(
       map(isValid => {
         if (!isValid) {
-          this.pop.showOkPopup('Thông báo', 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+          this.pop.showOkPopup({
+            message: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!',
+            header: 'Thông báo'
+          });
           this.router.navigate(['/login']); // Chuyển hướng nếu token không hợp lệ
           console.log("token ko hop le");
           return false;

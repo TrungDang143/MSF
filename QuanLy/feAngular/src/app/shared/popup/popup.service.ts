@@ -1,28 +1,44 @@
 
 import { Injectable } from '@angular/core';
-import { PopupOkComponent } from './popup-ok/popup-ok.component';
-import { MatDialog } from '@angular/material/dialog';
-import { PopupYesNoComponent } from './popup-yes-no/popup-yes-no.component';
+import { ConfirmationService } from 'primeng/api';
+import { Subject } from 'rxjs/internal/Subject';
+
+export interface ConfirmDialogData {
+  message: string;
+  header?: string;
+  acceptLabel?: string;
+  rejectLabel?: string;
+  icon?: string;
+  onAccept?: () => void;
+  onReject?: () => void;
+}
+export interface InfoDialogData {
+  message: string;
+  header?: string;
+  okLabel?: string;
+  icon?: string;
+  onClose?: () => void;
+}
 
 @Injectable({
   providedIn: 'root', 
 })
 export class PopupService {
-  constructor(private dialog: MatDialog){}
+
+  constructor(private confirmationService: ConfirmationService){}
   
-  showOkPopup(caption: string = 'Thông báo', message: string) {
-    this.dialog.open(PopupOkComponent, {
-      data: { caption: caption, message: message },
-    });
+  private confirmDialogSubject = new Subject<ConfirmDialogData>();
+  confirmDialog$ = this.confirmDialogSubject.asObservable();
+
+  private infoDialogSubject = new Subject<InfoDialogData>();
+  infoDialog$ = this.infoDialogSubject.asObservable();
+
+  showYesNoPopup(data: ConfirmDialogData) {
+    this.confirmDialogSubject.next(data);
+
   }
 
-  showYesNoPopup(caption: string, message: string) {
-    const dialogRef = this.dialog.open(PopupYesNoComponent, {
-      data: { caption: caption, message: message },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log('Result:', result); 
-    });
+  showOkPopup(data: InfoDialogData) {
+    this.infoDialogSubject.next(data);
   }
 }

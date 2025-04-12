@@ -16,6 +16,7 @@ import {
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
+import { ConfirmationService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -28,6 +29,7 @@ export const appConfig: ApplicationConfig = {
         preset: Aura,
       },
     }),
+    ConfirmationService, 
     provideHttpClient(withInterceptors([AuthInterceptor])),
     {
       provide: 'SocialAuthServiceConfig',

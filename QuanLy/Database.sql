@@ -17,14 +17,25 @@ CREATE TABLE Users (
     GoogleID      VARCHAR(100) NULL,             -- ID Google nếu đăng nhập bằng Google
     FacebookID    VARCHAR(100) NULL,              -- ID Facebook nếu đăng nhập bằng Facebook
 	otp varchar(10) null,
-	roleID int null
-
+	roleID int null,
+	LockTime datetime null,
+	RemainTime tinyint null
 );
 
-alter table users add roleID int null
-UPDATE Users
-SET RoleID = (SELECT RoleID FROM Role WHERE Role.RoleName = Users.Role);
-ALTER TABLE Users ADD CONSTRAINT FK_Users_Role FOREIGN KEY (RoleID) REFERENCES Role(RoleID);
+alter table users
+add IsExternalAvatar bit default 0 
+
+--SELECT name
+--FROM sys.check_constraints
+--WHERE parent_object_id = OBJECT_ID('Users') AND 
+--      definition LIKE '%[Gender]%'
+--ALTER TABLE Users
+--DROP CONSTRAINT CK__Users__Gender__4BAC3F29;
+
+--alter table users add roleID int null
+--UPDATE Users
+--SET RoleID = (SELECT RoleID FROM Role WHERE Role.RoleName = Users.Role);
+--ALTER TABLE Users ADD CONSTRAINT FK_Users_Role FOREIGN KEY (RoleID) REFERENCES Role(RoleID);
 --SELECT name, type_desc 
 --FROM sys.default_constraints 
 --WHERE parent_object_id = OBJECT_ID('Users');
@@ -130,7 +141,18 @@ INSERT INTO RolePermission (RoleID, PermissionID) VALUES
 -- Gán quyền cho Guest (chỉ có quyền xem)
 INSERT INTO RolePermission (RoleID, PermissionID) VALUES
 (4, (SELECT PermissionID FROM Permission WHERE PermissionName = 'view_content'));
-
+--------------------------------------------------------------------------
+CREATE TABLE Genders (
+    GenderID INT IDENTITY(1,1) PRIMARY KEY,
+	GenderName nvarchar(15) not null
+);
+insert into Genders values (N'Khác')
+--------------------------------------------------------------------------
+CREATE TABLE Status (
+    StatusID INT IDENTITY(1,1) PRIMARY KEY,
+	StatusName nvarchar(20) not null
+);
+insert into Status values (N'Vô hiệu hóa')
 -------------------------------------------------------------------------------
 CREATE TRIGGER trg_UpdateTimestamps
 ON Users
@@ -190,13 +212,67 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    IF EXISTS (SELECT 1 FROM Users WHERE (Username = @UsernameOrEmail OR Email = @UsernameOrEmail) AND PasswordHash = @PasswordHash)
+    -- Kiểm tra tài khoản có tồn tại không
+    IF EXISTS (
+        SELECT 1 
+        FROM Users 
+        WHERE ((Username = @UsernameOrEmail OR Email = @UsernameOrEmail) AND Status = 1)
+    )
     BEGIN
-        SET @ReturnStatus = 1;
+        -- Tài khoản tồn tại, kiểm tra mật khẩu
+        IF EXISTS (
+            SELECT 1 
+            FROM Users 
+            WHERE 
+                (Username = @UsernameOrEmail OR Email = @UsernameOrEmail)
+                AND PasswordHash = @PasswordHash
+        )
+        BEGIN
+            -- Kiểm tra locktime
+            IF EXISTS (
+                SELECT 1 
+                FROM Users 
+                WHERE 
+                    (Username = @UsernameOrEmail OR Email = @UsernameOrEmail)
+                    AND PasswordHash = @PasswordHash     
+                    AND (LockTime IS NULL OR LockTime <= GETDATE())
+            )
+            BEGIN
+				update users
+				set remaintime = 5
+				WHERE 
+                    (Username = @UsernameOrEmail OR Email = @UsernameOrEmail)
+
+                SET @ReturnStatus = 1; -- Đăng nhập thành công
+            END
+            ELSE
+            BEGIN
+                SET @ReturnStatus = 2; -- Tài khoản bị khóa
+            END
+        END
+        ELSE
+        BEGIN
+			if exists ( select 1 from Users where ((Username = @UsernameOrEmail OR Email = @UsernameOrEmail) and remaintime >0))
+			begin
+				update users
+					set remaintime = remaintime-1
+					WHERE 
+						(Username = @UsernameOrEmail OR Email = @UsernameOrEmail)
+			end
+			else
+			begin
+					update users
+					set locktime = DATEADD(MINUTE, 5, GETDATE())
+					WHERE 
+						(Username = @UsernameOrEmail OR Email = @UsernameOrEmail)
+			end
+
+            SET @ReturnStatus = 3; -- Sai mật khẩu
+        END
     END
     ELSE
     BEGIN
-        SET @ReturnStatus = 0;
+        SET @ReturnStatus = 0; -- Sai tài khoản hoawcj inactive
     END
 END;
 -------------------------------------------------------------------------------
@@ -438,6 +514,15 @@ BEGIN
 
 END;
 ----------------------------------------------------------------------------------------------------
+create procedure sp_GetUserByUserID
+    @UserID VARCHAR(100)
+AS
+BEGIN
+
+   SELECT top 1 * FROM Users WHERE (UserID = @UserID)
+
+END;
+----------------------------------------------------------------------------------------------------
 create procedure sp_GetRoleIDByUsernameOrEmail
     @UsernameOrEmail VARCHAR(100),
 	@rtnvalue int output
@@ -473,6 +558,88 @@ END;
 declare @rtnValue int;
 exec sp_GetAllAccount 'dtrung', @rtnValue output
 select @rtnValue
+----------------------------------------------------------------------------------------------------
+create procedure sp_GetGenders
+AS
+BEGIN
+
+  SELECT * FROM Genders
+
+END;
+declare @rtnValue int;
+exec sp_GetGenders 'dtrung', @rtnValue output
+select @rtnValue
+----------------------------------------------------------------------------------------------------
+create procedure sp_GetStatus
+AS
+BEGIN
+
+  SELECT * FROM Status
+
+END;
+declare @rtnValue int;
+exec sp_GetStatus 'dtrung', @rtnValue output
+select @rtnValue
+----------------------------------------------------------------------------------------------------
+create procedure sp_GetRole
+AS
+BEGIN
+
+  SELECT * FROM Role
+
+END;
+declare @rtnValue int;
+exec sp_GetRole 'dtrung', @rtnValue output
+select @rtnValue
+----------------------------------------------------------------------------------------------------
+CREATE PROCEDURE sp_UpdateUserInfo
+    @UserID INT,
+    @FullName NVARCHAR(100) = NULL,
+    @PhoneNumber VARCHAR(15) = NULL,
+    @Avatar VARCHAR(255) = NULL,
+    @DateOfBirth DATETIME = NULL,
+    @Gender TINYINT = NULL,
+    @Address NVARCHAR(100) = NULL,
+    @Status TINYINT = NULL,
+    @GoogleID VARCHAR(100) = NULL,
+    @FacebookID VARCHAR(100) = NULL,
+    @roleID INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+        IF @FullName IS NOT NULL
+        UPDATE Users SET FullName = @FullName WHERE UserID = @UserID;
+
+		IF @PhoneNumber IS NOT NULL
+			UPDATE Users SET PhoneNumber = @PhoneNumber WHERE UserID = @UserID;
+
+		IF @Avatar IS NOT NULL
+			UPDATE Users SET Avatar = @Avatar WHERE UserID = @UserID;
+
+		IF @DateOfBirth IS NOT NULL
+			UPDATE Users SET DateOfBirth = @DateOfBirth WHERE UserID = @UserID;
+
+		IF @Gender IS NOT NULL
+			UPDATE Users SET Gender = @Gender WHERE UserID = @UserID;
+
+		IF @Address IS NOT NULL
+			UPDATE Users SET Address = @Address WHERE UserID = @UserID;
+
+		IF @Status IS NOT NULL
+			UPDATE Users SET Status = @Status WHERE UserID = @UserID;
+
+		IF @GoogleID IS NOT NULL
+			UPDATE Users SET GoogleID = @GoogleID WHERE UserID = @UserID;
+
+		IF @FacebookID IS NOT NULL
+			UPDATE Users SET FacebookID = @FacebookID WHERE UserID = @UserID;
+
+		IF @RoleID IS NOT NULL
+			UPDATE Users SET RoleID = @RoleID WHERE UserID = @UserID;
+
+END;
+
 ----------------------------------------------------------------------------------------------------
 DECLARE @ReturnValue VARCHAR(100);
 DECLARE @ReturnStatus int;

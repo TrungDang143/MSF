@@ -24,7 +24,12 @@ import { MessageModule } from 'primeng/message';
 import { InplaceModule } from 'primeng/inplace';
 import { FileUploadModule } from 'primeng/fileupload';
 import { PopupService } from '../../../../shared/popup/popup.service';
-
+import {
+  ImageCropperComponent,
+  ImageCroppedEvent,
+  LoadedImage,
+} from 'ngx-image-cropper';
+import { AuthService } from '../../../../shared/auth.service';
 
 @Component({
   selector: 'app-list-accounts',
@@ -44,12 +49,21 @@ import { PopupService } from '../../../../shared/popup/popup.service';
     InplaceModule,
     ReactiveFormsModule,
     FileUploadModule,
+    ImageCropperComponent,
   ],
   templateUrl: './list-accounts.component.html',
   styleUrl: './list-accounts.component.css',
 })
 export class ListAccountsComponent implements OnInit {
-  constructor(private apiAccount: AccountService, private pop: PopupService) {}
+  constructor(
+    private apiAccount: AccountService,
+    private pop: PopupService,
+    private authService: AuthService
+  ) {}
+
+  hasPermission(permission: string): boolean {
+    return this.authService.hasPermission(permission);
+  }
 
   listAdmin: Account[] = [];
   listSubAdmin: Account[] = [];
@@ -63,12 +77,25 @@ export class ListAccountsComponent implements OnInit {
     this.loadData();
   }
 
-  loadData(){
-    this.apiAccount.GetAllUserAccount().subscribe((res) => {
-      console.log(res);
-      this.listAdmin = res.data.admins;
-      this.listSubAdmin = res.data.subAdmins;
-      this.listUser = res.data.users;
+  loadData() {
+    this.apiAccount.GetAllUserAccount().subscribe({
+      next: (res) => {
+        this.listAdmin = res.data.admins;
+        this.listSubAdmin = res.data.subAdmins;
+        this.listUser = res.data.users;
+      },
+      error: (err) => {
+        if (err.status === 403) {
+          // Không có quyền
+          this.pop.showOkPopup({
+            message: 'Bạn không có quyền truy cập chức năng này.',
+          });
+          // Option: redirect
+          // this.router.navigate(['/unauthorized']);
+        } else {
+          this.pop.showOkPopup({ message: 'Lỗi lấy danh sách users' });
+        }
+      },
     });
   }
   displayDetail: boolean = false;
@@ -83,7 +110,7 @@ export class ListAccountsComponent implements OnInit {
     dateOfBirth: new FormControl(null),
     gender: new FormControl(null),
     address: new FormControl(null, [Validators.maxLength(100)]),
-    status: new FormControl(null),
+    statusID: new FormControl(null),
     createdAt: new FormControl(null),
     updatedAt: new FormControl(null),
     googleID: new FormControl(null),
@@ -142,45 +169,126 @@ export class ListAccountsComponent implements OnInit {
 
   disabledBtnSave = false;
 
-  save(fileUpload: any) {
-    if(!this.detailAccountForm.valid){
-      //this.pop.showOkPopup('Thông báo', 'Vui lòng kiểm tra lại thông tin user!')
+  save() {
+    if (!this.detailAccountForm.valid) {
+      this.pop.showOkPopup({
+        message: 'Vui lòng kiểm tra lại thông tin user!',
+      });
       return;
+    } else {
+      this.pop.showYesNoPopup({
+        header: 'Xác nhận',
+        message: 'Bạn có chắc chắn muốn cập nhật user này?',
+        onAccept: () => {
+          this.acceptUpdate();
+        },
+        onReject: () => {
+          console.log('huy');
+        },
+      });
     }
+  }
 
-    if(this.disabledBtnSave) return;
+  acceptUpdate() {
+    if (this.disabledBtnSave) return;
     this.disabledBtnSave = true;
 
     const birht = this.detailAccountForm.get('dateOfBirth');
-    if(birht && birht.value){
+    if (birht && birht.value) {
       let convertDate = this.formatDateToString(birht.value);
       this.detailAccountForm.patchValue({ dateOfBirth: convertDate });
     }
     this.apiAccount.UpdateUser(this.detailAccountForm.getRawValue()).subscribe({
-      next: res=>{
-        if(res.result == '1'){
-          //this.pop.showOkPopup('Thông báo', 'Cập nhật thành công!')
+      next: (res) => {
+        if (res.result == '1') {
+          this.pop.showOkPopup({ message: 'Cập nhật thành công!' });
           this.disabledBtnSave = false;
           this.displayDetail = false;
           this.loadData();
-        }else{
-          //this.pop.showOkPopup('Thông báo', 'Lỗi cập nhật thông tin!')
+        } else {
+          this.pop.showOkPopup({ message: 'Lỗi cập nhật thông tin!' });
           this.disabledBtnSave = false;
         }
       },
-      error: err =>{
-        //this.pop.showOkPopup('Lỗi', 'Không thể kết nối với server!');
-        this.disabledBtnSave = false;
-        console.log(err.message)
-      }
-    })
-    fileUpload.clear();
+      error: (err) => {
+        if (err.status === 403) {
+          this.pop.showOkPopup({ message: 'Bạn không có quyền này!' });
+        } else {
+          this.pop.showOkPopup({
+            header: 'Lỗi',
+            message: 'Không thể kết nối với server!',
+          });
+          this.disabledBtnSave = false;
+          console.log(err.message);
+        }
+      },
+    });
+    //fileUpload.clear();
   }
 
-  closeDialog(fileUpload: any) {
-    fileUpload.clear();
+  closeDialog() {
+    //fileUpload.clear();
     this.displayDetail = false;
   }
+  deleteUser(userID: number) {
+    this.pop.showYesNoPopup({
+      message: 'Xác nhận xoá user này?',
+      onAccept: () => {
+        this.acceptDelete(userID);
+      },
+    });
+  }
+  acceptDelete(userID: number) {
+    this.apiAccount.DeleteUser(userID).subscribe({
+      next: (res) => {
+        if (res.result == '1') {
+          this.pop.showOkPopup({ message: 'Xoá thành công!' });
+          this.displayDetail = false;
+          this.loadData();
+        } else {
+          this.pop.showOkPopup({ message: 'Lỗi khi xoá user!' });
+        }
+      },
+      error: (err) => {
+        if (err.status === 403) {
+          this.pop.showOkPopup({ message: 'Bạn không có quyền này!' });
+        } else this.pop.showOkPopup({ message: 'Lỗi kết nối đến server!' });
+        console.log(err);
+      },
+    });
+  }
 
-  changeStatus(status: number) {}
+  displayPopupAvatar = false;
+
+  imageChangedEvent: any = '';
+  croppedImage: string = '';
+
+  changeAvatar() {
+    this.displayPopupAvatar = true;
+  }
+
+  fileChangeEvent(event: any): void {
+    this.imageChangedEvent = event;
+  }
+
+  imageCropped(event: ImageCroppedEvent) {
+    this.croppedImage = event.base64 ?? '';
+  }
+
+  imageLoaded() {
+    // ảnh load xong
+  }
+
+  cropperReady() {
+    // cropper sẵn sàng
+  }
+
+  loadImageFailed() {
+    console.error('Không thể load ảnh');
+  }
+  submitToServer() {
+    // Tạo body hoặc DTO để gửi BE
+    this.detailAccountForm.patchValue({ avatar: this.croppedImage });
+    this.displayPopupAvatar = false;
+  }
 }

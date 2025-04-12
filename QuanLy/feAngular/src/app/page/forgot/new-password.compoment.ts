@@ -33,7 +33,7 @@ export class NewPasswordComponent implements OnInit {
     if (this.dataService.isUserInfoWithOutOTPValid()) {
       this.userInfo.username = (this.dataService.getCurrentUserInfo() as { username: string; email: string; otp: string }).username;
     } else {
-      this.pop.showOkPopup('Thông báo', 'Vui lòng thử lại!');
+      this.pop.showOkPopup({message: 'Vui lòng thử lại!'});
       this.router.navigate(['/forgot']);
     }
   }
@@ -80,7 +80,7 @@ export class NewPasswordComponent implements OnInit {
 
   onSubmit() {
     if (this.newPwForm.invalid){
-      this.pop.showOkPopup('Thông báo', 'Kiểm tra lại thông tin: ' + this.getInvalidControl())
+      this.pop.showOkPopup({message: 'Kiểm tra lại thông tin: ' + this.getInvalidControl()})
       return;
     }
 
@@ -94,16 +94,16 @@ export class NewPasswordComponent implements OnInit {
         if(res.result == '1')
         {
           this.disableBtn = false;
-          this.pop.showOkPopup('Thông báo', 'Thay đổi mật khẩu thành công');
+          this.pop.showOkPopup({message: 'Thay đổi mật khẩu thành công'});
           this.router.navigate(['/login']);
         }else{
           this.disableBtn = false;
-          this.pop.showOkPopup('Thông báo', res.message);
+          this.pop.showOkPopup({message: res.message});
         }
       },
       error: (err) =>{
         this.disableBtn = false;
-        this.pop.showOkPopup('Thông báo', 'Lỗi hệ thống vui lòng thử lại sau!')
+        this.pop.showOkPopup({message:'Lỗi hệ thống vui lòng thử lại sau!'})
         console.log(err.message);
       }
     })

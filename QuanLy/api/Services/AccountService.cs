@@ -39,7 +39,30 @@ namespace api.Services
 
         public BaseResponse DeleteUser(DeleteUserDto inputDto)
         {
-            throw new NotImplementedException();
+            var res = new BaseResponse();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_DeleteUser", conn))
+                {
+                    conn.Open();
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
+
+                    cmd.ExecuteNonQuery();
+                }
+
+                res.Result = AppConstant.RESULT_SUCCESS;
+                res.Message = "Xoa thanh cong";
+            }
+            catch(Exception ex)
+            {
+                res.Result = AppConstant.RESULT_ERROR;
+                res.Message = ex.Message;
+            }
+
+            return res;
         }
 
         public BaseResponse FindUserByUsernameOrEmail(FindUserByUsernameOrEmailDto inputDto)
@@ -77,6 +100,10 @@ namespace api.Services
 
                             for (int i = 0; i < dt.Rows.Count; i++)
                             {
+                                if (!string.IsNullOrEmpty(dt.Rows[i]["Avatar"]?.ToString()))
+                                {
+                                    dt.Rows[i]["Avatar"] = setAvatar(dt.Rows[i]["IsExternalAvatar"].ToString(), dt.Rows[i]["Avatar"].ToString());
+                                }
                                 if ((int)dt.Rows[i]["roleID"] == roleID_Admin)
                                 {
                                     dtAdmin.ImportRow(dt.Rows[i]);
@@ -148,7 +175,7 @@ namespace api.Services
                     model.Email = dt.Rows[0]["Email"].ToString();
                     model.FullName = dt.Rows[0]["FullName"]?.ToString();
                     model.PhoneNumber = dt.Rows[0]["PhoneNumber"]?.ToString();
-                    model.Avatar = getAvatarBase64(dt.Rows[0]["Avatar"]?.ToString());
+                    model.Avatar = setAvatar(dt.Rows[0]["IsExternalAvatar"].ToString(), dt.Rows[0]["Avatar"].ToString());
                     var date = dt.Rows[0]["DateOfBirth"] != DBNull.Value ? (DateTime)dt.Rows[0]["DateOfBirth"] : new DateTime();
                     model.DateOfBirth = date > new DateTime() ? date.ToString("dd-MM-yyyy") : string.Empty;
                     model.Gender = dt.Rows[0]["Gender"] != DBNull.Value ? (byte?)dt.Rows[0]["Gender"] : null;
@@ -214,7 +241,7 @@ namespace api.Services
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
 
-                    model.Avatar = getAvatarBase64(dt.Rows[0]["Avatar"].ToString());
+                    model.Avatar = setAvatar(dt.Rows[0]["IsExternalAvatar"].ToString(), dt.Rows[0]["Avatar"].ToString());
                     model.Address = dt.Rows[0]["Address"].ToString();
                     model.PhoneNumber = dt.Rows[0]["PhoneNumber"].ToString();
                     model.Gender = dt.Rows[0]["Gender"] != DBNull.Value ? (byte)dt.Rows[0]["Gender"] : null;
@@ -247,9 +274,17 @@ namespace api.Services
                 string s when string.IsNullOrWhiteSpace(s) => DBNull.Value,
                 _ => value
             };
-        private string getAvatarBase64(string path)
+        private string setAvatar(string isExternalAvatar, string avatar)
         {
-            var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/avatars", path);
+            if(!string.IsNullOrEmpty(isExternalAvatar) && isExternalAvatar != "1")
+            {
+                return getAvatarBase64(avatar);
+            }
+            return avatar;
+        }
+        private string getAvatarBase64(string filename)
+        {
+            var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "avatars", filename);
             string base64 = string.Empty;
 
             if (System.IO.File.Exists(imagePath))
@@ -269,14 +304,14 @@ namespace api.Services
 
             byte[] imageBytes = Convert.FromBase64String(base64String);
             var fileName = Guid.NewGuid().ToString() + ".png";
-            var filePath = Path.Combine("wwwroot/uploads", fileName);
+            var filePath = Path.Combine("wwwroot/uploads/avatars", fileName);
 
             System.IO.File.WriteAllBytes(filePath, imageBytes);
 
-            var request = _httpContextAccessor.HttpContext.Request;
-            var imageUrl = $"{request.Scheme}://{request.Host}/uploads/avatars/{fileName}";
+            //var request = _httpContextAccessor.HttpContext.Request;
+            //var imageUrl = $"{request.Scheme}://{request.Host}/uploads/avatars/{fileName}";
 
-            return filePath;
+            return fileName;
         }
         public BaseResponse UpdateUser(UpdateUserDto inputDto)
         {
@@ -289,7 +324,7 @@ namespace api.Services
                     conn.Open();
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
-                    if (string.IsNullOrEmpty(inputDto.Avatar))
+                    if (!string.IsNullOrEmpty(inputDto.Avatar))
                     {
                         inputDto.Avatar = saveAvatar(inputDto.Avatar);
 

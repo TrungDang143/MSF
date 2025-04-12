@@ -1,8 +1,30 @@
-<h2 mat-dialog-title>{{ data.caption }}</h2>
-<mat-dialog-content>
-  <p>{{ data.message }}</p>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button (click)="choose(true)">Yes</button>
-  <button mat-button (click)="choose(false)">No</button>
-</mat-dialog-actions>
+<p-dialog 
+  [(visible)]="visible" 
+  [modal]="true" 
+  [closable]="false"
+  [header]="data?.header || 'Xác nhận'"
+  [baseZIndex]="10001"
+  [style]="{ width: '350px' }"
+>
+<div class="p-confirm-dialog-message" style="display: flex; align-items: center;">
+  <i [class]="data?.icon || 'pi pi-exclamation-triangle'" 
+     style="font-size: 2rem; margin-right: 10px;"></i>
+  <span>{{ data?.message }}</span>
+</div>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+            type="button" 
+            label="{{ data?.rejectLabel || 'Hủy' }}" 
+            icon="pi pi-times" 
+            (click)="handleReject()" 
+            class="p-button-text" />
+
+    <p-button 
+            type="button" 
+            label="{{ data?.acceptLabel || 'Đồng ý' }}" 
+            icon="pi pi-check" 
+            (click)="handleAccept()" 
+            autofocus />
+  </ng-template>
+</p-dialog>

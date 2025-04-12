@@ -1,26 +1,32 @@
 import { Component, Inject } from '@angular/core';
-import {
-  MatDialogRef,
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-} from '@angular/material/dialog';
+import { Dialog } from 'primeng/dialog';
+import { InfoDialogData, PopupService } from '../popup.service';
+import { CommonModule } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
 
 
 @Component({
   selector: 'app-popup-ok',
   templateUrl: './popup-ok.component.html',
+  standalone: true,
   imports: [
-    MatDialogModule,
+    Dialog, ButtonModule, CommonModule
   ],
   styleUrls: ['./popup-ok.component.css'],
 })
 export class PopupOkComponent {
-  constructor(
-    public dialogRef: MatDialogRef<PopupOkComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { caption: string; message: string }
-  ) {}
+  visible = false;
+  data: InfoDialogData | null = null;
 
-  close(): void {
-    this.dialogRef.close();
+  constructor(private popup: PopupService) {
+    this.popup.infoDialog$.subscribe(data => {
+      this.data = data;
+      this.visible = true;
+    });
+  }
+
+  handleOk() {
+    this.visible = false;
+    this.data?.onClose?.(); // Nếu có callback sau khi đóng
   }
 }

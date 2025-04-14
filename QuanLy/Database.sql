@@ -153,7 +153,21 @@ CREATE TABLE Status (
 	StatusName nvarchar(20) not null
 );
 insert into Status values (N'Vô hiệu hóa')
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+CREATE TABLE SystemLog (
+    Id INT PRIMARY KEY IDENTITY,
+    Username NVARCHAR(100),
+    Role NVARCHAR(50),
+    IPAddress NVARCHAR(50),
+	UserAgent NVARCHAR(500),
+    Url NVARCHAR(500),
+    Method NVARCHAR(10),
+    RequestBody NVARCHAR(MAX),
+    ResponseStatusCode INT,
+    ExceptionMessage NVARCHAR(MAX),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+------------------------------------------------------------------------------------------
 CREATE TRIGGER trg_UpdateTimestamps
 ON Users
 AFTER INSERT, UPDATE
@@ -536,6 +550,20 @@ declare @rtnValue int;
 exec sp_GetRoleIDByUsernameOrEmail 'dtrung', @rtnValue output
 select @rtnValue
 ----------------------------------------------------------------------------------------------------
+create procedure sp_GetRoleNameByUsernameOrEmail
+    @UsernameOrEmail VARCHAR(100),
+	@rtnvalue varchar(50) output
+AS
+BEGIN
+
+   set @rtnValue = (SELECT top 1 RoleName FROM Users  
+					inner join Role on role.roleId = Users.roleid
+					WHERE (Username = @UsernameOrEmail OR Email = @UsernameOrEmail))
+END;
+declare @rtnValue varchar(50);
+exec sp_GetRoleNameByUsernameOrEmail 'admin2', @rtnValue output
+select @rtnValue
+----------------------------------------------------------------------------------------------------
 create procedure sp_GetUsersByRoleID
     @RoleID int
 AS
@@ -639,7 +667,212 @@ BEGIN
 			UPDATE Users SET RoleID = @RoleID WHERE UserID = @UserID;
 
 END;
+----------------------------------------------------------------------------------------------------
+create procedure sp_DeleteUser
+@UserID int
+AS
+BEGIN
 
+  delete from users where UserID = @UserID
+
+END;
+declare @rtnValue int;
+exec sp_GetRole 'dtrung', @rtnValue output
+select @rtnValue
+----------------------------------------------------------------------------------------------------
+create procedure sp_GetPermissionByRoleID
+@RoleID int
+as
+begin
+	SELECT 
+        p.PermissionID,
+        p.PermissionName
+    FROM 
+        RolePermission rp
+    INNER JOIN 
+        Permission p ON rp.PermissionID = p.PermissionID
+    WHERE 
+        rp.RoleID = @RoleID
+
+end
+
+exec sp_GetPermissionByRoleID 3
+----------------------------------------------------------------------------------------------------
+create procedure sp_GetPermissionNameByPermissionID
+@PermissionID int,
+@rtnValue varchar(100) output
+as
+begin
+	set @rtnValue = (select PermissionName from Permission where PermissionID = @PermissionID)
+end
+
+declare @rtnValue varchar(100)
+exec sp_GetPermissionNameByPermissionID @PermissionID = 2, @rtnValue = @rtnValue OUTPUT;
+select @rtnValue
+----------------------------------------------------------------------------------------------------
+create procedure sp_GetAllPermissions
+as
+begin
+	select * from Permission 
+end
+
+----------------------------------------------------------------------------------------------------
+CREATE PROCEDURE sp_AddSystemLog
+    @Username NVARCHAR(100),
+    @Role NVARCHAR(50),
+    @IPAddress NVARCHAR(50),
+    @Url NVARCHAR(500),
+    @Method NVARCHAR(10),
+    @RequestBody NVARCHAR(MAX),
+    @ResponseStatusCode INT,
+    @ExceptionMessage NVARCHAR(MAX),
+    @UserAgent NVARCHAR(500),
+    @CreatedAt DATETIME
+AS
+BEGIN
+    INSERT INTO SystemLog (
+        Username,
+        Role,
+        IPAddress,
+        Url,
+        Method,
+        RequestBody,
+        ResponseStatusCode,
+        ExceptionMessage,
+        UserAgent,
+        CreatedAt
+    )
+    VALUES (
+        @Username,
+        @Role,
+        @IPAddress,
+        @Url,
+        @Method,
+        @RequestBody,
+        @ResponseStatusCode,
+        @ExceptionMessage,
+        @UserAgent,
+        @CreatedAt
+    )
+END
+
+----------------------------------------------------------------------------------------------------
+create procedure sp_GetAllSystemLog
+as
+begin
+	select * from SystemLog order by CreatedAt desc
+end
+----------------------------------------------------------------------------------------------------
+create table UserPermission (
+    UserID INT,
+    PermissionID INT,
+    PRIMARY KEY (UserID, PermissionID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (PermissionID) REFERENCES Permission(PermissionID)
+)
+----------------------------------------------------------------------------------------------------
+CREATE PROCEDURE sp_UpdateUserPermissions
+    @UserID INT,
+    @PermissionIDs NVARCHAR(MAX) -- VD: '1,3,5'
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Xoá quyền cũ của user
+    DELETE FROM UserPermission WHERE UserID = @UserID;
+
+    -- Thêm quyền mới
+    DECLARE @id INT;
+    DECLARE @PermissionTable TABLE (ID INT);
+
+    INSERT INTO @PermissionTable (ID)
+    SELECT value FROM STRING_SPLIT(@PermissionIDs, ',')
+
+    INSERT INTO UserPermission (UserID, PermissionID)
+    SELECT @UserID, ID FROM @PermissionTable;
+END
+
+----------------------------------------------------------------------------------------------------
+CREATE PROCEDURE sp_GetAllPermissionsForUser
+    @UserID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT DISTINCT p.PermissionID, p.PermissionName
+    FROM Permission p
+    WHERE p.PermissionID IN (
+        -- Quyền theo Role
+        SELECT rp.PermissionID
+        FROM Users u
+        JOIN RolePermission rp ON u.RoleID = rp.RoleID
+        WHERE u.UserID = @UserID
+
+        UNION
+
+        -- Quyền riêng
+        SELECT up.PermissionID
+        FROM UserPermission up
+        WHERE up.UserID = @UserID
+    )
+END
+
+----------------------------------------------------------------------------------------------------
+CREATE TABLE SystemSettings (
+    ID INT PRIMARY KEY IDENTITY,
+    SettingKey NVARCHAR(100) UNIQUE NOT NULL,
+    SettingValue NVARCHAR(500) NOT NULL,
+    Description NVARCHAR(500),
+    IsActive BIT DEFAULT 1
+)
+CREATE PROCEDURE sp_UpdateSystemSetting
+    @SettingKey NVARCHAR(100),
+    @SettingValue NVARCHAR(500),
+    @Description NVARCHAR(500) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM SystemSettings WHERE SettingKey = @SettingKey)
+    BEGIN
+        UPDATE SystemSettings
+        SET SettingValue = @SettingValue,
+            Description = CASE 
+                WHEN @Description IS NULL OR @Description = '' THEN Description 
+                ELSE @Description 
+             END
+        WHERE SettingKey = @SettingKey;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO SystemSettings (SettingKey, SettingValue, Description, IsActive)
+        VALUES (@SettingKey, @SettingValue, @Description, 1);
+    END
+END;
+
+EXEC sp_UpdateSystemSetting 'Password.MinLength', '8', N'Độ dài tối thiểu';
+EXEC sp_UpdateSystemSetting 'Password.RequireUpper', 'true', N'Phải có chữ hoa';
+EXEC sp_UpdateSystemSetting 'Password.RequireLower', 'true', N'Phải có chữ thường';
+EXEC sp_UpdateSystemSetting 'Password.RequireSpecial', 'true', N'Phải có ký tự đặc biệt';
+EXEC sp_UpdateSystemSetting 'Password.RequireDigit', 'true', N'Phải có chữ số';
+
+CREATE PROCEDURE sp_GetPasswordRules
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        SettingKey,
+        SettingValue,
+		description
+    FROM 
+        SystemSettings
+    WHERE 
+        SettingKey LIKE 'Password.%'
+        AND IsActive = 1;
+END;
+exec sp_GetPasswordRules
+----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 DECLARE @ReturnValue VARCHAR(100);
 DECLARE @ReturnStatus int;

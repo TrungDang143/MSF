@@ -23,6 +23,12 @@ export class AccountService {
     return this.http.get(url, { headers, params});
   }
 
+  GetDetailUserInfoByUsername(username: string): Observable<any>{
+    const url = environment.baseUrl + "Account/userInfo"
+    const params = new HttpParams().set('Username', username)
+    return this.http.get(url, { params});
+  }
+
   UpdateUser(userInfo: any): Observable<any>{
     const url = environment.baseUrl + "Account/UpdateUser";
     return this.http.post(url, userInfo);

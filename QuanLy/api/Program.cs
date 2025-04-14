@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.DependencyInjection;
+using api.AppUtils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -105,6 +106,9 @@ builder.Services.AddScoped<ISignUp, SignUpService>();
 builder.Services.AddScoped<IForgot, ForgotService>();
 builder.Services.AddScoped<IHome, HomeService>();
 builder.Services.AddScoped<IAccount, AccountService>();
+builder.Services.AddScoped<ISystemLogService, SystemLogService>();
+builder.Services.AddScoped<IUserSetting, UserSettingService>();
+builder.Services.AddScoped<ISystemSetting, SystemSettingService>();
 
 var app = builder.Build();
 
@@ -126,6 +130,8 @@ app.UseCors("AllowLocalhost");
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.MapControllers();
 

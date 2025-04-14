@@ -1,130 +1,115 @@
-@import 'bootstrap/dist/css/bootstrap.min.css';
-
-.parent {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(10, 1fr);
-}   
-
-.nav {
-    grid-column: span 5 / span 5;
-    background-color: rgb(241,243,246);
-    border-top-right-radius: 10px;
-    height: 10vh;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.25) ;
-    align-items: center;
+.sidebar {
+  width: 250px;
+  background-color: var(--p-surface-100);
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  grid-template-rows: 0.1fr 0.8fr 0.1fr;
+  gap: 8px;
+  height: 100vh;
+}
+.sidebar.collapsed {
+  width: 120px;
+}
+.sidebar.collapsed li {
+  text-align: center;
+  justify-self: center;
 }
 
-.menu {
-    grid-row: 1/-1;
-    background-color: rgb(241,243,246);
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-    border-right: 1px solid rgba(0, 0, 0, 0.25);
-    position: relative;
+/* Ẩn text menu khi thu gọn */
+.sidebar.collapsed .menu li {
+  display: none;
 }
+
+.sidebar__header {
+  margin-top: 25px;
+  margin-left: 10px;
+  margin-right: 10px;
+  height: 20%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  grid-row-start: 1;
+  grid-row: 50%;
+}
+
+.sidebar__logo {
+  width: 50px;
+  height: 50px;
+  padding: 10px;
+}
+
+.sidebar__catelory {
+  padding: 0;
+  grid-row-start: 2;
+}
+
+.sidebar__catelory ul {
+  padding-left: 20px;
+  padding-right: 20px;
+  list-style-type: none;
+}
+.sidebar__catelory li:not(.catelory-title) {
+  list-style-type: none;
+  padding: 5px;
+  padding-left: 15px;
+  border-radius: 5px;
+  align-items: center;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar__catelory li:hover:not(.catelory-title) {
+  background-color: var(--p-surface-300);
+}
+
+.sidebar__catelory i {
+  padding-right: 10px;
+}
+
+.catelory-title {
+  font-size: 17px;
+  font-weight: 500;
+  padding-top: 30px !important;
+}
+
+.sidebar__footer {
+  height: 20%;
+  grid-row-start: 3;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+:host ::ng-deep .account-btn{
+    background-color: var(--p-primary-200) !important;
+    opacity: 0.8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border: 0px;
+    border-radius: 15px;
+    color: black;
+}
+:host ::ng-deep .account-btn:hover{
+    color: var(--p-primary-900);
+}
+::ng-deep .account-menu{
+    margin-top: -45px !important;
+    border-radius: 15px;
+}
+
 
 .body {
-    overflow-y: auto;
-    max-height: calc((100vh / 10) * 9);
-    grid-column-start: 2;
-    grid-column-end: 7;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 8px;
+}
+    
+.nav {
+    grid-column: span 4 / span 4;
+}
+
+.content {
+    grid-column: span 4 / span 4;
+    grid-row: span 4 / span 4;
     grid-row-start: 2;
-    grid-row-end: 11;
-    padding: 15px;
-}
-
-.logo{
-    display: flex;
-    padding: 10px;
-    align-items: center;
-}
-
-.logo i{
-    margin-left: auto;
-}
-
-.catelory{
-    padding-top: 20px;
-    width: 100%;
-}
-
-.catelory table{
-    width: 100%;
-}
-
-.catelory th, .catelory td{
-    border-bottom: 1px solid #ddd;
-    padding: 15px;
-    text-align: left;
-}
-
-.catelory tr:hover {
-    background-color: rgb(248, 219, 241);
-    padding-top: 5px;
-    padding-bottom: 5px;
 }
         
-
-.nav {
-    display: flex;
-    align-items: center;
-    
-}   
-
-.welcome{
-    display: block;
-    padding: 10px;
-    padding-left: 30px;
-    align-items: center;
-}
-
-.notice {
-    align-items: center;
-    margin-left: auto;
-    padding: 10px;
-    padding-right: 25px;
-}
-
-.search {
-    align-items: center;
-    width: 70%;
-    padding: 10px;
-}
-
-.foot-menu{
-    position: absolute;
-    bottom: 0;
-    margin: 10px;
-}
-
-
-ul, li{
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-#menu1{
-    position: relative;
-}
-
-#menu2{
-    margin-left: 1px;
-    display: none;
-    position: absolute;
-}
-#menu2 >li{
-    padding: 10px;
-    background-color: rgb(255, 249, 248);
-    width: 200px;
-    border-bottom: 1px solid;
-}
-#menu2 >li:hover{
-    background-color: rgb(204, 186, 245);
-}
-
-#menu1:hover #menu2{
-    display: block;
-    position: absolute;
-}

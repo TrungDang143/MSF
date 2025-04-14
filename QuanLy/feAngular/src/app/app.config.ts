@@ -17,6 +17,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { ConfirmationService } from 'primeng/api';
+import { MyPreset } from '../assets/themes/mypreset';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,10 +27,13 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
-        preset: Aura,
+        preset: MyPreset,
+        options: {
+          darkModeSelector: '.my-app-dark',
+        },
       },
     }),
-    ConfirmationService, 
+    ConfirmationService,
     provideHttpClient(withInterceptors([AuthInterceptor])),
     {
       provide: 'SocialAuthServiceConfig',

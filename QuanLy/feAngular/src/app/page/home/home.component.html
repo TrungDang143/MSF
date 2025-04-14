@@ -1,68 +1,51 @@
-<div class="parent">
-  <div class="menu">
-    <div class="logo">
-      <img src="favicon.ico" />
-      <i class="pi pi-bars" style="font-size: 1.5rem"></i>
-    </div>
-    <div class="catelory">
-      <table>
-        <tbody>
-          <tr (click)="goToPage('/dashboard', '')">
-            <td>Trang chủ</td>
-            <td><i class="pi pi-home" style="font-size: 1.5rem"></i></td>
-          </tr>
-          <tr  id="menu1">
-            <td>Quản lý tài khoản</td>
-            <td><i class="pi pi-users" style="font-size: 1.5rem"></i></td>
-            <ul id="menu2">
-              <li (click)="goToPage('/list-accounts', 'view_users')">
-                  Danh sách tài khoản
+<div style="display: flex;">
+  <div [ngClass]="{ sidebar: true, collapsed: collapsed }">
+      <div class="sidebar__header">
+          <p-button icon="pi pi-bars" (click)="toggleSidebar()" class="sidebar__toggle-btn" variant="text"></p-button>
+          <img src="favicon.ico" class="sidebar__logo" />
+      </div>
+      <div class="sidebar__catelory">
+          <ul>
+              <li class="catelory-title">Main</li>
+              <li>
+                  <a><i class="pi pi-home" style="font-size: 1.5rem;"></i> <span *ngIf="!collapsed">Trang chủ</span></a>
               </li>
-              <li (click)="goToPage('/my-account', '')">
-                  Thông tin cá nhân
+              <li class="catelory-title">Accounts</li>
+              <li>
+                  <a>
+                      <i class="pi pi-users" style="font-size: 1.5rem;"></i>
+                      <span *ngIf="!collapsed">Danh sách tài khoản</span>
+                  </a>
+              </li>
+              <li>
+                  <a><i class="pi pi-user" style="font-size: 1.5rem;"></i> <span *ngIf="!collapsed">Tài khoản của tôi</span></a>
+              </li>
+              <li class="catelory-title">System</li>
+              <li>
+                  <a>
+                      <i class="pi pi-address-book" style="font-size: 1.5rem;"></i>
+                      <span *ngIf="!collapsed">Nhật ký</span>
+                  </a>
+              </li>
+              <li>
+                  <a><i class="pi pi-cog" style="font-size: 1.5rem;"></i> <span *ngIf="!collapsed">Cài đặt</span></a>
               </li>
           </ul>
-          </tr>
-          <tr (click)="goToPage('/setting', '')">
-            <td>Cài đặt</td>
-            <td><i class="pi pi-cog" style="font-size: 1.5rem"></i></td>
-          </tr>
-          <tr (click)="goToPage('/log', 'view_logs')">
-              <td>Nhật ký hệ thống</td>
-              <td>
-                <i class="pi pi-address-book" style="font-size: 1.5rem"></i>
-              </td>   
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="foot-menu">
-      <p-button label="Đăng xuất" severity="danger" (click)="Logout()"/>
-    </div>
-  </div>
-  <div class="nav">
-    <div class="welcome">
-      Welcome,
-      <br />
-      <b>{{ username }}</b>
-    </div>
-    <div class="search">
-      <div class="input-group w-100">
-        <input
-          type="text"
-          class="form-control rounded-start"
-          placeholder="Tìm kiếm..."
-        />
-        <button class="btn rounded-end btn-secondary">
-          <i class="pi pi-search"></i>
-        </button>
       </div>
-    </div>
-    <div class="notice">
-      <i class="pi pi-bell" style="font-size: 1.5rem"></i>
-    </div>
+      <div class="sidebar__footer">
+          <div class="card flex justify-center">
+              <p-menu #menu [model]="items" [popup]="true" styleClass="account-menu" />
+              <p-button (click)="menu.toggle($event)" styleClass="account-btn">
+                  <p-avatar [image]="avatar" class="mr-2" size="large" shape="circle" />
+                  <span class="inline-flex flex-col" *ngIf="!collapsed">
+                      <span class="font-bold" style="font-weight: 500;">{{ username }}</span>
+                  </span>
+              </p-button>
+          </div>
+      </div>
   </div>
   <div class="body">
-    <router-outlet></router-outlet>
-  </div>
+    <div class="nav">1</div>
+    <div class="content">2</div>
+</div>
 </div>

@@ -229,7 +229,9 @@ namespace api.Services
             {
                 using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
                 using (SqlCommand cmd = new SqlCommand("sp_GetUserByUsernameOrEmail", conn))
+                using (SqlCommand cmd_gender = new SqlCommand("sp_GetGenders", conn))
                 using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                using (SqlDataAdapter adapter_gender = new SqlDataAdapter(cmd_gender))
                 {
                     conn.Open();
 
@@ -245,14 +247,20 @@ namespace api.Services
                     model.Address = dt.Rows[0]["Address"].ToString();
                     model.PhoneNumber = dt.Rows[0]["PhoneNumber"].ToString();
                     model.Gender = dt.Rows[0]["Gender"] != DBNull.Value ? (byte)dt.Rows[0]["Gender"] : null;
-                    model.DateOfBirth = dt.Rows[0]["DateOfBirth"] != DBNull.Value ? (DateTime)dt.Rows[0]["DateOfBirth"] : null;
+                    var date = dt.Rows[0]["DateOfBirth"] != DBNull.Value ? (DateTime)dt.Rows[0]["DateOfBirth"] : new DateTime();
+                    model.DateOfBirth = date > new DateTime() ? date.ToString("dd-MM-yyyy") : string.Empty;
                     model.Email = dt.Rows[0]["Email"].ToString();
-                    model.Fullname = dt.Rows[0]["FullName"].ToString();
+                    model.FullName = dt.Rows[0]["FullName"].ToString();
                     model.Username = dt.Rows[0]["Username"].ToString();
                     model.Status = dt.Rows[0]["Status"] != DBNull.Value ? (byte)dt.Rows[0]["Status"] : null;
-                    model.IsFB = !string.IsNullOrEmpty(dt.Rows[0]["FacebookID"].ToString());
-                    model.IsGG = !string.IsNullOrEmpty(dt.Rows[0]["GoogleID"].ToString());
+                    model.FacebookID = !string.IsNullOrEmpty(dt.Rows[0]["FacebookID"].ToString());
+                    model.GoogleID= !string.IsNullOrEmpty(dt.Rows[0]["GoogleID"].ToString());
                     model.RoleID = dt.Rows[0]["roleID"] != DBNull.Value ? (int)dt.Rows[0]["roleID"] : null;
+
+                    dt.Clear();
+                    cmd_gender.CommandType = CommandType.StoredProcedure;
+                    adapter_gender.Fill(dt);
+                    model.ListGender = dt.ConvertToList<Gender>();
 
                     res.Data = model;
                     res.Result = AppConstant.RESULT_SUCCESS;

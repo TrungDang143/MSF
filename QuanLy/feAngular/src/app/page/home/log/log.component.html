@@ -1,4 +1,106 @@
-<p>log works!</p>
-<div style="background-color: aqua; height: 700px;">
+<div>
+  <div class="card">
+    <p-table
+      #dt2
+      [value]="systemLog"
+      [paginator]="true"
+      dataKey="id"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [globalFilterFields]="[
+        'username',
+        'role',
+        'IPAddress',
+        'UserAgent',
+        'Url',
+        'Method',
+        'RequestBody',
+        'ResponseStatusCode',
+        'ExceptionMessage',
+        'CreateAt'
+      ]"
+      [resizableColumns]="true"
+      styleClass="p-datatable-gridlines custom-border"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      [showCurrentPageReport]="true"
+      autoLayout="true"
+    >
+      <ng-template #caption>
+        <div class="flex">
+          <p-iconfield iconPosition="left" class="ml-auto">
+            <p-inputicon>
+              <i class="pi pi-search"></i>
+            </p-inputicon>
+            <input
+              pInputText
+              type="text"
+              [(ngModel)]="globalFilterValue"
+              (input)="applyFilterGlobal($event, 'contains')"
+              placeholder="Search keyword"
+            />
+          </p-iconfield>
+          <p-datepicker 
+            [(ngModel)]="dateFrom"
+            dateFormat="dd/mm/yy"
+            placeholder="From date"
+            [showIcon]="true"
+          ></p-datepicker >
 
+          <p-datepicker 
+            [(ngModel)]="dateTo"
+            dateFormat="dd/mm/yy"
+            placeholder="To date"
+            [showIcon]="true"
+          ></p-datepicker >
+
+          <button
+            pButton
+            type="button"
+            icon="pi pi-filter"
+            label="Filter"
+            (click)="filterByDateRange()"
+          ></button>
+
+          <button
+            pButton
+            type="button"
+            icon="pi pi-times"
+            label="Clear"
+            class="p-button-secondary"
+            (click)="clearDateFilter()"
+          ></button>
+
+        </div>
+      </ng-template>
+      <ng-template #header>
+        <tr>
+          <th pResizableColumn style="width: 10%">Username</th>
+          <th pResizableColumn style="width: 8%">Role</th>
+          <th pResizableColumn style="width: 10%">IP Address</th>
+          <th pResizableColumn style="width: 15%">Thông tin thiết bị</th>
+          <th pResizableColumn style="width: 15%">Url</th>
+          <th pResizableColumn style="width: 8%">Method</th>
+          <th pResizableColumn style="width: 18%">Request Body</th>
+          <th pResizableColumn style="width: 8%">Status</th>
+          <th pResizableColumn style="width: 20%">Exception</th>
+          <th pResizableColumn style="width: 15%">Create At</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-log>
+        <tr>
+          <td>{{ log.username }}</td>
+          <td>{{ log.role }}</td>
+          <td>{{ log.ipAddress }}</td>
+          <td>{{ log.userAgent }}</td>
+          <td>{{ log.url }}</td>
+          <td>{{ log.method }}</td>
+          <td>{{ log.requestBody }}</td>
+          <td>{{ log.responseStatusCode }}</td>
+          <td>{{ log.exceptionMessage }}</td>
+          <td>{{ log.createdAt | date:"dd/MM/yyyy hh:mm:ss" }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 </div>

@@ -1,18 +1,23 @@
-
-
-th, td {
-  padding: 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+:host ::ng-deep .custom-list-user-table td,
+:host ::ng-deep .custom-list-user-table th {
+  border-bottom: 1px solid rgb(226, 232, 240) !important;
+  border-right: 1px solid rgb(226, 232, 240) !important;
+}
+:host ::ng-deep .custom-list-user-table th {
+  background-color: var(--p-surface-300);
+  text-align: center;
+}
+:host::ng-deep .custom-pmessage span {
+  justify-items: center !important;
+  text-align: center !important;
 }
 
-tr:nth-child(even) {
-  background-color: #f2f2f2;
+.filter {
+  display: flex;
+  margin: 5px;
 }
-
-th {
-  background-color: #a24bfa;
-  color: white;
+::ng-deep .filter p-select {
+  margin-left: 10px;
 }
 
 .active {
@@ -25,24 +30,21 @@ th {
   color: red;
   font-weight: bold;
   text-align: center;
-
 }
 
-.sub-title{
-    padding-top: 20px;
+.sub-title {
+  padding-top: 20px;
 }
-
 
 .popup-detail {
   overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(8, 1fr);
+  grid-template-rows: repeat(7, 1fr);
   gap: 5px;
-  width: 1300px;
+  width: 1200;
   max-height: 500px;
 }
-  
 
 .popup-detail .userID {
   grid-column: span 3 / span 3;
@@ -58,37 +60,37 @@ th {
 .popup-detail .username {
   grid-column: span 3 / span 3;
   grid-column-start: 1;
-  grid-row-start: 3;
+  grid-row-start: 2;
 }
 
 .popup-detail .email {
   grid-column: span 3 / span 3;
   grid-column-start: 4;
-  grid-row-start: 3;
+  grid-row-start: 2;
 }
 
 .popup-detail .date {
   grid-column: span 3 / span 3;
   grid-column-start: 1;
-  grid-row-start: 4;
+  grid-row-start: 3;
 }
 
 .popup-detail .gender {
   grid-column: span 3 / span 3;
   grid-column-start: 4;
-  grid-row-start: 4;
+  grid-row-start: 3;
 }
 
 .popup-detail .address {
   grid-column: span 3 / span 3;
   grid-column-start: 1;
-  grid-row-start: 5;
+  grid-row-start: 4;
 }
 
 .popup-detail .phone {
   grid-column: span 3 / span 3;
   grid-column-start: 4;
-  grid-row-start: 5;
+  grid-row-start: 4;
 }
 
 .popup-detail .avatar {
@@ -96,72 +98,81 @@ th {
   grid-row: span 2 / span 2;
   grid-column-start: 7;
   grid-row-start: 1;
-  grid-row-end: 2;
+  grid-row-end: 4;
+  display: flex;
   justify-content: center;
-  background: #a24bfa;
+  align-items: end;
 }
 
-.popup-detail .avatar img{
+.popup-detail .avatar img {
   border-radius: 50%;
 }
 
-.popup-detail .create-update{
-  grid-column: span 2 / span 2;
-  grid-column-start: 7;
-  grid-row-start: 2;
+::ng-deep .popup-detail .avatar p-button {
+  margin: 10px !important;
 }
-.popup-detail .otp {
+
+.popup-detail .detail-info {
   grid-column: span 2 / span 2;
   grid-column-start: 7;
-  grid-row-start: 5;
+  grid-row-start: 4;
+  grid-row-end: 9;
+}
+::ng-deep .custom-detail-pmessage {
+  margin-bottom: 10px;
 }
 
 .popup-detail .gg {
-  grid-column: span 3 / span 3;
-  grid-row-start: 6;
+  grid-column: 1 / span 3;
+  grid-row-start: 5;
 }
-
 .popup-detail .fb {
-  grid-column: span 3 / span 3;
-  grid-column-start: 4;
+  grid-column: 1 / span 3;
   grid-row-start: 6;
-}
-
-.popup-detail .locktime {
-  grid-column: span 2 / span 2;
-  grid-column-start: 7;
-  grid-row-start: 6;
-}
-
-.popup-detail .remaintime {
-  grid-column: span 2 / span 2;
-  grid-column-start: 7;
-  grid-row-start: 7;
 }
 
 .popup-detail .role {
   grid-column: span 3 / span 3;
-  grid-column-start: 1;
-  grid-row-start: 7;
+  grid-column-start: 4;
+  grid-row-start: 5;
 }
 
 .popup-detail .status {
   grid-column: span 3 / span 3;
   grid-column-start: 4;
+  grid-row-start: 6;
+  grid-row-end: 7;
+}
+
+.popup-detail .setting-btn {
+  grid-column: 1 / span 4;
   grid-row-start: 7;
+  grid-row-end: 8;
+  margin-left: 20px;
 }
 
 .popup-detail .action-btn {
-  grid-column: span 8 / span 8;
-  grid-row-start: 8;
+  grid-column: 1 / span 4;
+  grid-column-start: 5;
+  grid-row-start: 7;
+  grid-row-end: 8;
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 20px;
 }
-      
+
+::ng-deep .popup-detail .action-btn p-button{
+  margin-right: 5px;
+}
+::ng-deep .popup-detail .setting-btn p-button{
+  margin-right: 5px;
+}
+
 .popup-detail input {
   width: 350px;
-
 }
 
-.popup-detail .popup-cell{
+.popup-detail .popup-cell {
   padding: 10px;
 }
 
@@ -169,31 +180,51 @@ th {
   display: flex;
   gap: 1rem;
 }
-.google-btn {
-    background-color: #db4437 !important;
-    border: none;
-    color: white;
+::ng-deep .google-btn {
+  background-color: #db4437 !important;
+  border: none;
+  color: white;
 
-    &:hover {
-      background-color: #c23321;
-    }
+  &:hover {
+    background-color: #c23321;
   }
+}
 
-.facebook-btn {
-    background-color: #4267B2 !important;
-    border: none;
-    color: white;
+::ng-deep .facebook-btn {
+  background-color: #4267b2 !important;
+  border: none;
+  color: white;
 
-    &:hover {
-      background-color: #37589b;
-    }
+  &:hover {
+    background-color: #37589b;
   }
+}
 
-  .popup-cell{
-    padding: 5px;
-  }
+.popup-cell {
+  padding: 5px;
+}
 
-  .popup-cell p-select{
-    width: 200px;
-  }
+.popup-cell p-select {
+  width: 200px;
+}
+
+.popup-permission{
+  grid-template-columns: 0.8fr 1fr;
+  grid-template-rows: 0.1fr 1fr 0.1fr;
+  overflow-y: auto;
+  display: grid;
+  gap: 50px;
+}
+
+.overview-permission{
+  border-right: 1px solid var(--p-surface-300);
+}
+.overview-permission ul li{
+  list-style-type: none;
+  padding: 2px;
+  margin-right: 20px;
+}
+::ng-deep .overview-permission .catelory-permission-btn{
+  width: 100% !important;
+}
 

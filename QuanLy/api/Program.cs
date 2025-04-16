@@ -109,6 +109,7 @@ builder.Services.AddScoped<IAccount, AccountService>();
 builder.Services.AddScoped<ISystemLogService, SystemLogService>();
 builder.Services.AddScoped<IUserSetting, UserSettingService>();
 builder.Services.AddScoped<ISystemSetting, SystemSettingService>();
+builder.Services.AddScoped<IPermission, PermissionService>();
 
 var app = builder.Build();
 

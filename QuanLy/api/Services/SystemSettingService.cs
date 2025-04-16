@@ -10,6 +10,89 @@ namespace api.Services
 {
     public class SystemSettingService : ISystemSetting
     {
+        public BaseResponse CreateRole(CreateRoleDto inputDto)
+        {
+            var res = new BaseResponse();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_CreateRole", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    conn.Open();
+
+                    cmd.Parameters.AddWithValue("@RoleName", inputDto.RoleName);
+                    cmd.Parameters.AddWithValue("@Description", inputDto.Description);
+                    var rtnStatus = new SqlParameter("@rtnStatus", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output,
+                    };
+                    cmd.Parameters.Add(rtnStatus);
+                    cmd.ExecuteNonQuery();
+
+                    if((int)rtnStatus.Value == 1)
+                    {
+                        res.Message = "Tạo role thành công!";
+                        res.Result = AppConstant.RESULT_SUCCESS;
+                    }
+                    else
+                    {
+                        res.Message = "Role đã tồn tại!";
+                        res.Result = AppConstant.RESULT_ERROR;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                res.Message = ex.Message;
+                res.Result = AppConstant.RESULT_ERROR;
+            }
+
+            return res;
+        }
+
+        public BaseResponse DeleteRole(DeleteRoleDto inputDto)
+        {
+            var res = new BaseResponse();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_DeleteRole", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    conn.Open();
+
+                    cmd.Parameters.AddWithValue("@RoleID", inputDto.RoleId);
+                    var rtnStatus = new SqlParameter("@rtnStatus", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output,
+                    };
+                    cmd.Parameters.Add(rtnStatus);
+                    cmd.ExecuteNonQuery();
+
+                    if ((int)rtnStatus.Value == 1)
+                    {
+                        res.Message = "Xoá role thành công!";
+                        res.Result = AppConstant.RESULT_SUCCESS;
+                    }
+                    else
+                    {
+                        res.Message = "Xoá role thất bại!";
+                        res.Result = AppConstant.RESULT_ERROR;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                res.Message = ex.Message;
+                res.Result = AppConstant.RESULT_ERROR;
+            }
+
+            return res;
+        }
+
         public BaseResponse GetPasswordRule()
         {
             var res = new BaseResponse();
@@ -57,6 +140,35 @@ namespace api.Services
                     cmd.ExecuteNonQuery();
 
                     res.Message = "Update Password rule thanh cong!";
+                    res.Result = AppConstant.RESULT_SUCCESS;
+                }
+            }
+            catch (Exception ex)
+            {
+                res.Message = ex.Message;
+                res.Result = AppConstant.RESULT_ERROR;
+            }
+
+            return res;
+        }
+
+        public BaseResponse UpdateRolePermission(UpdateRolePermissionDto inputDto)
+        {
+            var res = new BaseResponse();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_UpdateRolePermissions", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    conn.Open();
+
+                    cmd.Parameters.AddWithValue("@RoleId", inputDto.RoleID);
+                    cmd.Parameters.AddWithValue("@PermissionIds", inputDto.PermissionIDs);
+                    cmd.ExecuteNonQuery();
+
+                    res.Message = "Cập nhật thành công!";
                     res.Result = AppConstant.RESULT_SUCCESS;
                 }
             }

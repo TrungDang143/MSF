@@ -73,9 +73,6 @@ namespace api.Services
         public BaseResponse GetAllUserAccounts()
         {
             var res = new BaseResponse();
-            int roleID_Admin = 1;
-            int roleID_SubAdmin = 3;
-            int roleID_User = 2;
             GetAllAccountsOutDto model = new GetAllAccountsOutDto();
 
             try
@@ -86,42 +83,51 @@ namespace api.Services
 
                     using (SqlCommand cmd = new SqlCommand("sp_GetAllAccount", conn))
                     using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                    using (SqlCommand cmd_role = new SqlCommand("sp_GetRole", conn))
+                    using (SqlDataAdapter adapter_role = new SqlDataAdapter(cmd_role))
+                    using (SqlCommand cmd_status = new SqlCommand("sp_GetStatus", conn))
+                    using (SqlDataAdapter adapter_status = new SqlDataAdapter(cmd_status))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
+                        cmd_role.CommandType = CommandType.StoredProcedure;
+                        cmd_status.CommandType = CommandType.StoredProcedure;
 
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);
+                        DataTable dt_role = new DataTable();
+                        adapter_role.Fill(dt_role);
+                        DataTable dt_status = new DataTable();
+                        adapter_status.Fill(dt_status);
+
+                        dt.Columns.Add("RoleName", typeof(String));
+                        dt.Columns.Add("StatusName", typeof(String));
 
                         if (dt.Rows.Count > 0)
                         {
-                            DataTable dtAdmin = dt.Clone();
-                            DataTable dtSubAdmin = dt.Clone();
-                            DataTable dtUser = dt.Clone();
-
                             for (int i = 0; i < dt.Rows.Count; i++)
                             {
                                 if (!string.IsNullOrEmpty(dt.Rows[i]["Avatar"]?.ToString()))
                                 {
                                     dt.Rows[i]["Avatar"] = setAvatar(dt.Rows[i]["IsExternalAvatar"].ToString(), dt.Rows[i]["Avatar"].ToString());
                                 }
-                                if ((int)dt.Rows[i]["roleID"] == roleID_Admin)
+                                if (!string.IsNullOrEmpty(dt.Rows[i]["roleID"]?.ToString()))
                                 {
-                                    dtAdmin.ImportRow(dt.Rows[i]);
+                                    
+                                    dt.Rows[i]["RoleName"] = getRoleName(dt_role, dt.Rows[i]["roleID"].ToString());
                                 }
-                                else if ((int)dt.Rows[i]["roleID"] == roleID_SubAdmin)
+                                if (!string.IsNullOrEmpty(dt.Rows[i]["Status"]?.ToString()))
                                 {
-                                    dtSubAdmin.ImportRow(dt.Rows[i]);
+                                    
+                                    dt.Rows[i]["StatusName"] = getStatusName(dt_status, dt.Rows[i]["Status"].ToString());
                                 }
-                                else if ((int)dt.Rows[i]["roleID"] == roleID_User)
-                                {
-                                    dtUser.ImportRow(dt.Rows[i]);
-                                }
+                                //dt.Rows[i]["GoogleID"] = !string.IsNullOrEmpty(dt.Rows[i]["GoogleID"]?.ToString()) ? true : false;
+                                //dt.Rows[i]["FacebookID"] = !string.IsNullOrEmpty(dt.Rows[i]["FacebookID"]?.ToString()) ? true : false;
+
+                                //var date = dt.Rows[0]["DateOfBirth"] != DBNull.Value ? (DateTime)dt.Rows[0]["DateOfBirth"] : new DateTime();
+                                //dt.Rows[0]["DateOfBirth"] = date > new DateTime() ? date.ToString("dd-MM-yyyy") : string.Empty;
                             }
 
-                            model.Admins = dtAdmin.ConvertToList<Account>();
-                            model.SubAdmins = dtSubAdmin.ConvertToList<Account>();
-                            model.Users = dtUser.ConvertToList<Account>();
-
+                            model.Users = dt.ConvertToList<Account>();
                             res.Message = "Success!";
                             res.Data = model;
                             res.Result = AppConstant.RESULT_SUCCESS;
@@ -142,7 +148,32 @@ namespace api.Services
 
             return res;
         }
-
+        private string getRoleName(DataTable dt, string roleID)
+        {
+            string result = string.Empty;
+            foreach(DataRow dr in dt.Rows)
+            {
+                if (dr[0].ToString() == roleID)
+                {
+                    result = dr[1].ToString();
+                    break;
+                }
+            }
+            return result;
+        }
+        private string getStatusName(DataTable dt, string statusID)
+        {
+            string result = string.Empty;
+            foreach (DataRow dr in dt.Rows)
+            {
+                if (dr[0].ToString() == statusID)
+                {
+                    result = dr[1].ToString();
+                    break;
+                }
+            }
+            return result;
+        }
         public BaseResponse GetDetailUserInfo(GetDetailUserInfoInDto inputDto)
         {
             var res = new BaseResponse();
@@ -284,7 +315,7 @@ namespace api.Services
             };
         private string setAvatar(string isExternalAvatar, string avatar)
         {
-            if(!string.IsNullOrEmpty(isExternalAvatar) && isExternalAvatar != "1")
+            if(!string.IsNullOrEmpty(isExternalAvatar) && isExternalAvatar != "True")
             {
                 return getAvatarBase64(avatar);
             }
@@ -362,6 +393,11 @@ namespace api.Services
                 res.Result = AppConstant.RESULT_ERROR;
             }
             return res;
+        }
+
+        public BaseResponse GetAllUserPermission(GetAllUserPermissionDto inputDto)
+        {
+            throw new NotImplementedException();
         }
     }
 }

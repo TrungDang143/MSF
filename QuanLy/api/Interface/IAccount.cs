@@ -13,6 +13,7 @@ namespace api.Interface
         public BaseResponse CreateUser(CreateUserDto inputDto);
         public BaseResponse ChangeStatusUser(ChangeStatusUserDto inputDto);
         public BaseResponse ChangeRoleUser(ChangeRoleUserDto inputDto);
+        public BaseResponse GetAllUserPermission(GetAllUserPermissionDto inputDto);
 
     }
 }

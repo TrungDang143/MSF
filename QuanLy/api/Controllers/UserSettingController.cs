@@ -17,12 +17,14 @@ namespace api.Controllers
             _userSetting = userSetting;
         }
 
+        [HasPermission("assign_permissions")]
         [HttpPost("SetUserPermission")]
         public BaseResponse SetUserPermission([FromQuery]SetUserPermissionDto inputDto)
         {
             return _userSetting.SetUserPermission(inputDto);
         }
 
+        [HasPermission("view_permissions")]
         [HttpGet("GetUserPermission")]
         public BaseResponse GetUserPermission([FromQuery] GetUserPermissionDto inputDto)
         {

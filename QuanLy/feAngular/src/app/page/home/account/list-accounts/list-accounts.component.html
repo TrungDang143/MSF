@@ -1,123 +1,94 @@
-<div class="title">
-  <h2>Danh sách tài khoản</h2>
-</div>
-<div class="content">
-  <div class="list-admin">
-    <p class="sub-title">Tài khoản Admin</p>
-    <table>
+<div class="card">
+  <p-table
+    #dt2
+    [value]="listUser"
+    [paginator]="true"
+    dataKey="id"
+    [rows]="5"
+    [rowsPerPageOptions]="[5, 10, 20]"
+    [globalFilterFields]="['username', 'email', 'fullName']"
+    [resizableColumns]="true"
+    styleClass="p-datatable-gridlines custom-list-user-table"
+    [tableStyle]="{ 'min-width': '50rem' }"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [showCurrentPageReport]="true"
+    [filters]="filters"
+  >
+    <ng-template #caption>
+      <div class="filter">
+        <p-iconfield iconPosition="left" class="ml-auto">
+          <p-inputicon>
+            <i class="pi pi-search"></i>
+          </p-inputicon>
+          <input
+            pInputText
+            type="text"
+            [(ngModel)]="globalFilterValue"
+            (input)="applyFilterGlobal($event, 'contains')"
+            placeholder="Tìm kiếm"
+          />
+        </p-iconfield>
+        <p-select
+          [options]="roles"
+          [(ngModel)]="selectedRole"
+          placeholder="Lọc theo role"
+          (onChange)="dt2.filter($event.value, 'roleName', 'equals')"
+          [showClear]="true"
+        ></p-select>
+      </div>
+    </ng-template>
+    <ng-template #header>
       <tr>
-        <th style="width: 160px; text-align: center">Avatar</th>
-        <th style="width: 180px">Fullname</th>
-        <th style="width: 180px">Username</th>
-        <th style="width: 280px">Email</th>
-        <th style="width: 80px; text-align: center">Status</th>
-        <th style="width: 150px; text-align: center">Action</th>
+        <th pResizableColumn style="width: 5%">Avatar</th>
+        <th pResizableColumn style="width: 10%">Username</th>
+        <th pResizableColumn style="width: 10%">Fullname</th>
+        <th pResizableColumn style="width: 10%">Email</th>
+        <th pResizableColumn style="width: 6%">Role</th>
+        <th pResizableColumn style="width: 6%">Status</th>
+        <th pResizableColumn style="width: 6%">Action</th>
       </tr>
-      <tr *ngIf="!listAdmin || listAdmin.length === 0">
-        <td colspan="6" style="text-align: center; color: rgb(255, 57, 57)">
-          Danh sách trống
+    </ng-template>
+    <ng-template #body let-user>
+      <tr>
+        <td>
+          <img
+            src="{{ user.avatar }}"
+            alt="avatar"
+            height="50px"
+            width="50px"
+          />
         </td>
-      </tr>
-      <tr *ngFor="let item of listAdmin">
-        <td style="text-align: center">
-          <img src="{{ item.avatar }}" alt="avatar" width="100px" height="100px" />
-        </td>
-        <td>{{ item.fullname }}</td>
-        <td>{{ item.username }}</td>
-        <td>{{ item.email }}</td>
-        <td [ngClass]="item.status === 1 ? 'active' : 'inactive'">
-          {{ item.status === 1 ? "Active" : "Inactive" }}
+        <td>{{ user.username }}</td>
+        <td>{{ user.fullName }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.roleName }}</td>
+        <td>
+          <p-message
+            severity="{{
+              user.statusName === 'Kích hoạt' ? 'success' : 'error'
+            }}"
+            styleClass="custom-pmessage"
+          >
+            <span>{{ user.statusName }}</span>
+          </p-message>
         </td>
         <td style="text-align: center">
           <p-button
             label="Detail"
             severity="info"
-            (click)="viewDetail(item.userID)"
+            (click)="viewDetail(user.userID)"
           />
         </td>
       </tr>
-    </table>
-  </div>
-  <div class="list-sub-admin">
-    <p class="sub-title">Tài khoản Sub-Admin</p>
-    <table>
-      <tr>
-        <th style="width: 160px; text-align: center">Avatar</th>
-        <th style="width: 180px">Fullname</th>
-        <th style="width: 180px">Username</th>
-        <th style="width: 280px">Email</th>
-        <th style="width: 80px; text-align: center">Status</th>
-        <th style="width: 150px; text-align: center">Action</th>
-      </tr>
-      <tr *ngIf="!listSubAdmin || listSubAdmin.length === 0">
-        <td colspan="6" style="text-align: center; color: rgb(255, 57, 57)">
-          Danh sách trống
-        </td>
-      </tr>
-      <tr *ngFor="let item of listSubAdmin">
-        <td style="text-align: center">
-          <img src="{{ item.avatar }}" alt="avatar" width="100px" />
-        </td>
-        <td>{{ item.fullname }}</td>
-        <td>{{ item.username }}</td>
-        <td>{{ item.email }}</td>
-        <td [ngClass]="item.status === 1 ? 'active' : 'inactive'">
-          {{ item.status === 1 ? "Active" : "Inactive" }}
-        </td>
-        <td style="text-align: center">
-          <p-button
-            label="Detail"
-            severity="info"
-            (click)="viewDetail(item.userID)"
-          />
-        </td>
-      </tr>
-    </table>
-  </div>
-  <div class="list-user">
-    <p class="sub-title">Tài khoản User</p>
-    <table>
-      <tr>
-        <th style="width: 160px; text-align: center">Avatar</th>
-        <th style="width: 180px">Fullname</th>
-        <th style="width: 180px">Username</th>
-        <th style="width: 280px">Email</th>
-        <th style="width: 80px; text-align: center">Status</th>
-        <th style="width: 150px; text-align: center">Action</th>
-      </tr>
-      <tr *ngIf="!listUser || listUser.length === 0">
-        <td colspan="6" style="text-align: center; color: rgb(255, 57, 57)">
-          Danh sách trống
-        </td>
-      </tr>
-      <tr *ngFor="let item of listUser">
-        <td style="text-align: center">
-          <img src="{{ item.avatar }}" alt="avatar" width="100px" />
-        </td>
-        <td>{{ item.fullname }}</td>
-        <td>{{ item.username }}</td>
-        <td>{{ item.email }}</td>
-        <td [ngClass]="item.status === 1 ? 'active' : 'inactive'">
-          {{ item.status === 1 ? "Active" : "Inactive" }}
-        </td>
-        <td style="text-align: center">
-          <p-button
-            label="Detail"
-            severity="info"
-            (click)="viewDetail(item.userID)"
-          />
-        </td>
-      </tr>
-    </table>
-  </div>
+    </ng-template>
+  </p-table>
 </div>
 
 <p-dialog
   header="Chi tiết tài khoản"
   [(visible)]="displayDetail"
   [modal]="true"
-  [style]="{ width: '90%' }"
-  
+  [style]="{ width: '85%' }"
 >
   <form action method="post" [formGroup]="detailAccountForm">
     <div *ngIf="!detailAccountForm">
@@ -217,23 +188,50 @@
           </p-floatlabel>
         </div>
         <div class="popup-cell avatar">
-          <img src="{{ detailAccountForm.value.avatar }}" alt="Image" width="100px" height="100px"/>
+          <img
+            src="{{ detailAccountForm.value.avatar }}"
+            alt="Image"
+            width="150px"
+            height="150px"
+          />
           <!-- <p-fileupload #fileUpload mode="basic" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" 
-          (onSelect)="selectAvatar($event)" chooseLabel="Chọn ảnh"/> -->
+              (onSelect)="selectAvatar($event)" chooseLabel="Chọn ảnh"/> -->
           <p-button label="Thay thế" (onClick)="changeAvatar()"></p-button>
         </div>
-        <div class="popup-cell create-update">
-          <p-message severity="success"
-            >Create time: {{ detailAccountForm.value.createdAt }}</p-message
-          >
-          <p-message severity="success"
-            >Last update: {{ detailAccountForm.value.updatedAt }}</p-message
-          >
-        </div>
-        <div class="popup-cell otp">
-          <p-message severity="secondary"
-            >OTP: {{ detailAccountForm.value.otp || "###" }}</p-message
-          >
+        <div class="popup-cell detail-info">
+          <div class="create">
+            <p-message severity="success" styleClass="custom-detail-pmessage"
+              >Create time: {{ detailAccountForm.value.createdAt }}</p-message
+            >
+          </div>
+          <div class="update">
+            <p-message severity="success" styleClass="custom-detail-pmessage"
+              >Last update: {{ detailAccountForm.value.updatedAt }}</p-message
+            >
+          </div>
+          <div class="otp">
+            <p-message severity="secondary" styleClass="custom-detail-pmessage"
+              >OTP: {{ detailAccountForm.value.otp || "###" }}</p-message
+            >
+          </div>
+          <div class="locktime">
+            <p-message
+              severity="warn"
+              variant="outlined"
+              styleClass="custom-detail-pmessage"
+              >Last lock time:
+              {{ detailAccountForm.value.lockTime || "-" }}</p-message
+            >
+          </div>
+          <div class="remaintime">
+            <p-message
+              severity="warn"
+              variant="outlined"
+              styleClass="custom-detail-pmessage"
+              >Remaining Login Attempts:
+              {{ detailAccountForm.value.remainTime || "###" }}</p-message
+            >
+          </div>
         </div>
         <div class="popup-cell gg">
           Liên kết với Google:
@@ -252,7 +250,7 @@
               <p-button
                 label="Liên kết với Google"
                 icon="pi pi-google"
-                class="p-button-rounded p-button-secondary google-btn"
+                styleClass="p-button-rounded p-button-secondary google-btn"
               >
               </p-button>
             </div>
@@ -275,24 +273,13 @@
               <p-button
                 label="Liên kết với Facebook"
                 icon="pi pi-facebook"
-                class="facebook-btn"
+                styleClass="p-button-rounded p-button-secondary facebook-btn"
               >
               </p-button>
             </div>
           </ng-template>
         </div>
-        <div class="popup-cell locktime">
-          <p-message severity="warn" variant="outlined"
-            >Last lock time:
-            {{ detailAccountForm.value.lockTime || "-" }}</p-message
-          >
-        </div>
-        <div class="popup-cell remaintime">
-          <p-message severity="warn" variant="outlined"
-            >Remaining Login Attempts:
-            {{ detailAccountForm.value.remainTime || "###" }}</p-message
-          >
-        </div>
+
         <div class="popup-cell role">
           <p-floatlabel variant="on">
             <p-select
@@ -326,42 +313,237 @@
             iconPos="right"
             (onClick)="save()"
             [disabled]="!hasPermission('edit_users')"
-            
           />
-          <p-button label="Cancel" icon="pi pi-times" iconPos="right" (onClick)="closeDialog()"/>
-          <p-button [disabled]="!hasPermission('delete_users')"  label="Delete" icon="pi pi-trash" iconPos="right" (onClick)="deleteUser(detailAccountForm.get('userID')?.value)" severity="danger"/>
+          <p-button
+            label="Cancel"
+            icon="pi pi-times"
+            iconPos="right"
+            (onClick)="closeDialog()"
+          />
+        </div>
+        <div class="popup-cell setting-btn">
+          <p-button
+            [disabled]="!hasPermission('delete_users')"
+            label="Delete"
+            icon="pi pi-trash"
+            iconPos="right"
+            (onClick)="deleteUser(detailAccountForm.get('userID')?.value)"
+            severity="danger"
+          />
+          <p-button
+            [disabled]="!hasPermission('view_permissions')"
+            label="Phân quyền"
+            icon="pi pi-shield"
+            iconPos="right"
+            (onClick)="userPermission(detailAccountForm.get('userID')?.value)"
+            severity="success"
+          />
         </div>
       </div>
     </div>
   </form>
 </p-dialog>
+
 <p-dialog
-  header="Thay đổi avatar"
+  header="Thay đổi Avatar"
   [(visible)]="displayPopupAvatar"
   [modal]="true"
-  [style]="{ width: '800px', height: '600px' }" 
+  [style]="{ width: '800px', height: '600px' }"
 >
-<div class="popup-avatar" style="display: flex;">
+  <div class="popup-avatar">
     <input type="file" (change)="fileChangeEvent($event)" />
-    
+
     <image-cropper
       [imageChangedEvent]="imageChangedEvent"
       [maintainAspectRatio]="true"
-      [aspectRatio]="1/1"
+      [aspectRatio]="1 / 1"
       [resizeToWidth]="200"
       [roundCropper]="true"
-      [output]="'base64'" 
+      [output]="'base64'"
       format="png"
       (imageCropped)="imageCropped($event)"
       (imageLoaded)="imageLoaded()"
       (cropperReady)="cropperReady()"
       (loadImageFailed)="loadImageFailed()"
-      style="height: 500px;"
+      style="height: 400px"
     ></image-cropper>
-    
-    <img *ngIf="croppedImage" [src]="croppedImage" class="preview" width="100px" height="100px"/>
-    
-    <button (click)="submitToServer()">Xác nhận</button>
-</div>
+    <p-button (click)="submitToServer()">Xác nhận</p-button>
+  </div>
+</p-dialog>
 
+<p-dialog
+  header="User permission"
+  [(visible)]="displayPopupPermission"
+  [modal]="true"
+  [style]="{ width: '800px', height: '600px' }"
+>
+  <div class="popup-permission">
+    <div class="header-overview-permission">
+      <p-checkbox
+        [(ngModel)]="isAllCatelorySelected"
+        (onChange)="toggleAllCatelory()"
+        binary="true"
+        inputId="allCatelorySelected"
+      >
+      </p-checkbox>
+      <label for="allCatelorySelected" style="margin-left: 2px"
+        >Cấp tất cả loại quyền</label
+      >
+    </div>
+    <div class="header-detail-permission">
+      <div *ngIf="showDetailPermission == 1">
+        <p-checkbox
+          [(ngModel)]="isAllUserSelected"
+          (onChange)="
+            toggleAllDetail(permission_User, permission_User_Selected, isAllUserSelected)
+          "
+          binary="true"
+          inputId="allDetailSelected"
+        >
+        </p-checkbox>
+        <label for="allDetailSelected" style="margin-left: 2px"
+          >Cấp tất cả quyền User</label
+        >
+      </div>
+
+      <div *ngIf="showDetailPermission == 2">
+        <p-checkbox
+          [(ngModel)]="isAllRoleSelected"
+          (onChange)="
+            toggleAllDetail(permission_Role, permission_Role_Selected, isAllRoleSelected)
+          "
+          binary="true"
+          inputId="allDetailSelected"
+        >
+        </p-checkbox>
+        <label for="allDetailSelected" style="margin-left: 2px"
+          >Cấp tất cả quyền Role</label
+        >
+      </div>
+
+      <div *ngIf="showDetailPermission == 3">
+        <p-checkbox
+          [(ngModel)]="isAllPermissionSelected"
+          (onChange)="
+            toggleAllDetail(
+              permission_Permission,
+              permission_Permission_Selected,
+              isAllPermissionSelected
+            )
+          "
+          binary="true"
+          inputId="allDetailSelected"
+        >
+        </p-checkbox>
+        <label for="allDetailSelected" style="margin-left: 2px"
+          >Cấp tất cả quyền Phân quyền</label
+        >
+      </div>
+
+      <div *ngIf="showDetailPermission == 4">
+        <p-checkbox
+          [(ngModel)]="isAllContentSelected"
+          (onChange)="toggleAllDetail(permission_Content, permission_Content_Selected, isAllContentSelected)"
+          binary="true"
+          inputId="allDetailSelected"
+        >
+        </p-checkbox>
+        <label for="allDetailSelected" style="margin-left: 2px"
+          >Cấp tất cả quyền Content</label
+        >
+      </div>
+
+      <div *ngIf="showDetailPermission == 5">
+        <p-checkbox
+          [(ngModel)]="isAllSystemSelected"
+          (onChange)="toggleAllDetail(permission_System, permission_System_Selected, isAllSystemSelected)"
+          binary="true"
+          inputId="allDetailSelected"
+        >
+        </p-checkbox>
+        <label for="allDetailSelected" style="margin-left: 2px"
+          >Cấp tất cả quyền System</label
+        >
+      </div>
+    </div>
+    <div class="overview-permission">
+      <ul class="catelory-permission">
+        <li *ngFor="let item of cateloryPermission">
+          <p-button
+            [label]="item"
+            severity="secondary"
+            styleClass="catelory-permission-btn"
+            (click)="getPermission(item)"
+          />
+        </li>
+      </ul>
+    </div>
+    <div class="detail-permission">
+      <div *ngIf="showDetailPermission == 1">
+        <p-tree
+          [value]="permission_User"
+          selectionMode="checkbox"
+          [(selection)]="permission_User_Selected"
+          (selectionChange)="onDetailSelectionChange(showDetailPermission)"
+          [propagateSelectionUp]="true"
+          [propagateSelectionDown]="true"
+        >
+        </p-tree>
+      </div>
+
+      <div *ngIf="showDetailPermission == 2">
+        <p-tree
+          [value]="permission_Role"
+          selectionMode="checkbox"
+          [(selection)]="permission_Role_Selected"
+          (selectionChange)="onDetailSelectionChange(showDetailPermission)"
+          [propagateSelectionUp]="true"
+          [propagateSelectionDown]="true"
+        >
+        </p-tree>
+      </div>
+
+      <div *ngIf="showDetailPermission == 3">
+        <p-tree
+          [value]="permission_Permission"
+          selectionMode="checkbox"
+          [(selection)]="permission_Permission_Selected"
+          (selectionChange)="onDetailSelectionChange(showDetailPermission)"
+          [propagateSelectionUp]="true"
+          [propagateSelectionDown]="true"
+        >
+        </p-tree>
+      </div>
+
+      <div *ngIf="showDetailPermission == 4">
+        <p-tree
+          [value]="permission_Content"
+          selectionMode="checkbox"
+          [(selection)]="permission_Content_Selected"
+          (selectionChange)="onDetailSelectionChange(showDetailPermission)"
+          [propagateSelectionUp]="true"
+          [propagateSelectionDown]="true"
+        >
+        </p-tree>
+      </div>
+
+      <div *ngIf="showDetailPermission == 5">
+        <p-tree
+          [value]="permission_System"
+          selectionMode="checkbox"
+          [(selection)]="permission_System_Selected"
+          (selectionChange)="onDetailSelectionChange(showDetailPermission)"
+          [propagateSelectionUp]="true"
+          [propagateSelectionDown]="true"
+        >
+        </p-tree>
+      </div>
+      <div *ngIf="!([1, 2, 3, 4, 5].includes(showDetailPermission))">
+        <p-message severity="error">Không tìm thấy nội dung!</p-message>
+      </div>
+    </div>
+    <div class="action-btn">
+      <p-button (click)="updateUserPermission()">Xác nhận</p-button>
+    </div>
+  </div>
 </p-dialog>

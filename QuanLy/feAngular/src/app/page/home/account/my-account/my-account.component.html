@@ -1,223 +1,198 @@
 <div>
-    <h2>Thông tin tài khoản</h2>
+  <h2>Thông tin tài khoản</h2>
 </div>
 <div>
-    <form action method="post" [formGroup]="detailAccountForm">
-        <div *ngIf="!detailAccountForm">
-          <p style="color: red">Vui lòng thử lại</p>
+  <form action method="post" [formGroup]="detailAccountForm">
+    <div *ngIf="!detailAccountForm">
+      <p style="color: red">Vui lòng thử lại</p>
+    </div>
+    <div *ngIf="detailAccountForm">
+      <div class="popup-detail">
+        <div class="popup-cell fullname">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_fullname"
+              formControlName="fullName"
+              autocomplete="off"
+            />
+            <label for="input_fullname">Fullname</label>
+          </p-floatlabel>
         </div>
-        <div *ngIf="detailAccountForm">
-          <div class="popup-detail">
-            <div class="popup-cell userID">
-              <p-floatlabel variant="on">
-                <input
-                  pInputText
-                  id="input_userID"
-                  formControlName="userID"
-                  autocomplete="off"
-                />
-                <label for="input_userID">UserID</label>
-              </p-floatlabel>
-            </div>
-            <div class="popup-cell fullname">
-              <p-floatlabel variant="on">
-                <input
-                  pInputText
-                  id="input_fullname"
-                  formControlName="fullName"
-                  autocomplete="off"
-                />
-                <label for="input_fullname">Fullname</label>
-              </p-floatlabel>
-            </div>
-            <div class="popup-cell username">
-              <p-floatlabel variant="on">
-                <input
-                  pInputText
-                  id="input_username"
-                  formControlName="username"
-                  autocomplete="off"
-                />
-                <label for="input_username">Username</label>
-              </p-floatlabel>
-            </div>
-            <div class="popup-cell email">
-              <p-floatlabel variant="on">
-                <input
-                  pInputText
-                  id="input_email"
-                  formControlName="email"
-                  autocomplete="off"
-                />
-                <label for="input_email">Email</label>
-              </p-floatlabel>
-            </div>
-            <div class="popup-cell date">
-              <p-floatlabel variant="on">
-                <p-datepicker
-                  formControlName="dateOfBirth"
-                  inputId="input_date"
-                  showIcon
-                  iconDisplay="input"
-                  dateFormat="dd/mm/yy"
-                />
-                <label for="input_date">Date of birth</label>
-              </p-floatlabel>
-            </div>
-            <div class="popup-cell gender">
-              <p-floatlabel variant="on">
-                <p-select
-                  inputId="input_gender"
-                  [options]="genders"
-                  styleClass="w-full"
-                  formControlName="gender"
-                  optionLabel="genderName"
-                  optionValue="genderID"
-                />
-                <label for="input_gender">Gender</label>
-              </p-floatlabel>
-            </div>
-            <div class="popup-cell address">
-              <p-floatlabel variant="on">
-                <input
-                  pInputText
-                  id="input_address"
-                  formControlName="address"
-                  autocomplete="off"
-                />
-                <label for="input_address">Address</label>
-              </p-floatlabel>
-            </div>
-            <div class="popup-cell phone">
-              <p-floatlabel variant="on">
-                <input
-                  pInputText
-                  id="input_phone"
-                  formControlName="phoneNumber"
-                  autocomplete="off"
-                />
-                <label for="input_phone">Phone number</label>
-              </p-floatlabel>
-            </div>
-            <div class="popup-cell avatar">
-              <img src="{{ detailAccountForm.value.avatar }}" alt="Image" width="100px" height="100px"/>
-              <!-- <p-fileupload #fileUpload mode="basic" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" 
+        <div class="popup-cell username">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_username"
+              formControlName="username"
+              autocomplete="off"
+            />
+            <label for="input_username">Username</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell email">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_email"
+              formControlName="email"
+              autocomplete="off"
+            />
+            <label for="input_email">Email</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell date">
+          <p-floatlabel variant="on">
+            <p-datepicker
+              formControlName="dateOfBirth"
+              inputId="input_date"
+              showIcon
+              iconDisplay="input"
+              dateFormat="dd/mm/yy"
+            />
+            <label for="input_date">Date of birth</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell gender">
+          <p-floatlabel variant="on">
+            <p-select
+              inputId="input_gender"
+              [options]="genders"
+              styleClass="w-full"
+              formControlName="gender"
+              optionLabel="genderName"
+              optionValue="genderID"
+            />
+            <label for="input_gender">Gender</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell address">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_address"
+              formControlName="address"
+              autocomplete="off"
+            />
+            <label for="input_address">Address</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell phone">
+          <p-floatlabel variant="on">
+            <input
+              pInputText
+              id="input_phone"
+              formControlName="phoneNumber"
+              autocomplete="off"
+            />
+            <label for="input_phone">Phone number</label>
+          </p-floatlabel>
+        </div>
+        <div class="popup-cell avatar">
+          <img
+            src="{{ detailAccountForm.value.avatar }}"
+            alt="Image"
+            width="150px"
+            height="150px"
+          />
+          <!-- <p-fileupload #fileUpload mode="basic" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" 
               (onSelect)="selectAvatar($event)" chooseLabel="Chọn ảnh"/> -->
-              <p-button label="Thay thế" (onClick)="changeAvatar()"></p-button>
-            </div>
-            <div class="popup-cell create-update">
-              <p-message severity="success"
-                >Create time: {{ detailAccountForm.value.createdAt }}</p-message
-              >
-              <p-message severity="success"
-                >Last update: {{ detailAccountForm.value.updatedAt }}</p-message
-              >
-            </div>
-            <div class="popup-cell otp">
-              <p-message severity="secondary"
-                >OTP: {{ detailAccountForm.value.otp || "###" }}</p-message
-              >
-            </div>
-            <div class="popup-cell gg">
-              Liên kết với Google:
-              <p-inplace *ngIf="detailAccountForm.value.googleID; else btnGG">
-                <ng-template #display>
-                  <span>Đã liên kết</span>
-                </ng-template>
-                <ng-template #content>
-                  <p class="m-0">
-                    {{ detailAccountForm.value.googleID }}
-                  </p>
-                </ng-template>
-              </p-inplace>
-              <ng-template #btnGG>
-                <div class="social-login">
-                  <p-button
-                    label="Liên kết với Google"
-                    icon="pi pi-google"
-                    class="p-button-rounded p-button-secondary google-btn"
-                  >
-                  </p-button>
-                </div>
-              </ng-template>
-            </div>
-            <div class="popup-cell fb">
-              Liên kết với Facebook:
-              <p-inplace *ngIf="detailAccountForm.value.facebookID; else btnFF">
-                <ng-template #display>
-                  <span>Đã liên kết</span>
-                </ng-template>
-                <ng-template #content>
-                  <p class="m-0">
-                    {{ detailAccountForm.value.facebookID }}
-                  </p>
-                </ng-template>
-              </p-inplace>
-              <ng-template #btnFF>
-                <div class="social-login">
-                  <p-button
-                    label="Liên kết với Facebook"
-                    icon="pi pi-facebook"
-                    class="facebook-btn"
-                  >
-                  </p-button>
-                </div>
-              </ng-template>
-            </div>
-            <div class="popup-cell locktime">
-              <p-message severity="warn" variant="outlined"
-                >Last lock time:
-                {{ detailAccountForm.value.lockTime || "-" }}</p-message
-              >
-            </div>
-            <div class="popup-cell remaintime">
-              <p-message severity="warn" variant="outlined"
-                >Remaining Login Attempts:
-                {{ detailAccountForm.value.remainTime || "###" }}</p-message
-              >
-            </div>
-            
-            <div class="popup-cell action-btn">
-              <p-button
-                label="Save"
-                icon="pi pi-check"
-                iconPos="right"
-                (onClick)="save()"
-                
-              />
-            </div>
-          </div>
+          <p-button label="Thay thế" (onClick)="changeAvatar()"></p-button>
         </div>
-      </form>
+        <div class="popup-cell role-status">
+          <p-message severity="success" styleClass="p-message"
+            >Role: {{ detailAccountForm.value.roleID }}</p-message
+          >
+          <p-message severity="success" styleClass="p-message"
+            >Status: {{ detailAccountForm.value.statusID }}</p-message
+          >
+        </div>
+
+        <div class="popup-cell gg">
+          Liên kết với Google:
+          <p-inplace *ngIf="detailAccountForm.value.googleID; else btnGG">
+            <ng-template #display>
+              <span>Đã liên kết</span>
+            </ng-template>
+            <ng-template #content>
+              <p class="m-0">
+                {{ detailAccountForm.value.googleID }}
+              </p>
+            </ng-template>
+          </p-inplace>
+          <ng-template #btnGG>
+            <div class="social-login">
+              <p-button
+                label="Liên kết với Google"
+                icon="pi pi-google"
+                class="p-button-rounded p-button-secondary google-btn"
+                styleClass="google-btn"
+              >
+              </p-button>
+            </div>
+          </ng-template>
+        </div>
+        <div class="popup-cell fb">
+          Liên kết với Facebook:
+          <p-inplace *ngIf="detailAccountForm.value.facebookID; else btnFF">
+            <ng-template #display>
+              <span>Đã liên kết</span>
+            </ng-template>
+            <ng-template #content>
+              <p class="m-0">
+                {{ detailAccountForm.value.facebookID }}
+              </p>
+            </ng-template>
+          </p-inplace>
+          <ng-template #btnFF>
+            <div class="social-login">
+              <p-button
+                label="Liên kết với Facebook"
+                icon="pi pi-facebook"
+                class="p-button-rounded p-button-secondary facebook-btn"
+                styleClass="facebook-btn"
+              >
+              </p-button>
+            </div>
+          </ng-template>
+        </div>
+
+        <div class="popup-cell action-btn">
+          <p-button
+            label="Save"
+            icon="pi pi-check"
+            iconPos="right"
+            (onClick)="save()"
+          />
+        </div>
+      </div>
+    </div>
+  </form>
 </div>
 
 <p-dialog
   header="Thay đổi avatar"
   [(visible)]="displayPopupAvatar"
   [modal]="true"
-  [style]="{ width: '800px', height: '600px' }" 
+  [style]="{ width: '800px', height: '600px' }"
 >
-<div class="popup-avatar" style="display: flex;">
+  <div class="popup-avatar">
     <input type="file" (change)="fileChangeEvent($event)" />
-    
+
     <image-cropper
       [imageChangedEvent]="imageChangedEvent"
       [maintainAspectRatio]="true"
-      [aspectRatio]="1/1"
+      [aspectRatio]="1 / 1"
       [resizeToWidth]="200"
       [roundCropper]="true"
-      [output]="'base64'" 
+      [output]="'base64'"
       format="png"
       (imageCropped)="imageCropped($event)"
       (imageLoaded)="imageLoaded()"
       (cropperReady)="cropperReady()"
       (loadImageFailed)="loadImageFailed()"
-      style="height: 500px;"
+      style="height: 400px"
     ></image-cropper>
-    
-    <img *ngIf="croppedImage" [src]="croppedImage" class="preview" width="100px" height="100px"/>
-    
-    <button (click)="submitToServer()">Xác nhận</button>
-</div>
-
+    <p-button (click)="submitToServer()">Xác nhận</p-button>
+  </div>
 </p-dialog>

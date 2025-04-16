@@ -1,5 +1,34 @@
-:host ::ng-deep .custom-border td,
-:host ::ng-deep .custom-border th {
-    border-bottom: 1px solid rgb(226, 232, 240) !important; 
-    border-right: 1px solid rgb(226, 232, 240) !important; 
+:host ::ng-deep .custom-log-table td,
+:host ::ng-deep .custom-log-table th {
+  border-bottom: 1px solid rgb(226, 232, 240) !important;
+  border-right: 1px solid rgb(226, 232, 240) !important;
+ 
+  /* max-width: 200px !important;
+  max-height: 80px !important;
+  overflow: auto !important;
+  white-space: pre-wrap !important; 
+  word-break: break-word !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important; */
+}
+:host ::ng-deep .custom-log-table th {
+    background-color: var(--p-surface-300);
+}
+::ng-deep .custom-log-table{
+    max-width: 1200px; /* hoặc 100% nếu bạn muốn table full content */
+  }
+
+.card{
+    width: 100%;
+    height: 550px;
+  overflow-x: auto;
+  padding: 5px 10px 5px;
+}
+
+.flex{
+    display: flex;
+  align-items: center;
+  justify-content: space-between;
 }

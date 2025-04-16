@@ -1,51 +1,102 @@
-<div style="display: flex;">
+<div class="home" [ngClass]="{ collapsed: collapsed }">
   <div [ngClass]="{ sidebar: true, collapsed: collapsed }">
-      <div class="sidebar__header">
-          <p-button icon="pi pi-bars" (click)="toggleSidebar()" class="sidebar__toggle-btn" variant="text"></p-button>
-          <img src="favicon.ico" class="sidebar__logo" />
+    <div class="sidebar__header">
+      <p-button
+        icon="pi pi-bars"
+        (click)="toggleSidebar()"
+        class="sidebar__toggle-btn"
+        variant="text"
+      ></p-button>
+      <img src="favicon.ico" class="sidebar__logo" />
+    </div>
+    <div class="sidebar__catelory">
+      <ul>
+        <li class="catelory-title">Main</li>
+        <li (click)="goToPage('/dashboard', '')">
+          <a
+            ><i class="pi pi-home" style="font-size: 1.5rem"></i>
+            <span *ngIf="!collapsed">Trang chủ</span></a
+          >
+        </li>
+        <li class="catelory-title">Accounts</li>
+        <li (click)="goToPage('/list-accounts', 'view_users')">
+          <a>
+            <i class="pi pi-users" style="font-size: 1.5rem"></i>
+            <span *ngIf="!collapsed">Danh sách tài khoản</span>
+          </a>
+        </li>
+        <li (click)="goToPage('/my-account', '')">
+          <a
+            ><i class="pi pi-user" style="font-size: 1.5rem"></i>
+            <span *ngIf="!collapsed">Tài khoản của tôi</span></a
+          >
+        </li>
+        <li class="catelory-title">System</li>
+        <li (click)="goToPage('/log', 'view_logs')">
+          <a>
+            <i class="pi pi-address-book" style="font-size: 1.5rem"></i>
+            <span *ngIf="!collapsed">Nhật ký</span>
+          </a>
+        </li>
+        <li (click)="goToPage('/setting', 'manage_settings')">
+          <a
+            ><i class="pi pi-cog" style="font-size: 1.5rem"></i>
+            <span *ngIf="!collapsed">Cài đặt</span></a
+          >
+        </li>
+      </ul>
+    </div>
+    <div class="sidebar__footer">
+      <div class="card flex justify-center">
+        <p-menu
+          #menu
+          [model]="menuAccountitems"
+          [popup]="true"
+          styleClass="account-menu"
+        />
+        <p-button (click)="menu.toggle($event)" styleClass="account-btn">
+          <p-avatar [image]="avatar" class="mr-2" size="large" shape="circle" />
+          <span class="inline-flex flex-col" *ngIf="!collapsed">
+            <span class="font-bold" style="font-weight: 500">{{
+              username
+            }}</span>
+          </span>
+        </p-button>
       </div>
-      <div class="sidebar__catelory">
-          <ul>
-              <li class="catelory-title">Main</li>
-              <li>
-                  <a><i class="pi pi-home" style="font-size: 1.5rem;"></i> <span *ngIf="!collapsed">Trang chủ</span></a>
-              </li>
-              <li class="catelory-title">Accounts</li>
-              <li>
-                  <a>
-                      <i class="pi pi-users" style="font-size: 1.5rem;"></i>
-                      <span *ngIf="!collapsed">Danh sách tài khoản</span>
-                  </a>
-              </li>
-              <li>
-                  <a><i class="pi pi-user" style="font-size: 1.5rem;"></i> <span *ngIf="!collapsed">Tài khoản của tôi</span></a>
-              </li>
-              <li class="catelory-title">System</li>
-              <li>
-                  <a>
-                      <i class="pi pi-address-book" style="font-size: 1.5rem;"></i>
-                      <span *ngIf="!collapsed">Nhật ký</span>
-                  </a>
-              </li>
-              <li>
-                  <a><i class="pi pi-cog" style="font-size: 1.5rem;"></i> <span *ngIf="!collapsed">Cài đặt</span></a>
-              </li>
-          </ul>
-      </div>
-      <div class="sidebar__footer">
-          <div class="card flex justify-center">
-              <p-menu #menu [model]="items" [popup]="true" styleClass="account-menu" />
-              <p-button (click)="menu.toggle($event)" styleClass="account-btn">
-                  <p-avatar [image]="avatar" class="mr-2" size="large" shape="circle" />
-                  <span class="inline-flex flex-col" *ngIf="!collapsed">
-                      <span class="font-bold" style="font-weight: 500;">{{ username }}</span>
-                  </span>
-              </p-button>
-          </div>
-      </div>
+    </div>
   </div>
   <div class="body">
-    <div class="nav">1</div>
-    <div class="content">2</div>
-</div>
+    <div class="body-nav">
+        <p>
+          Welcome<br /><b>{{ username }}</b>
+        </p>
+
+        <p-inputgroup>
+          <input pInputText placeholder="Keyword" />
+          <p-inputgroup-addon>
+            <p-button
+              icon="pi pi-search"
+              severity="secondary"
+              variant="text"
+              
+            />
+          </p-inputgroup-addon>
+        </p-inputgroup>
+
+        <div class="flex items-center gap-2">
+          <p-avatar
+            image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png"
+            shape="circle"
+          />
+        </div>
+    </div>
+    <div class="content">
+        <div class="card flex justify-center">
+          <p-breadcrumb class="max-w-full" [model]="breadcrumbItems" [home]="breadcrumbHome" styleClass="breadcrumb"/>
+      </div>
+      <div class="content-page">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
 </div>

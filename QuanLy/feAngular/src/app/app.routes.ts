@@ -26,12 +26,12 @@ export const routes: Routes = [
     component: HomeComponent,
     canActivate: [AuthGuard],
     children: [
-      { path: 'account', component: AccountComponent },
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'setting', component: SettingComponent },
-      { path: 'log', component: LogComponent },
-      { path: 'list-accounts', component: ListAccountsComponent },
-      { path: 'my-account', component: MyAccountComponent },
+      { path: 'account', component: AccountComponent, data: { breadcrumb: 'Tài khoản' } },
+      { path: 'dashboard', component: DashboardComponent, data: { breadcrumb: 'Tổng quan' } },
+      { path: 'setting', component: SettingComponent, data: { breadcrumb: 'Cài đặt' } },
+      { path: 'log', component: LogComponent, data: { breadcrumb: 'Nhật ký hệ thống' } },
+      { path: 'list-accounts', component: ListAccountsComponent, data: { breadcrumb: 'Danh sách tài khoản' } },
+      { path: 'my-account', component: MyAccountComponent, data: { breadcrumb: 'Tài khoản của tôi' } },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

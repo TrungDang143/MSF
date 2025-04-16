@@ -1,10 +1,11 @@
 export interface Account {
   userID: number;
   avatar: string | null;
-  fullname: string | null;
+  fullName: string | null;
   username: string;
   email: string;
-  status: number;
+  statusName: string;
+  roleName: string;
 }
 
 export interface AccountDetail {

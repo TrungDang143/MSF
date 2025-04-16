@@ -332,6 +332,26 @@
     ]
   },
   {
+    "ContainingType": "api.Controllers.PermissionController",
+    "Method": "GetAllPermission",
+    "RelativePath": "api/Permission/GetAllPermission",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "api.Controllers.SignUpController",
     "Method": "SignUp",
     "RelativePath": "api/SignUp",
@@ -379,6 +399,58 @@
   },
   {
     "ContainingType": "api.Controllers.SystemSettingController",
+    "Method": "CreateRole",
+    "RelativePath": "api/SystemSetting/CreateRole",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inputDto",
+        "Type": "api.DTO.SystemSetting.CreateRoleDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.SystemSettingController",
+    "Method": "DeleteRole",
+    "RelativePath": "api/SystemSetting/DeleteRole",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inputDto",
+        "Type": "api.DTO.SystemSetting.DeleteRoleDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.SystemSettingController",
     "Method": "GetPasswordRule",
     "RelativePath": "api/SystemSetting/GetPasswordRule",
     "HttpMethod": "GET",
@@ -408,6 +480,32 @@
       {
         "Name": "inputDto",
         "Type": "api.DTO.SystemSetting.UpdatePasswordRuleDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.SystemSettingController",
+    "Method": "UpdateRolePermission",
+    "RelativePath": "api/SystemSetting/UpdateRolePermission",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "inputDto",
+        "Type": "api.DTO.SystemSetting.UpdateRolePermissionDto",
         "IsRequired": true
       }
     ],

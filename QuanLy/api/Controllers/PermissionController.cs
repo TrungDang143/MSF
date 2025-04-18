@@ -1,4 +1,5 @@
 ﻿using api.AppUtils;
+using api.DTO.Perrmission;
 using api.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,13 @@ namespace api.Controllers
         public BaseResponse GetAllPermission()
         {
             return _permission.GetAllPermission();
+        }
+
+        [HasPermission("view_permissions")]
+        [HttpGet("GetPermissionByRoleID")]
+        public BaseResponse GetPermissionByRoleID([FromQuery]GetPermissionByRoleIDDto inputDto)
+        {
+            return _permission.GetPermissionByRoleID(inputDto);
         }
     }
 }

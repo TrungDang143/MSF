@@ -100,6 +100,9 @@
 :host ::ng-deep .account-btn:hover {
   color: var(--p-primary-900);
 }
+:host ::ng-deep .account-btn:hover span{
+  color: var(--p-primary-500);
+}
 ::ng-deep .account-menu {
   border-radius: 15px;
 }

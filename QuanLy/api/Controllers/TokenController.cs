@@ -41,11 +41,10 @@ namespace api.Controllers
             return Ok(new { message = "Token is valid" });
         }
 
-        [HttpPost("verify-recaptcha")]
-        public IActionResult VerifyRecaptcha([FromBody] RecaptchaRequest request)
-        {
-            return Ok(_token.VerifyRecaptcha(request));
-        }
-
+        //[HttpPost("verify-recaptcha")]
+        //public IActionResult VerifyRecaptcha([FromBody] RecaptchaRequest request)
+        //{
+        //    return Ok(_token.VerifyRecaptcha(request));
+        //}
     }
 }

@@ -33,6 +33,13 @@ namespace api.Controllers
             return _account.GetAllUserAccounts();
         }
 
+        [HasPermission("view_users")]
+        [HttpGet("GetAllRole")]
+        public BaseResponse GetAllRole()
+        {
+            return _account.GetAllRole();
+        }
+
         [HasPermission("edit_users")]
         [HttpGet("GetDetailUserInfo")]
         public BaseResponse GetDetailUserInfo([FromQuery] GetDetailUserInfoInDto inputDto)
@@ -52,6 +59,34 @@ namespace api.Controllers
         public BaseResponse DeleteUser([FromQuery] DeleteUserDto inputDto)
         {
             return _account.DeleteUser(inputDto);
+        }
+
+        [HasPermission("view_permissions")]
+        [HttpGet("GetAllUserPermission")]
+        public BaseResponse GetAllUserPermission([FromQuery] GetAllUserPermissionDto inputDto)
+        {
+            return _account.GetAllUserPermission(inputDto);
+        }
+
+        [HasPermission("assign_permissions")]
+        [HttpPost("UpdateUserPermission")]
+        public BaseResponse UpdateUserPermission([FromBody] UpdateUserPermissionDto inputDto)
+        {
+            return _account.UpdateUserPermission(inputDto);
+        }
+
+        [HasPermission("create_users")]
+        [HttpGet("GetRoleGenderStatus")]
+        public BaseResponse GetRoleGenderStatus()
+        {
+            return _account.GetRoleGenderStatus();
+        }
+
+        [HasPermission("create_users")]
+        [HttpPost("CreateUser")]
+        public BaseResponse CreateUser([FromBody]CreateUserDto inputDto)
+        {
+            return _account.CreateUser(inputDto);
         }
     }
 }

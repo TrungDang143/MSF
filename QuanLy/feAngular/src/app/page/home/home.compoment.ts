@@ -75,7 +75,7 @@ export class HomeComponent implements OnInit {
   breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/home/dashboard' };
 
   username: string = '###';
-  avatar: string = 'favicon.ico';
+  avatar: string = 'avatar/default-avatar.jpg';
   ngOnInit(): void {
     this.getFullName();
   }

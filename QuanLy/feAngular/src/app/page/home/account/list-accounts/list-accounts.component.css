@@ -20,6 +20,10 @@
   margin-left: 10px;
 }
 
+.action{
+  justify-self: flex-end;
+}
+
 .active {
   color: green;
   font-weight: bold;
@@ -125,10 +129,12 @@
 .popup-detail .gg {
   grid-column: 1 / span 3;
   grid-row-start: 5;
+  height: 80px;
 }
 .popup-detail .fb {
   grid-column: 1 / span 3;
   grid-row-start: 6;
+  height: 80px;
 }
 
 .popup-detail .role {
@@ -228,3 +234,165 @@
   width: 100% !important;
 }
 
+.popup-create-user {
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  gap: 5px;
+  width: 1200;
+  max-height: 500px;
+}
+
+.popup-create-user .userID {
+  grid-column: span 3 / span 3;
+  grid-row-start: 1;
+}
+
+.popup-create-user .fullname {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 1;
+}
+
+.popup-create-user .username {
+  grid-column: span 3 / span 3;
+  grid-column-start: 1;
+  grid-row-start: 2;
+}
+
+.popup-create-user .email {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 1;
+}
+.popup-create-user .password {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 2;
+}
+
+.rule-password {
+  padding-left: 0.5rem;   /* pl-2 */
+  margin-left: 0.5rem;    /* ml-2 */
+  margin-top: 0rem;       /* my-0 = mt-0 + mb-0 */
+  margin-bottom: 0rem;
+  line-height: 1.5;       /* leading-normal */
+}
+
+.popup-create-user .date {
+  grid-column: span 3 / span 3;
+  grid-column-start: 1;
+  grid-row-start: 3;
+}
+
+.popup-create-user .gender {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 3;
+}
+
+.popup-create-user .address {
+  grid-column: span 3 / span 3;
+  grid-column-start: 1;
+  grid-row-start: 4;
+}
+
+.popup-create-user .phone {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 4;
+}
+
+.popup-create-user .avatar {
+  grid-column: span 2 / span 2;
+  grid-row: span 2 / span 2;
+  grid-column-start: 7;
+  grid-row-start: 1;
+  grid-row-end: 4;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+}
+
+.popup-create-user .avatar img {
+  border-radius: 50%;
+}
+
+::ng-deep .popup-create-user .avatar p-button {
+  margin: 10px !important;
+}
+
+.popup-create-user .gg {
+  grid-column: 1 / span 3;
+  grid-row-start: 5;
+  height: 80px;
+}
+.popup-create-user .fb {
+  grid-column: 1 / span 3;
+  grid-row-start: 6;
+  height: 80px;
+}
+
+.popup-create-user .role {
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 5;
+}
+
+.popup-create-user .status {
+  grid-column: span 3 / span 3;
+  grid-column-start: 1;
+  grid-row-start: 5;
+  grid-row-end: 6;
+}
+
+.popup-create-user .setting-btn {
+  grid-column: 1 / span 4;
+  grid-row-start: 7;
+  grid-row-end: 8;
+  margin-left: 20px;
+}
+
+.popup-create-user .action-btn {
+  grid-column: 1 / span 4;
+  grid-column-start: 5;
+  grid-row-start: 7;
+  grid-row-end: 8;
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 20px;
+}
+
+::ng-deep .popup-create-user .action-btn p-button{
+  margin-right: 5px;
+}
+::ng-deep .popup-create-user .setting-btn p-button{
+  margin-right: 5px;
+}
+
+::ng-deep .popup-create-user-cell input {
+  width: 350px !important;
+}
+
+
+.popup-create-user {
+  padding: 10px;
+}
+
+.social-login {
+  display: flex;
+  gap: 1rem;
+}
+
+.popup-create-user-cell p-select {
+  width: 200px;
+}
+
+.popup-permission{
+  grid-template-columns: 0.8fr 1fr;
+  grid-template-rows: 0.1fr 1fr 0.1fr;
+  overflow-y: auto;
+  display: grid;
+  gap: 50px;
+}

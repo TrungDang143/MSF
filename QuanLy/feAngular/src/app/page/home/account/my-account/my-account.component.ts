@@ -61,7 +61,6 @@ export class MyAccountComponent implements OnInit {
           dateOfBirth = this.parseDateFromString(data.dateOfBirth);
           this.detailAccountForm.patchValue({ dateOfBirth: dateOfBirth });
         }
-        console.log('data', this.detailAccountForm)
       },
       error: (err) => {
         if (err.status === 401) {

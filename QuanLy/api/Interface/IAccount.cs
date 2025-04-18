@@ -14,6 +14,8 @@ namespace api.Interface
         public BaseResponse ChangeStatusUser(ChangeStatusUserDto inputDto);
         public BaseResponse ChangeRoleUser(ChangeRoleUserDto inputDto);
         public BaseResponse GetAllUserPermission(GetAllUserPermissionDto inputDto);
-
+        public BaseResponse UpdateUserPermission(UpdateUserPermissionDto inputDto);
+        public BaseResponse GetAllRole();
+        public BaseResponse GetRoleGenderStatus();
     }
 }

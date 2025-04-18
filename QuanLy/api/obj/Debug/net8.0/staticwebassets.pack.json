@@ -45,6 +45,26 @@
       "PackagePath": "staticwebassets\\uploads\\avatars\\df8de905-ec2a-4850-b320-c22358a32816.png"
     },
     {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\ea4d1923-07c5-4e21-bd51-3fb2024d9d5b.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\ea4d1923-07c5-4e21-bd51-3fb2024d9d5b.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\f3d6e04d-58e2-4a57-881f-4de66640edad.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\f3d6e04d-58e2-4a57-881f-4de66640edad.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\f89ac3f3-de95-43f3-8ced-386624e54b6a.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\f89ac3f3-de95-43f3-8ced-386624e54b6a.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\fb201b9f-a53d-4c88-8757-005636283b7c.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\fb201b9f-a53d-4c88-8757-005636283b7c.png"
+    },
+    {
+      "Id": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\fc68d714-35f1-462a-963f-19811090ddff.png",
+      "PackagePath": "staticwebassets\\uploads\\avatars\\fc68d714-35f1-462a-963f-19811090ddff.png"
+    },
+    {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.api.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },

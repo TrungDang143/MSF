@@ -109,7 +109,7 @@ public static class CaptchaHelper
             string actualToken = GenerateCaptchaToken(code, secretKey);
             string actualHash = actualToken.Split(':')[1];
 
-            return code.Equals(inputText, StringComparison.OrdinalIgnoreCase) && actualHash == expectedHash;
+            return code.Equals(inputText, StringComparison.Ordinal) && actualHash == expectedHash;
         }
         catch
         {

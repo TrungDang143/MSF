@@ -26,16 +26,16 @@ namespace api.Services
             _config = config;
         }
 
-        public async Task<string> VerifyRecaptcha(RecaptchaRequest request)
-        {
-            var secretKey = "6Le83QQrAAAAANm8amg0o9g2UDAD9em1_hl3wUnO";
-            var url = $"https://www.google.com/recaptcha/api/siteverify?secret={secretKey}&response={request.Token}";
+        //public async Task<string> VerifyRecaptcha(RecaptchaRequest request)
+        //{
+        //    var secretKey = "6Le83QQrAAAAANm8amg0o9g2UDAD9em1_hl3wUnO";
+        //    var url = $"https://www.google.com/recaptcha/api/siteverify?secret={secretKey}&response={request.Token}";
 
-            using var client = new HttpClient();
-            var response = await client.GetStringAsync(url);
+        //    using var client = new HttpClient();
+        //    var response = await client.GetStringAsync(url);
 
-            return response;
-        }
+        //    return response;
+        //}
 
         public bool ValidateToken(string token)
         {
@@ -90,62 +90,62 @@ namespace api.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public string Decode(string token)
-        {
-            string[] parts = token.Split('.');
-            if (parts.Length < 2)
-            {
-                throw new ArgumentException("Token không hợp lệ!");
-            }
+        //public string Decode(string token)
+        //{
+        //    string[] parts = token.Split('.');
+        //    if (parts.Length < 2)
+        //    {
+        //        throw new ArgumentException("Token không hợp lệ!");
+        //    }
 
-            string payload = parts[1];
+        //    string payload = parts[1];
 
-            payload = payload.Replace('_', '/').Replace('-', '+');
-            switch (payload.Length % 4)
-            {
-                case 2: payload += "=="; break;
-                case 3: payload += "="; break;
-            }
+        //    payload = payload.Replace('_', '/').Replace('-', '+');
+        //    switch (payload.Length % 4)
+        //    {
+        //        case 2: payload += "=="; break;
+        //        case 3: payload += "="; break;
+        //    }
 
-            // Decode Base64
-            byte[] decodedBytes = Convert.FromBase64String(payload);
-            var result = System.Text.Encoding.UTF8.GetString(decodedBytes);
-            return result;
-        }
+        //    // Decode Base64
+        //    byte[] decodedBytes = Convert.FromBase64String(payload);
+        //    var result = System.Text.Encoding.UTF8.GetString(decodedBytes);
+        //    return result;
+        //}
 
-        public static async Task<PayloadFBDto> DecodeFBToken(string token)
-        {
-            PayloadFBDto payload = new PayloadFBDto();
+        //public static async Task<PayloadFBDto> DecodeFBToken(string token)
+        //{
+        //    PayloadFBDto payload = new PayloadFBDto();
 
-            HttpClient client = new HttpClient();
+        //    HttpClient client = new HttpClient();
 
-            string url = $"https://graph.facebook.com/me?fields=id,name,picture,email&access_token={token}";
+        //    string url = $"https://graph.facebook.com/me?fields=id,name,picture,email&access_token={token}";
 
-            try
-            {
-                HttpResponseMessage response = await client.GetAsync(url);
-                response.EnsureSuccessStatusCode(); // Ném lỗi nếu không thành công
-                string result = await response.Content.ReadAsStringAsync();
+        //    try
+        //    {
+        //        HttpResponseMessage response = await client.GetAsync(url);
+        //        response.EnsureSuccessStatusCode(); // Ném lỗi nếu không thành công
+        //        string result = await response.Content.ReadAsStringAsync();
 
-                JObject json = JObject.Parse(result);
+        //        JObject json = JObject.Parse(result);
 
-                string id = json["id"]?.ToString();
-                string name = json["name"]?.ToString();
-                string email = json["email"]?.ToString();
-                string picture = json["picture"]?["data"]?["url"]?.ToString();
+        //        string id = json["id"]?.ToString();
+        //        string name = json["name"]?.ToString();
+        //        string email = json["email"]?.ToString();
+        //        string picture = json["picture"]?["data"]?["url"]?.ToString();
 
-                payload.email = email;
-                payload.name = name;
-                payload.ID = id;
-                payload.picture = picture;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Lỗi khi gọi API Facebook: {ex.Message}");
-            }
+        //        payload.email = email;
+        //        payload.name = name;
+        //        payload.ID = id;
+        //        payload.picture = picture;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Lỗi khi gọi API Facebook: {ex.Message}");
+        //    }
 
-            return payload;
-        }
+        //    return payload;
+        //}
 
         public static async Task<PayloadGGToken> DecodeGGToken(string token)
         {
@@ -170,17 +170,17 @@ namespace api.Services
 
         }
 
-        public string GetUsernameFormLoginToken(string token)
-        {
-            var claimsPrincipal = DecodeToken(token);
-            string username = string.Empty;
-            if (claimsPrincipal != null)
-            {
-                username = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
-            }
+        //public string GetUsernameFormLoginToken(string token)
+        //{
+        //    var claimsPrincipal = DecodeToken(token);
+        //    string username = string.Empty;
+        //    if (claimsPrincipal != null)
+        //    {
+        //        username = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
+        //    }
 
-            return username;
-        }
+        //    return username;
+        //}
 
         public string GetUserRoleName(string username)
         {
@@ -260,33 +260,33 @@ namespace api.Services
             return roleID;
         }
 
-        public ClaimsPrincipal? DecodeToken(string token)
-        {
-            var jwtSettings = _config.GetSection("Jwt");
-            var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+        //public ClaimsPrincipal? DecodeToken(string token)
+        //{
+        //    var jwtSettings = _config.GetSection("Jwt");
+        //    var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings["Issuer"],
-                ValidAudience = jwtSettings["Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(key)
-            };
+        //    var tokenHandler = new JwtSecurityTokenHandler();
+        //    var validationParameters = new TokenValidationParameters
+        //    {
+        //        ValidateIssuer = true,
+        //        ValidateAudience = true,
+        //        ValidateLifetime = true,
+        //        ValidateIssuerSigningKey = true,
+        //        ValidIssuer = jwtSettings["Issuer"],
+        //        ValidAudience = jwtSettings["Audience"],
+        //        IssuerSigningKey = new SymmetricSecurityKey(key)
+        //    };
 
-            try
-            {
-                var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
-                return principal;
-            }
-            catch
-            {
-                return null; // Token không hợp lệ
-            }
-        }
+        //    try
+        //    {
+        //        var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
+        //        return principal;
+        //    }
+        //    catch
+        //    {
+        //        return null; // Token không hợp lệ
+        //    }
+        //}
 
         public List<string> GetPermissionName(int roleID)
         {

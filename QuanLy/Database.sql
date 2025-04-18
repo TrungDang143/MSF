@@ -537,6 +537,15 @@ BEGIN
 
 END;
 ----------------------------------------------------------------------------------------------------
+create procedure sp_GetRoleIDByUserID
+    @UserID int,
+	@rtnvalue int output
+AS
+BEGIN
+
+   set @rtnValue = (SELECT RoleID FROM Users WHERE (userid = @userid))
+
+END;
 create procedure sp_GetRoleIDByUsernameOrEmail
     @UsernameOrEmail VARCHAR(100),
 	@rtnvalue int output
@@ -643,7 +652,7 @@ BEGIN
 			UPDATE Users SET PhoneNumber = @PhoneNumber WHERE UserID = @UserID;
 
 		IF @Avatar IS NOT NULL
-			UPDATE Users SET Avatar = @Avatar WHERE UserID = @UserID;
+			UPDATE Users SET Avatar = @Avatar, IsExternalAvatar = 0 WHERE UserID = @UserID;
 
 		IF @DateOfBirth IS NOT NULL
 			UPDATE Users SET DateOfBirth = @DateOfBirth WHERE UserID = @UserID;
@@ -663,9 +672,14 @@ BEGIN
 		IF @FacebookID IS NOT NULL
 			UPDATE Users SET FacebookID = @FacebookID WHERE UserID = @UserID;
 
-		IF @RoleID IS NOT NULL
+		
+		IF @RoleID IS NOT NULL and @roleID <> (select roleID from users WHERE UserID = @UserID)
+		BEGIN
 			UPDATE Users SET RoleID = @RoleID WHERE UserID = @UserID;
 
+			DELETE FROM UserPermission WHERE UserID = @UserID;
+			DELETE FROM UserDeniedPermission WHERE UserID = @UserID;
+		END	
 END;
 ----------------------------------------------------------------------------------------------------
 create procedure sp_DeleteUser
@@ -770,26 +784,53 @@ create table UserPermission (
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
     FOREIGN KEY (PermissionID) REFERENCES Permission(PermissionID)
 )
+
+CREATE TABLE UserDeniedPermission (
+    UserID INT,
+    PermissionID INT,
+    PRIMARY KEY (UserID, PermissionID)
+);
 ----------------------------------------------------------------------------------------------------
 CREATE PROCEDURE sp_UpdateUserPermissions
     @UserID INT,
-    @PermissionIDs NVARCHAR(MAX) -- VD: '1,3,5'
+    @PermissionIDs NVARCHAR(MAX) -- Danh sách quyền mong muốn cuối cùng (VD: '1,3,5,6')
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Xoá quyền cũ của user
+    -- Xoá quyền riêng cũ
     DELETE FROM UserPermission WHERE UserID = @UserID;
+    DELETE FROM UserDeniedPermission WHERE UserID = @UserID;
 
-    -- Thêm quyền mới
-    DECLARE @id INT;
-    DECLARE @PermissionTable TABLE (ID INT);
+    -- Lấy RoleID của user
+    DECLARE @RoleID INT;
+    SELECT @RoleID = RoleID FROM Users WHERE UserID = @UserID;
 
-    INSERT INTO @PermissionTable (ID)
-    SELECT value FROM STRING_SPLIT(@PermissionIDs, ',')
+    -- Quyền theo role
+    DECLARE @RolePermissions TABLE (PermissionID INT);
+    INSERT INTO @RolePermissions (PermissionID)
+    SELECT PermissionID FROM RolePermission WHERE RoleID = @RoleID;
 
+    -- Quyền mong muốn cuối cùng
+    DECLARE @DesiredPermissions TABLE (PermissionID INT);
+    INSERT INTO @DesiredPermissions (PermissionID)
+    SELECT TRY_CAST(value AS INT) 
+    FROM STRING_SPLIT(@PermissionIDs, ',') 
+    WHERE TRY_CAST(value AS INT) IS NOT NULL;
+
+    -- Thêm quyền cấp thêm: trong desired nhưng không có trong role
     INSERT INTO UserPermission (UserID, PermissionID)
-    SELECT @UserID, ID FROM @PermissionTable;
+    SELECT @UserID, dp.PermissionID
+    FROM @DesiredPermissions dp
+    LEFT JOIN @RolePermissions rp ON dp.PermissionID = rp.PermissionID
+    WHERE rp.PermissionID IS NULL;
+
+    -- Thêm quyền deny: có trong role nhưng không nằm trong desired
+    INSERT INTO UserDeniedPermission (UserID, PermissionID)
+    SELECT @UserID, rp.PermissionID
+    FROM @RolePermissions rp
+    LEFT JOIN @DesiredPermissions dp ON rp.PermissionID = dp.PermissionID
+    WHERE dp.PermissionID IS NULL;
 END
 
 ----------------------------------------------------------------------------------------------------
@@ -873,6 +914,38 @@ BEGIN
 END;
 exec sp_GetPasswordRules
 ----------------------------------------------------------------------------------------------------
+create proc sp_UpdateRolePermission
+@roleID int,
+@permissionIDs nvarchar(max)
+as
+begin
+	SET NOCOUNT ON;
+
+	IF @RoleId = 1
+	BEGIN
+		RETURN;
+	END
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DELETE FROM RolePermission WHERE RoleId = @RoleId;
+
+        IF LEN(@PermissionIds) > 0
+        BEGIN
+            INSERT INTO RolePermission (RoleId, PermissionId)
+            SELECT @RoleId, TRIM(value)
+            FROM STRING_SPLIT(@PermissionIds, ',')
+            WHERE TRY_CAST(value AS INT) IS NOT NULL
+        END
+
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK;
+        THROW;
+    END CATCH
+end
 ----------------------------------------------------------------------------------------------------
 DECLARE @ReturnValue VARCHAR(100);
 DECLARE @ReturnStatus int;
@@ -885,3 +958,9 @@ SELECT FORMAT(ABS(CHECKSUM(NEWID())) % 10000, 'D4') AS RandomCode;
 
 DECLARE @ReturnValue NVARCHAR(100);
 exec sp_CreateUser 'admin3', 'password', 'abc1@gmail.com', N'đặng đức trung', default, default,default,default,default,default,default,default,  @ReturnValue output
+
+
+
+
+
+

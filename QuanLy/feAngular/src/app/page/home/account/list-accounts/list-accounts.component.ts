@@ -173,12 +173,14 @@ export class ListAccountsComponent implements OnInit {
   viewDetail(id: any) {
     this.apiAccount.GetDetailUserInfo(id).subscribe({
       next: (res) => {
+        this.detailAccountForm.reset();
         this.displayDetail = true;
         this.displayPopupCreateUser = false;
         const data = res.data;
         this.genders = data.listGender;
         this.roles = data.listRole;
         this.status = data.listStatus;
+
         this.detailAccountForm.patchValue(data);
 
         var dateOfBirth: Date | null;
@@ -338,9 +340,13 @@ export class ListAccountsComponent implements OnInit {
     console.error('Không thể load ảnh');
   }
   submitToServer() {
-    if (this.displayPopupCreateUser)
-      this.createAccountForm.patchValue({ avatar: this.croppedImage });
-    else this.detailAccountForm.patchValue({ avatar: this.croppedImage });
+
+    if(this.croppedImage){
+      if (this.displayPopupCreateUser)
+        this.createAccountForm.patchValue({ avatar: this.croppedImage });
+      else this.detailAccountForm.patchValue({ avatar: this.croppedImage });
+    }
+
     this.displayPopupAvatar = false;
   }
 
@@ -850,7 +856,7 @@ export class ListAccountsComponent implements OnInit {
     ]),
     fullName: new FormControl(null, [Validators.maxLength(100)]),
     phoneNumber: new FormControl(null, [Validators.maxLength(15)]),
-    avatar: new FormControl('avatar/default-avatar.jpg'),
+    avatar: new FormControl(null),
     dateOfBirth: new FormControl(null),
     gender: new FormControl(null),
     address: new FormControl(null, [Validators.maxLength(100)]),
@@ -1049,7 +1055,13 @@ export class ListAccountsComponent implements OnInit {
 
     console.log(this.createAccountForm.value)
     if (this.disableBtnCreateUser) return;
-    this.disableBtnCreateUser = false;
+    this.disableBtnCreateUser = true;
+
+    const birht = this.createAccountForm.get('dateOfBirth');
+    if (birht && birht.value) {
+      let convertDate = this.formatDateToString(birht.value);
+      this.createAccountForm.patchValue({ dateOfBirth: convertDate });
+    }
 
     this.apiAccount.CreateUser(this.createAccountForm.value).subscribe({
       next: (res) => {

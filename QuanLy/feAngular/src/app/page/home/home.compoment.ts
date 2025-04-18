@@ -72,23 +72,27 @@ export class HomeComponent implements OnInit {
   }
 
   breadcrumbItems: MenuItem[] = [];
-  breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/home/dashboard' };
+  breadcrumbHome: MenuItem = {
+    icon: 'pi pi-home',
+    routerLink: '/home/dashboard',
+  };
 
   username: string = '###';
   avatar: string = 'avatar/default-avatar.jpg';
   ngOnInit(): void {
-    this.getFullName();
+    this.GetUserInfo();
   }
 
-  getFullName() {
-    this.apiHome.getFullName().subscribe({
+  GetUserInfo() {
+    this.apiHome.GetUserInfo().subscribe({
       next: (res) => {
         if (res.result == '1') {
-          this.username = res.data;
+          this.username = res.data.fullname;
+          this.avatar = res.data.avatar ?? this.avatar;
         }
       },
       error: (err) => {
-        console.log('Lỗi lấy username', err);
+        console.log('Lỗi lấy userinfo', err);
       },
     });
   }
@@ -108,7 +112,7 @@ export class HomeComponent implements OnInit {
       this.router.navigate(['/home' + url]).then(() => {
         // Chờ route cập nhật xong
         this.router.events
-          .pipe(filter(event => event instanceof NavigationEnd))
+          .pipe(filter((event) => event instanceof NavigationEnd))
           .subscribe(() => {
             this.breadcrumbItems = this.breadcrumbService.getBreadcrumbs();
           });

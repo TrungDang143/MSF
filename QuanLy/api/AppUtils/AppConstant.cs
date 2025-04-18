@@ -40,5 +40,18 @@
                 return config.GetSection("Default")["KeyCaptcha"]!;
             }
         }
+
+        public static string DEFAULT_AVATAR
+        {
+            get
+            {
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .Build();
+
+                return config.GetSection("Default")["Avatar"]!;
+            }
+        }
     }
 }

@@ -347,8 +347,8 @@
   },
   {
     "ContainingType": "api.Controllers.HomeController",
-    "Method": "GetFullName",
-    "RelativePath": "api/Home/GetFullName",
+    "Method": "GetUserInfo",
+    "RelativePath": "api/Home/GetUserInfo",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

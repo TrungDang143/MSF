@@ -1,4 +1,5 @@
-﻿using api.DTO.Home;
+﻿using api.AppUtils;
+using api.DTO.Home;
 using api.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +17,10 @@ namespace api.Controllers
             _home = home;
         }
 
-        [HttpGet("GetFullName")]
-        public BaseResponse GetFullName([FromQuery]GetFullNameInputDto inputDto)
+        [HttpGet("GetUserInfo")]
+        public BaseResponse GetUserInfo([FromQuery]GetFullNameInputDto inputDto)
         {
-            return _home.GetFullName(inputDto);
+            return _home.GetUserInfo(inputDto);
         }
     }
 }

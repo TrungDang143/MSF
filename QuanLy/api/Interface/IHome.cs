@@ -4,6 +4,6 @@ namespace api.Interface
 {
     public interface IHome
     {
-        public BaseResponse GetFullName(GetFullNameInputDto inputDto);
+        public BaseResponse GetUserInfo(GetFullNameInputDto inputDto);
     }
 }

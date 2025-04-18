@@ -11,27 +11,6 @@ namespace api.Services
 {
     public class AccountService : IAccount
     {
-        private readonly IConfiguration _config;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IWebHostEnvironment _webHostEnvironment;
-
-        public AccountService(IConfiguration config, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment webHostEnvironment)
-        {
-            _config = config;
-            _httpContextAccessor = httpContextAccessor;
-            _webHostEnvironment = webHostEnvironment;
-        }
-
-        public BaseResponse ChangeRoleUser(ChangeRoleUserDto inputDto)
-        {
-            throw new NotImplementedException();
-        }
-
-        public BaseResponse ChangeStatusUser(ChangeStatusUserDto inputDto)
-        {
-            throw new NotImplementedException();
-        }
-
         public BaseResponse CreateUser(CreateUserDto inputDto)
         {
             var res = new BaseResponse();
@@ -47,8 +26,11 @@ namespace api.Services
                     var passwordHash = HashPassword.Encrypt(inputDto.password);
                     if (!string.IsNullOrEmpty(inputDto.avatar))
                     {
-                        inputDto.avatar = saveAvatar(inputDto.avatar);
-
+                        inputDto.avatar = ImageBase64Helper.SaveAvatar(inputDto.avatar);
+                    }
+                    else
+                    {
+                        inputDto.avatar = ImageBase64Helper.SaveAvatar(AppConstant.DEFAULT_AVATAR);
                     }
 
                     cmd.Parameters.AddWithValue("@Username", inputDto.username);
@@ -140,11 +122,6 @@ namespace api.Services
             return res;
         }
 
-        public BaseResponse FindUserByUsernameOrEmail(FindUserByUsernameOrEmailDto inputDto)
-        {
-            throw new NotImplementedException();
-        }
-
         public BaseResponse GetAllUserAccounts()
         {
             var res = new BaseResponse();
@@ -183,7 +160,7 @@ namespace api.Services
                             {
                                 if (!string.IsNullOrEmpty(dt.Rows[i]["Avatar"]?.ToString()))
                                 {
-                                    dt.Rows[i]["Avatar"] = setAvatar(dt.Rows[i]["IsExternalAvatar"].ToString(), dt.Rows[i]["Avatar"].ToString());
+                                    dt.Rows[i]["Avatar"] = ImageBase64Helper.GetAvatar(dt.Rows[i]["IsExternalAvatar"].ToString(), dt.Rows[i]["Avatar"].ToString());
                                 }
                                 if (!string.IsNullOrEmpty(dt.Rows[i]["roleID"]?.ToString()))
                                 {
@@ -281,7 +258,7 @@ namespace api.Services
                     model.Email = dt.Rows[0]["Email"].ToString();
                     model.FullName = dt.Rows[0]["FullName"]?.ToString();
                     model.PhoneNumber = dt.Rows[0]["PhoneNumber"]?.ToString();
-                    model.Avatar = setAvatar(dt.Rows[0]["IsExternalAvatar"].ToString(), dt.Rows[0]["Avatar"].ToString());
+                    model.Avatar = ImageBase64Helper.GetAvatar(dt.Rows[0]["IsExternalAvatar"].ToString(), dt.Rows[0]["Avatar"].ToString());
                     var date = dt.Rows[0]["DateOfBirth"] != DBNull.Value ? (DateTime)dt.Rows[0]["DateOfBirth"] : new DateTime();
                     model.DateOfBirth = date > new DateTime() ? date.ToString("dd-MM-yyyy") : string.Empty;
                     model.Gender = dt.Rows[0]["Gender"] != DBNull.Value ? (byte?)dt.Rows[0]["Gender"] : null;
@@ -349,7 +326,7 @@ namespace api.Services
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
 
-                    model.Avatar = setAvatar(dt.Rows[0]["IsExternalAvatar"].ToString(), dt.Rows[0]["Avatar"].ToString());
+                    model.Avatar = ImageBase64Helper.GetAvatar(dt.Rows[0]["IsExternalAvatar"].ToString(), dt.Rows[0]["Avatar"].ToString());
                     model.Address = dt.Rows[0]["Address"].ToString();
                     model.PhoneNumber = dt.Rows[0]["PhoneNumber"].ToString();
                     model.Gender = dt.Rows[0]["Gender"] != DBNull.Value ? (byte)dt.Rows[0]["Gender"] : null;
@@ -380,53 +357,7 @@ namespace api.Services
             }
             return res;
         }
-
-        object DbNullIfNull(object value) =>
-            value switch
-            {
-                null => DBNull.Value,
-                string s when string.IsNullOrWhiteSpace(s) => DBNull.Value,
-                _ => value
-            };
-        private string setAvatar(string isExternalAvatar, string avatar)
-        {
-            if(!string.IsNullOrEmpty(isExternalAvatar) && isExternalAvatar != "True")
-            {
-                return getAvatarBase64(avatar);
-            }
-            return avatar;
-        }
-        private string getAvatarBase64(string filename)
-        {
-            var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "avatars", filename);
-            string base64 = string.Empty;
-
-            if (System.IO.File.Exists(imagePath))
-            {
-                var imageBytes = System.IO.File.ReadAllBytes(imagePath);
-                var base64String = Convert.ToBase64String(imageBytes);
-                base64 = "data:image/png;base64," + base64String;
-            }
-
-            return base64;
-
-        }
-        private string saveAvatar(string base64)
-        {
-            var base64String = base64.Replace("data:image/png;base64,", "")
-                                   .Replace("data:image/jpeg;base64,", "");
-
-            byte[] imageBytes = Convert.FromBase64String(base64String);
-            var fileName = Guid.NewGuid().ToString() + ".png";
-            var filePath = Path.Combine("wwwroot/uploads/avatars", fileName);
-
-            System.IO.File.WriteAllBytes(filePath, imageBytes);
-
-            //var request = _httpContextAccessor.HttpContext.Request;
-            //var imageUrl = $"{request.Scheme}://{request.Host}/uploads/avatars/{fileName}";
-
-            return fileName;
-        }
+        
         public BaseResponse UpdateUser(UpdateUserDto inputDto)
         {
             var res = new BaseResponse();
@@ -440,22 +371,25 @@ namespace api.Services
 
                     if (!string.IsNullOrEmpty(inputDto.Avatar))
                     {
-                        inputDto.Avatar = saveAvatar(inputDto.Avatar);
-
+                        inputDto.Avatar = ImageBase64Helper.SaveAvatar(inputDto.Avatar);
+                    }
+                    else
+                    {
+                        inputDto.Avatar = AppConstant.DEFAULT_AVATAR;
                     }
 
                     cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
-                    cmd.Parameters.AddWithValue("@FullName", DbNullIfNull(inputDto.FullName)); //DBNull.Value
-                    cmd.Parameters.AddWithValue("@PhoneNumber", DbNullIfNull(inputDto.PhoneNumber));
-                    cmd.Parameters.AddWithValue("@Avatar", DbNullIfNull(inputDto.Avatar));
-                    cmd.Parameters.AddWithValue("@DateOfBirth", DbNullIfNull(inputDto.DateOfBirth));
-                    cmd.Parameters.AddWithValue("@Gender", DbNullIfNull(inputDto.Gender));
-                    cmd.Parameters.AddWithValue("@Address", DbNullIfNull(inputDto.Address));
-                    cmd.Parameters.AddWithValue("@Status", DbNullIfNull(inputDto.statusID));
-                    cmd.Parameters.AddWithValue("@GoogleID", DbNullIfNull(inputDto.GoogleID));
-                    cmd.Parameters.AddWithValue("@FacebookID", DbNullIfNull(inputDto.FacebookID));
+                    cmd.Parameters.AddWithValue("@FullName"     , Utils.DbNullIfNull(inputDto.FullName)); //DBNull.Value
+                    cmd.Parameters.AddWithValue("@PhoneNumber"  , Utils.DbNullIfNull(inputDto.PhoneNumber));
+                    cmd.Parameters.AddWithValue("@Avatar"       , Utils.DbNullIfNull(inputDto.Avatar));
+                    cmd.Parameters.AddWithValue("@DateOfBirth"  , Utils.DbNullIfNull(inputDto.DateOfBirth));
+                    cmd.Parameters.AddWithValue("@Gender"       , Utils.DbNullIfNull(inputDto.Gender));
+                    cmd.Parameters.AddWithValue("@Address"      , Utils.DbNullIfNull(inputDto.Address));
+                    cmd.Parameters.AddWithValue("@Status"       , Utils.DbNullIfNull(inputDto.statusID));
+                    cmd.Parameters.AddWithValue("@GoogleID"     , Utils.DbNullIfNull(inputDto.GoogleID));
+                    cmd.Parameters.AddWithValue("@FacebookID"   , Utils.DbNullIfNull(inputDto.FacebookID));
                     if (inputDto.roleID != null && inputDto.roleID == 1) inputDto.roleID = null;
-                    cmd.Parameters.AddWithValue("@roleID", DbNullIfNull(inputDto.roleID));
+                    cmd.Parameters.AddWithValue("@roleID"       , Utils.DbNullIfNull(inputDto.roleID));
 
                     cmd.ExecuteNonQuery();
 

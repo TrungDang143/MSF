@@ -32,6 +32,8 @@ namespace api.Services
 
                     foreach(DataRow dr in dt.Rows)
                     {
+                        if ((int)dr[0] == 15) continue;//setting he thong
+
                         if (dr[1].ToString().Contains("users"))
                         {
                             dt_user.ImportRow(dr);
@@ -92,7 +94,8 @@ namespace api.Services
                     List<int> listPermissionIDs = new List<int>();
                     foreach (DataRow dr in dt.Rows)
                     {
-                        listPermissionIDs.Add((int)dr[0]);
+                        if ((int)dr[0] != 15) //setting he thong
+                            listPermissionIDs.Add((int)dr[0]);
                     }
                     res.Data = listPermissionIDs;
                 }

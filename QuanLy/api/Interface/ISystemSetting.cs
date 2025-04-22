@@ -4,10 +4,11 @@ namespace api.Interface
 {
     public interface ISystemSetting
     {
-        public BaseResponse UpdatePasswordRule(UpdatePasswordRuleDto inputDto);
-        public BaseResponse GetPasswordRule();
-        public BaseResponse CreateRole(CreateRoleDto inputDto);
-        public BaseResponse UpdateRolePermission(UpdateRolePermissionDto inputDto);
-        public BaseResponse DeleteRole(DeleteRoleDto inputDto);
+        public Task<BaseResponse> UpdatePasswordRule(UpdatePasswordRuleDto inputDto);
+        public Task<BaseResponse> GetPasswordRule();
+        public Task<BaseResponse> CreateRole(CreateRoleDto inputDto);
+        public Task<BaseResponse> UpdateRolePermission(UpdateRolePermissionDto inputDto);
+        public Task<BaseResponse> DeleteRole(DeleteRoleDto inputDto);
+        public Task<BaseResponse> GetListRole();
     }
 }

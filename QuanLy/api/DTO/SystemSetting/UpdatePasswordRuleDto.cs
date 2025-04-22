@@ -2,8 +2,7 @@
 {
     public class UpdatePasswordRuleDto
     {
-        public string SettingKey { get; set; }
-        public string SettingValue { get; set; }
-        public string Description { get; set; }
+        public int minLength { get; set; }
+        public List<PasswordRule> passwordRules { get; set; }
     }
 }

@@ -1,5 +1,100 @@
 .tab-password{
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(3, 1fr);
+    grid-template-rows: 35px 1fr 1fr;
+    gap: 10px;
+}
+.tab-password .content{
+    margin-left: 10px;
+}
+.tab-password .detail-content{
+    margin-top: 8px;
+}
+.tab-password .action-btn{
+    margin-top: 10px;
+}
+
+
+
+:host ::ng-deep .custom-role-table td,
+:host ::ng-deep .custom-role-table th {
+  border-bottom: 1px solid rgb(226, 232, 240) !important;
+  border-right: 1px solid rgb(226, 232, 240) !important;
+ 
+  /* max-width: 200px !important;
+  max-height: 80px !important;
+  overflow: auto !important;
+  white-space: pre-wrap !important; 
+  word-break: break-word !important;*/
+
+  white-space: nowrap !important;
+  /* overflow: hidden !important;
+  text-overflow: ellipsis !important;  */
+}
+:host ::ng-deep .custom-role-table th {
+    background-color: var(--p-surface-300) !important;
+}
+::ng-deep .custom-role-table{
+    max-width: 1200px; /* hoặc 100% nếu bạn muốn table full content */
+  }
+
+.card{
+    width: 100%;
+    height: 550px;
+  overflow-x: auto;
+  padding: 5px 10px 5px;
+}
+
+.flex{
+    display: flex;
+  align-items: center;
+}
+
+.flex input, p-datepicker, button{
+  margin-right: 10px;
+}
+.action-btn .btn-delete button{
+  margin-right: 10px !important;
+}
+
+.form-new-role{
+  margin: 10px;
+}
+
+.form-new-role input{
+  width: 340px;
+}
+
+.form-new-role p-floatlabel{
+  margin-top: 20px;
+}
+
+.form-new-role .action-btn{
+  display: flex;
+  justify-content: end;
+  margin: 10px;
+}
+
+.form-new-role .action-btn p-button{
+  margin-left: 10px;
+}
+
+.popup-permission{
+  grid-template-columns: 0.8fr 1fr;
+  grid-template-rows: 0.1fr 1fr 0.1fr;
+  overflow-y: auto;
+  display: grid;
+  gap: 50px;
+}
+
+.overview-permission{
+  border-right: 1px solid var(--p-surface-300);
+}
+.overview-permission ul li{
+  list-style-type: none;
+  padding: 2px;
+  margin-right: 20px;
+}
+::ng-deep .overview-permission .catelory-permission-btn{
+  width: 100% !important;
 }

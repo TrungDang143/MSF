@@ -1,15 +1,6 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  numberAttribute,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
-import {
-  Account,
-  AccountDetail,
-} from '../../../../model/account/account.model';
+import { NgFor, NgIf } from '@angular/common';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { Account } from '../../../../model/account/account.model';
 import { AccountService } from '../../../../services/account.service';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -18,7 +9,6 @@ import {
   FormControl,
   FormGroup,
   FormsModule,
-  NgModel,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -95,10 +85,9 @@ export class ListAccountsComponent implements OnInit {
   genders = [];
   roles = [];
   status = [];
-  
+
   ngOnInit(): void {
     this.loadData();
-
   }
 
   loadData() {
@@ -194,12 +183,12 @@ export class ListAccountsComponent implements OnInit {
       },
     });
   }
-
+  //be gui ve string
   parseDateFromString(dateStr: string): Date {
     const [day, month, year] = dateStr.split('-').map(Number);
     return new Date(year, month - 1, day);
   }
-
+  //gui lai string cho be
   formatDateToString(date: Date): string {
     const dd = String(date.getDate()).padStart(2, '0');
     const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -340,8 +329,7 @@ export class ListAccountsComponent implements OnInit {
     console.error('Không thể load ảnh');
   }
   submitToServer() {
-
-    if(this.croppedImage){
+    if (this.croppedImage) {
       if (this.displayPopupCreateUser)
         this.createAccountForm.patchValue({ avatar: this.croppedImage });
       else this.detailAccountForm.patchValue({ avatar: this.croppedImage });
@@ -594,118 +582,155 @@ export class ListAccountsComponent implements OnInit {
 
     this.permissionSelected.length = 0;
   }
+
+  mockupUserPermission(permissionIds: number[]){
+    const permissionGroups = [
+      {
+        nodes: this.permission_User,
+        selected: this.permission_User_Selected,
+      },
+      {
+        nodes: this.permission_Role,
+        selected: this.permission_Role_Selected,
+      },
+      {
+        nodes: this.permission_Permission,
+        selected: this.permission_Permission_Selected,
+      },
+      {
+        nodes: this.permission_Content,
+        selected: this.permission_Content_Selected,
+      },
+      {
+        nodes: this.permission_System,
+        selected: this.permission_System_Selected,
+      },
+    ];
+
+    this.toggleAllPermissionByIds(permissionGroups, permissionIds);
+
+    this.updateParentSelection(
+      this.permission_User,
+      this.permission_User_Selected
+    );
+    this.updateParentSelection(
+      this.permission_Role,
+      this.permission_Role_Selected
+    );
+    this.updateParentSelection(
+      this.permission_Permission,
+      this.permission_Permission_Selected
+    );
+    this.updateParentSelection(
+      this.permission_Content,
+      this.permission_Content_Selected
+    );
+    this.updateParentSelection(
+      this.permission_System,
+      this.permission_System_Selected
+    );
+
+    for (let i = 1; i <= 5; i++) {
+      this.onDetailSelectionChange(i);
+    }
+  }
+
+  mockupPermission(data: any){
+    this.permission_User = [
+      {
+        label: 'User',
+        data: 'permission_User',
+        expanded: true,
+        children: this.convertToTreeNodes(data.permission_User),
+      },
+    ];
+    this.permission_Role = [
+      {
+        label: 'Role',
+        data: 'permission_Role',
+        expanded: true,
+        children: this.convertToTreeNodes(data.permission_Role),
+      },
+    ];
+
+    this.permission_Content = [
+      {
+        label: 'Content',
+        data: 'permission_Content',
+        expanded: true,
+        children: this.convertToTreeNodes(data.permission_Content),
+      },
+    ];
+
+    this.permission_Permission = [
+      {
+        label: 'Permission',
+        data: 'permission_Permission',
+        expanded: true,
+        children: this.convertToTreeNodes(data.permission_Permission),
+      },
+    ];
+
+    this.permission_System = [
+      {
+        label: 'System',
+        data: 'permission_System',
+        expanded: true,
+        children: this.convertToTreeNodes(data.permission_System),
+      },
+    ];
+  }
+
+
+  isChangedRole = false;
+
+  //show permission cua user
   userPermission(userID: number) {
     this.apiPermission.getAllPermission().subscribe({
       next: (res) => {
         if (res.result == '1') {
           this.showPermission();
-          this.permission_User = [
-            {
-              label: 'User',
-              data: 'permission_User',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_User),
-            },
-          ];
-          this.permission_Role = [
-            {
-              label: 'Role',
-              data: 'permission_Role',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_Role),
-            },
-          ];
+          this.mockupPermission(res.data)
 
-          this.permission_Content = [
-            {
-              label: 'Content',
-              data: 'permission_Content',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_Content),
-            },
-          ];
-
-          this.permission_Permission = [
-            {
-              label: 'Permission',
-              data: 'permission_Permission',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_Permission),
-            },
-          ];
-
-          this.permission_System = [
-            {
-              label: 'System',
-              data: 'permission_System',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_System),
-            },
-          ];
-
-          this.apiAccount.GetAllUserPermission(userID).subscribe({
-            next: (res) => {
-              if (res.result == '1') {
-                let permissionIds: [] = res.data;
-
-                const permissionGroups = [
-                  {
-                    nodes: this.permission_User,
-                    selected: this.permission_User_Selected,
-                  },
-                  {
-                    nodes: this.permission_Role,
-                    selected: this.permission_Role_Selected,
-                  },
-                  {
-                    nodes: this.permission_Permission,
-                    selected: this.permission_Permission_Selected,
-                  },
-                  {
-                    nodes: this.permission_Content,
-                    selected: this.permission_Content_Selected,
-                  },
-                  {
-                    nodes: this.permission_System,
-                    selected: this.permission_System_Selected,
-                  },
-                ];
-
-                this.toggleAllPermissionByIds(permissionGroups, permissionIds);
-
-                this.updateParentSelection(
-                  this.permission_User,
-                  this.permission_User_Selected
-                );
-                this.updateParentSelection(
-                  this.permission_Role,
-                  this.permission_Role_Selected
-                );
-                this.updateParentSelection(
-                  this.permission_Permission,
-                  this.permission_Permission_Selected
-                );
-                this.updateParentSelection(
-                  this.permission_Content,
-                  this.permission_Content_Selected
-                );
-                this.updateParentSelection(
-                  this.permission_System,
-                  this.permission_System_Selected
-                );
-
-                for (let i = 1; i <= 5; i++) {
-                  this.onDetailSelectionChange(i);
+          console.log(this.isChangedRole);
+          if(!this.isChangedRole){
+            //lay tat ca quyen (role + extend)
+            this.apiAccount.GetAllUserPermission(userID).subscribe({
+              next: (res) => {
+                if (res.result == '1') {
+                  let permissionIds: [] = res.data;
+  
+                  this.mockupUserPermission(permissionIds);
+  
+                } else {
+                  this.pop.showOkPopup({ message: res.message });
                 }
-              } else {
-                this.pop.showOkPopup({ message: res.message });
-              }
-            },
-            error: (err) => {
-              this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
-              console.log(err);
-            },
-          });
+              },
+              error: (err) => {
+                this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
+                console.log(err);
+              },
+            });
+          }else{
+            this.apiPermission
+              .getPermissionByRoleID(
+                this.detailAccountForm.get('roleID')?.value
+              )
+              .subscribe({
+                next: (res) => {
+                  if (res.result == '1') {
+                    let permissionIds: [] = res.data;
+                    this.mockupUserPermission(permissionIds)
+                  } else {
+                    this.pop.showOkPopup({ message: res.message });
+                  }
+                },
+                error: (err) => {
+                  this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
+                  console.log(err);
+                },
+              });
+          }
 
           this.getPermission(this.cateloryPermission[0]);
         } else {
@@ -812,7 +837,6 @@ export class ListAccountsComponent implements OnInit {
         ids.push(node.data.permissionID);
       }
     });
-    console.log(this.detailAccountForm.value);
     if (this.detailAccountForm.get('roleID')?.value == 1) {
       this.pop.showOkPopup({
         message: 'Không thể chỉnh sửa quyền của role Admin!!',
@@ -887,55 +911,17 @@ export class ListAccountsComponent implements OnInit {
       },
     });
   }
+  changeRole() {
+    this.createAccountForm.get('permissionIds')?.setValue([]);
+    this.isChangedRole = true;
+  }
 
   createUserPermission() {
     this.apiPermission.getAllPermission().subscribe({
       next: (res) => {
         if (res.result == '1') {
           this.showPermission();
-          this.permission_User = [
-            {
-              label: 'User',
-              data: 'permission_User',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_User),
-            },
-          ];
-          this.permission_Role = [
-            {
-              label: 'Role',
-              data: 'permission_Role',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_Role),
-            },
-          ];
-
-          this.permission_Content = [
-            {
-              label: 'Content',
-              data: 'permission_Content',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_Content),
-            },
-          ];
-
-          this.permission_Permission = [
-            {
-              label: 'Permission',
-              data: 'permission_Permission',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_Permission),
-            },
-          ];
-
-          this.permission_System = [
-            {
-              label: 'System',
-              data: 'permission_System',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_System),
-            },
-          ];
+          this.mockupPermission(res.data)
 
           if (this.createAccountForm.get('roleID')?.value) {
             this.apiPermission
@@ -945,60 +931,23 @@ export class ListAccountsComponent implements OnInit {
               .subscribe({
                 next: (res) => {
                   if (res.result == '1') {
-                    let permissionIds: [] = res.data;
+                    let userPermissionIds: [] = res.data;
+                    let lastSetPermissionIds = this.createAccountForm.get(
+                      'permissionIds'
+                    )?.value as number[];
 
-                    const permissionGroups = [
-                      {
-                        nodes: this.permission_User,
-                        selected: this.permission_User_Selected,
-                      },
-                      {
-                        nodes: this.permission_Role,
-                        selected: this.permission_Role_Selected,
-                      },
-                      {
-                        nodes: this.permission_Permission,
-                        selected: this.permission_Permission_Selected,
-                      },
-                      {
-                        nodes: this.permission_Content,
-                        selected: this.permission_Content_Selected,
-                      },
-                      {
-                        nodes: this.permission_System,
-                        selected: this.permission_System_Selected,
-                      },
-                    ];
-
-                    this.toggleAllPermissionByIds(
-                      permissionGroups,
-                      permissionIds
-                    );
-
-                    this.updateParentSelection(
-                      this.permission_User,
-                      this.permission_User_Selected
-                    );
-                    this.updateParentSelection(
-                      this.permission_Role,
-                      this.permission_Role_Selected
-                    );
-                    this.updateParentSelection(
-                      this.permission_Permission,
-                      this.permission_Permission_Selected
-                    );
-                    this.updateParentSelection(
-                      this.permission_Content,
-                      this.permission_Content_Selected
-                    );
-                    this.updateParentSelection(
-                      this.permission_System,
-                      this.permission_System_Selected
-                    );
-
-                    for (let i = 1; i <= 5; i++) {
-                      this.onDetailSelectionChange(i);
+                    let permissionIds: number[];
+                    if (lastSetPermissionIds) {
+                      permissionIds = [
+                        ...new Set([
+                          ...userPermissionIds,
+                          ...lastSetPermissionIds,
+                        ]),
+                      ];
+                    } else {
+                      permissionIds = [...userPermissionIds];
                     }
+                    this.mockupUserPermission(permissionIds)
                   } else {
                     this.pop.showOkPopup({ message: res.message });
                   }
@@ -1053,7 +1002,7 @@ export class ListAccountsComponent implements OnInit {
       return;
     }
 
-    console.log(this.createAccountForm.value)
+    console.log(this.createAccountForm.value);
     if (this.disableBtnCreateUser) return;
     this.disableBtnCreateUser = true;
 

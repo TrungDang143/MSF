@@ -13,6 +13,7 @@
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
     [showCurrentPageReport]="true"
     [filters]="filters"
+    [scrollable]="true" scrollHeight="420px"
   >
     <ng-template #caption>
       <div class="filter">
@@ -48,13 +49,13 @@
     </ng-template>
     <ng-template #header>
       <tr>
-        <th pResizableColumn style="width: 5%">Avatar</th>
-        <th pResizableColumn style="width: 10%">Username</th>
-        <th pResizableColumn style="width: 10%">Fullname</th>
-        <th pResizableColumn style="width: 10%">Email</th>
-        <th pResizableColumn style="width: 6%">Role</th>
-        <th pResizableColumn style="width: 6%">Status</th>
-        <th pResizableColumn style="width: 6%">Action</th>
+        <th pResizableColumn >Avatar</th>
+        <th pResizableColumn >Username</th>
+        <th pResizableColumn >Fullname</th>
+        <th pResizableColumn >Email</th>
+        <th pResizableColumn >Role</th>
+        <th pResizableColumn >Status</th>
+        <th pResizableColumn >Action</th>
       </tr>
     </ng-template>
     <ng-template #body let-user>
@@ -303,6 +304,7 @@
                 optionLabel="roleName"
                 optionValue="roleID"
                 appendTo="body"
+                (onChange)="changeRole()"
               />
               <label for="input_role">Role</label>
             </p-floatlabel>
@@ -745,6 +747,7 @@
                 optionLabel="roleName"
                 optionValue="roleID"
                 appendTo="body"
+                (onChange)="changeRole()"
               />
               <label for="input_role">Role</label>
             </p-floatlabel>

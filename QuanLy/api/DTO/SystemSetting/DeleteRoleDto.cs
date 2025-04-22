@@ -2,6 +2,6 @@
 {
     public class DeleteRoleDto
     {
-        public string RoleId { get; set; }
+        public List<int> RoleIds { get; set; }
     }
 }

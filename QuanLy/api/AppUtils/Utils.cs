@@ -2,6 +2,11 @@
 {
     public class Utils
     {
+        /// <summary>
+        /// check null
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static object DbNullIfNull(object value) =>
         value switch
         {

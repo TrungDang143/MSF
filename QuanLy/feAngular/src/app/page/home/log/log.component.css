@@ -7,14 +7,14 @@
   max-height: 80px !important;
   overflow: auto !important;
   white-space: pre-wrap !important; 
-  word-break: break-word !important;
+  word-break: break-word !important;*/
 
   white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important; */
+  /* overflow: hidden !important;
+  text-overflow: ellipsis !important;  */
 }
 :host ::ng-deep .custom-log-table th {
-    background-color: var(--p-surface-300);
+    background-color: var(--p-surface-300) !important;
 }
 ::ng-deep .custom-log-table{
     max-width: 1200px; /* hoặc 100% nếu bạn muốn table full content */
@@ -30,5 +30,11 @@
 .flex{
     display: flex;
   align-items: center;
-  justify-content: space-between;
+}
+
+.flex input, p-datepicker{
+  margin-right: 10px;
+}
+.action-btn .btn-delete button{
+  margin-right: 10px;
 }

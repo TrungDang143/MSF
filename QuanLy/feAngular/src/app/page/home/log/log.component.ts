@@ -12,6 +12,10 @@ import { PopupService } from '../../../shared/popup/popup.service';
 import { DateTimeService } from '../../../utils/date-time.service';
 import { DatePickerModule } from 'primeng/datepicker';
 import { FormsModule } from '@angular/forms';
+import { LazyLoadEvent } from 'primeng/api';
+import { TableLazyLoadEvent } from 'primeng/table';
+import { PaginatorState } from 'primeng/paginator';
+import { PaginatorModule } from 'primeng/paginator';
 
 @Component({
   selector: 'app-log',
@@ -25,109 +29,152 @@ import { FormsModule } from '@angular/forms';
     ButtonModule,
     CommonModule,
     DatePickerModule,
-    FormsModule
+    FormsModule,
+    PaginatorModule,
   ],
   templateUrl: './log.component.html',
   styleUrl: './log.component.css',
 })
 export class LogComponent implements OnInit {
   @ViewChild('dt2') dt2: Table | undefined;
-  systemLog: any[] = [];
 
   dateFrom: Date | null = null;
   dateTo: Date | null = null;
-  globalFilterValue: string = '';
+  usernameFilter: string = '';
 
-  originalLogs: any[] = []; // Lưu toàn bộ dữ liệu ban đầu
+  selectedLogs: any[] = [];
 
   constructor(private apiLog: LogService, private pop: PopupService) {}
 
-  applyFilterGlobal($event: any, stringVal: any) {
-    this.dt2!.filterGlobal(
-      ($event.target as HTMLInputElement).value,
-      stringVal
-    );
-  }
+  // applyFilterGlobal($event: any, stringVal: any) {
+  //   this.dt2!.filterGlobal(
+  //     ($event.target as HTMLInputElement).value,
+  //     stringVal
+  //   );
+  // }
 
   ngOnInit(): void {
-    this.getlog();
+    // this.getlog();
   }
 
-  getlog() {
-    this.apiLog.GetAllLog().subscribe({
-      next: (res) => {
-        if (res) {
-          // for (let i = 0; i < res.data.length; i++) {
-          //   res.data[i].createdAt = DateTimeService.ConvertUtcToTimeZone(
-          //     res.data[i].createdAt
-          //   );
-          // }
-          this.systemLog = res.data;
-          this.originalLogs = res.data;
-          console.log('data', res);
-        }
-      },
-      error: (err) => {
-        if (err === 403) {
-          this.pop.showOkPopup({ message: 'Bạn không có quyền truy cập!' });
-        } else {
-          this.pop.showOkPopup({ message: 'Lỗi kết nối tới server!' });
-          console.log(err);
-        }
-      },
-    });
-  }
+  totalRows = 0;
+  loading = false;
+  logs: any[] = [];
 
-  filterByDateRange() {
-    if (!this.dateFrom && !this.dateTo) {
-      this.systemLog = [...this.originalLogs];
-      return;
+  first: number = 0;
+  rows: number = 10;
+  rowsPerPageOptions = [10, 20, 30];
+  onPageChange(event: PaginatorState) {
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? 10;
+    console.log(this.first, this.rows);
+    this.loadSysLogsLazy();
+  }
+  loadSysLogsLazy() {
+    this.loading = true;
+    
+    if (this.first !== undefined && this.rows !== undefined) {
+      const page = this.first / this.rows! + 1;
+      const pageSize = this.rows!;
+
+      this.apiLog
+        .GetLogPaging(
+          pageSize,
+          page,
+          this.usernameFilter,
+          this.dateFrom,
+          this.dateTo
+        )
+        .subscribe({
+          next: (res) => {
+            if (res.result == '1') {
+              this.logs = res.data;
+              this.totalRows = res.totalRows;
+              this.loading = false;
+            } else {
+              this.pop.showOkPopup({ message: 'Lỗi lấy nhật ký hệ thống!' });
+              this.loading = false;
+            }
+          },
+          error: (err) => {
+            if (err === 403) {
+              this.pop.showOkPopup({ message: 'Bạn không có quyền truy cập!' });
+            } else {
+              this.pop.showOkPopup({ message: 'Lỗi kết nối tới server!' });
+              console.log(err);
+            }
+            this.loading = false;
+          },
+        });
     }
-
-    this.systemLog = this.originalLogs.filter((log) => {
-      const logDate = new Date(log.createdAt);
-      const from = this.dateFrom ? new Date(this.dateFrom) : null;
-      const to = this.dateTo ? new Date(this.dateTo) : null;
-
-      if (from && to) return logDate >= from && logDate <= to;
-      if (from) return logDate >= from;
-      if (to) return logDate <= to;
-      return true;
-    });
   }
 
-  clearDateFilter() {
+  filter() {
+    if (this.usernameFilter || this.dateFrom || this.dateTo) {
+      if (this.dateFrom && this.dateTo) {
+        if (this.dateFrom > this.dateTo) {
+          this.pop.showOkPopup({
+            message: 'Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc',
+          });
+          return;
+        }
+      }
+      this.selectedLogs.length = 0;
+      this.loadSysLogsLazy();
+    } else {
+      this.pop.showOkPopup({ message: 'Điền tiêu chí lọc!' });
+    }
+  }
+
+  refresh() {
     this.dateFrom = null;
     this.dateTo = null;
-    this.globalFilterValue = '';
-    this.systemLog = [...this.originalLogs];
-    if (this.dt2) {
-      this.dt2.reset(); 
-    }
+    this.usernameFilter = '';
+    this.first = 0;
+    this.rows = 10;
+    this.selectedLogs.length = 0;
+    this.loadSysLogsLazy();
   }
 
-  // selectedCustomer!: Customer[]
-  //cols = [
-  //     { field: 'name', header: 'Name', customExportHeader: 'ten nguoi' },
-  //     { field: 'country.name', header: 'Country' },
-  //     { field: 'company', header: 'Company' },
-  //     { field: 'representative.name', header: 'Representative' }
-  // ];
-  // resolveFieldData(data: any, field: string): any {
-  //   if (!data || !field) return null;
-  //   if (field.indexOf('.') === -1) {
-  //     return data[field];
-  //   } else {
-  //     let fields = field.split('.');
-  //     let value = data;
-  //     for (let f of fields) {
-  //       if (value == null) return null;
-  //       value = value[f];
-  //     }
-  //     return value;
-  //   }
-  // }
-  // show(){
-  //   console.log(this.selectedCustomer)
-  // }
+  selectedLogIds: number[] = []
+
+  handleDeleteLogs() {
+    if(this.selectedLogs.length == 0){
+      this.pop.showOkPopup({message: "Vui lòng chọn 1 log để xoá!"});
+    }else{
+      this.pop.showYesNoPopup({
+        header: 'Xác nhận',
+        message: 'Bạn có chắc chắn muốn xoá Logs?',
+        onAccept: () => {
+          this.deleteSelectedLogs();
+        },
+        onReject: () => {
+          console.log('huy');
+        },
+      });
+    } 
+  }
+  deleteSelectedLogs() {
+    this.selectedLogs.forEach(element => {
+      this.selectedLogIds.push(element.id)
+    });
+    this.apiLog.DeleteLogByIds(this.selectedLogIds).subscribe({
+      next: res=>{
+        if(res.result == '1'){
+          this.pop.showOkPopup({message: res.message});
+          this.selectedLogs.length = 0;
+          this.selectedLogIds.length = 0;
+          this.loadSysLogsLazy();
+        }else{
+          this.pop.showOkPopup({message: "Lỗi xoá log!"});
+          console.log(res.message);
+        }
+      },
+      error: err=>{
+        this.pop.showOkPopup({message: "Không thể kết nối server!"})
+        console.log(err);
+      },
+      
+    })
+  }
 }

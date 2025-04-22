@@ -1,4 +1,4 @@
-﻿create database entryTestQly
+﻿	create database entryTestQly
 CREATE TABLE Users (
     UserID        INT IDENTITY(1,1) PRIMARY KEY,  -- ID tự tăng
     Username      VARCHAR(100) UNIQUE NOT NULL,   -- Tên đăng nhập (Không trùng)
@@ -19,7 +19,8 @@ CREATE TABLE Users (
 	otp varchar(10) null,
 	roleID int null,
 	LockTime datetime null,
-	RemainTime tinyint null
+	RemainTime tinyint null,
+	IsExternalAvatar bit default 0 
 );
 
 alter table users
@@ -190,11 +191,11 @@ AS
 BEGIN
     SET NOCOUNT ON;
     UPDATE Role
-    SET CreatedAt = GETDATE()
+    SET CreatedAt = getutcdate()
     WHERE RoleID IN (SELECT RoleID FROM inserted) AND CreatedAt IS NULL;
 
     UPDATE Role
-    SET UpdatedAt = GETDATE()
+    SET UpdatedAt = getutcdate()
     WHERE RoleID IN (SELECT RoleID FROM inserted);
 END;
 -------------------------------------------------------------------------------
@@ -868,8 +869,9 @@ CREATE TABLE SystemSettings (
 )
 CREATE PROCEDURE sp_UpdateSystemSetting
     @SettingKey NVARCHAR(100),
-    @SettingValue NVARCHAR(500),
-    @Description NVARCHAR(500) = NULL
+    @SettingValue NVARCHAR(500) = null,
+    @Description NVARCHAR(500) = NULL,
+	@IsActive bit = null
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -877,10 +879,17 @@ BEGIN
     IF EXISTS (SELECT 1 FROM SystemSettings WHERE SettingKey = @SettingKey)
     BEGIN
         UPDATE SystemSettings
-        SET SettingValue = @SettingValue,
+        SET SettingValue = CASE 
+                WHEN @SettingValue IS NULL OR @SettingValue = '' THEN SettingValue 
+                ELSE @SettingValue
+             END,
             Description = CASE 
                 WHEN @Description IS NULL OR @Description = '' THEN Description 
                 ELSE @Description 
+             END,
+			 IsActive = CASE 
+                WHEN @IsActive IS NULL THEN IsActive 
+                ELSE @IsActive 
              END
         WHERE SettingKey = @SettingKey;
     END
@@ -912,7 +921,7 @@ BEGIN
         SettingKey LIKE 'Password.%'
         AND IsActive = 1;
 END;
-exec sp_GetPasswordRules
+drop procedure sp_GetPasswordRules
 ----------------------------------------------------------------------------------------------------
 create proc sp_UpdateRolePermission
 @roleID int,
@@ -931,12 +940,187 @@ begin
 
         DELETE FROM RolePermission WHERE RoleId = @RoleId;
 
-        IF LEN(@PermissionIds) > 0
+        IF (
+			SELECT COUNT(*) 
+			FROM STRING_SPLIT(@PermissionIds, ',') 
+			WHERE TRY_CAST(value AS INT) IS NOT NULL) > 0 
+			AND (
+				SELECT COUNT(*) 
+				FROM STRING_SPLIT(@PermissionIds, ',') 
+				WHERE TRY_CAST(value AS INT) IS NOT NULL) < (SELECT COUNT(*) FROM Permission)
+		BEGIN
+			INSERT INTO RolePermission (RoleId, PermissionId)
+			SELECT @RoleId, TRIM(value)
+			FROM STRING_SPLIT(@PermissionIds, ',')
+			WHERE TRY_CAST(value AS INT) IS NOT NULL
+		END
+
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK;
+        THROW;
+    END CATCH
+end
+----------------------------------------------------------------------------------------------------
+CREATE TYPE RoleType AS TABLE (
+    RoleID INT,
+    RoleName NVARCHAR(100)
+);
+CREATE TYPE GenderType AS TABLE (
+    GenderID INT,
+    GenderName NVARCHAR(100)
+);
+CREATE TYPE StatusType AS TABLE (
+    StatusID INT,
+    StatusName NVARCHAR(100)
+);
+CREATE PROCEDURE sp_GetRoleGenderStatus
+@rtnRole RoleType output,
+@rtnGender GenderType output,
+@rtnStatus StatusType output
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO @rtnRole
+    SELECT RoleID, RoleName FROM Role;
+
+    INSERT INTO @rtnGender
+    SELECT GenderID, GenderName FROM Genders;
+
+    INSERT INTO @rtnStatus
+    SELECT StatusID, StatusName FROM Status;
+END;
+exec sp_GetPasswordRules
+
+----------------------------------------------------------------------------------------------------
+create proc sp_CreateUser2
+@Username           VARCHAR(100),
+    @PasswordHash       VARCHAR(255),
+    @Email              VARCHAR(100),
+    @FullName           NVARCHAR(100) = NULL,
+    @PhoneNumber        VARCHAR(15) = NULL,
+    @Avatar             VARCHAR(255) = NULL,
+    @DateOfBirth        DATETIME = NULL,
+    @Gender             TINYINT = NULL,
+    @Address            NVARCHAR(100) = NULL,
+    @Status             TINYINT = 1,
+    @GoogleID           VARCHAR(100) = NULL,
+    @FacebookID         VARCHAR(100) = NULL,
+    @RoleID             INT = NULL,
+    @IsExternalAvatar   BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Users (
+        Username,
+        PasswordHash,
+        Email,
+        FullName,
+        PhoneNumber,
+        Avatar,
+        DateOfBirth,
+        Gender,
+        Address,
+        Status,
+        GoogleID,
+        FacebookID,
+        roleID,
+        IsExternalAvatar
+    )
+    VALUES (
+        @Username,
+        @PasswordHash,
+        @Email,
+        @FullName,
+        @PhoneNumber,
+        @Avatar,
+        @DateOfBirth,
+        @Gender,
+        @Address,
+        @Status,
+        @GoogleID,
+        @FacebookID,
+        @RoleID,
+        @IsExternalAvatar
+    );
+END
+----------------------------------------------------------------------------------------------------
+create proc sp_GetAvatarByUsernameOrEmail
+	@UsernameOrEmail VARCHAR(100),
+	@rtnAvatar varchar(255) output,
+	@rtnIsExternalAvatar bit output
+AS
+BEGIN
+
+   set @rtnAvatar = (SELECT Avatar FROM Users WHERE (Username = @UsernameOrEmail OR Email = @UsernameOrEmail))
+   set @rtnIsExternalAvatar = (SELECT IsExternalAvatar FROM Users WHERE (Username = @UsernameOrEmail OR Email = @UsernameOrEmail))
+
+END;
+----------------------------------------------------------------------------------------------------
+CREATE PROCEDURE sp_GetSettingsByPrefix
+    @Prefix NVARCHAR(100) = NULL,
+    @IsActive BIT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT *
+    FROM SystemSettings
+    WHERE 
+        (@Prefix IS NULL OR SettingKey LIKE @Prefix + '.%')
+        AND (@IsActive IS NULL OR IsActive = @IsActive)
+END
+exec sp_GetSettingsByPrefix
+----------------------------------------------------------------------------------------------------
+create proc sp_GetSystemLogsByPaging
+@PageSize int,
+@PageNumber int,
+@Username varchar(100) = null,
+@From datetime = null,
+@To datetime = null,
+@TotalRows int output
+as
+begin
+	SET NOCOUNT ON;
+
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+
+    -- Lấy tổng số bản ghi
+    set @TotalRows = (SELECT COUNT(*) AS TotalRecords
+    FROM SystemLog
+    WHERE (@Username IS NULL OR Username LIKE '%' + @Username + '%')
+      AND (@From IS NULL OR CreatedAt >= @From)
+      AND (@To IS NULL OR CreatedAt <= @To));
+
+    -- Lấy dữ liệu theo trang
+    SELECT *
+    FROM SystemLog
+    WHERE (@Username IS NULL OR Username LIKE '%' + @Username + '%')
+      AND (@From IS NULL OR CreatedAt >= @From)
+      AND (@To IS NULL OR CreatedAt <= @To)
+    ORDER BY CreatedAt DESC
+    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
+end
+----------------------------------------------------------------------------------------------------
+create proc sp_DeleteLogsByIds
+@logIds varchar(max)
+as
+begin
+	SET NOCOUNT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        IF LEN(@logIds) > 0
         BEGIN
-            INSERT INTO RolePermission (RoleId, PermissionId)
-            SELECT @RoleId, TRIM(value)
-            FROM STRING_SPLIT(@PermissionIds, ',')
-            WHERE TRY_CAST(value AS INT) IS NOT NULL
+            Delete from SystemLog
+			where Id in (
+            SELECT TRIM(value)
+            FROM STRING_SPLIT(@logIds, ',')
+            WHERE TRY_CAST(value AS INT) IS NOT NULL and TRY_CAST(value AS INT) <> 1)
         END
 
         COMMIT;
@@ -946,6 +1130,52 @@ begin
         THROW;
     END CATCH
 end
+exec sp_DeleteLogsByIds '1,4,ad, 5,a'
+----------------------------------------------------------------------------------------------------
+create proc sp_CreateRole
+    @RoleName VARCHAR(50),
+    @Description nvarchar(100),
+	@rtnStatus int output
+	as
+	begin
+		If exists (select 1 from Role where @RoleName = RoleName)
+		begin
+			set @rtnStatus = 0;
+			return;
+		end
+
+		insert into Role ( RoleName, Description) values (@RoleName, @Description)
+		set @rtnStatus = 1
+			
+	end
+
+create proc sp_DeleteRole
+@roleIds varchar(max)
+as
+begin
+	begin try
+		begin transaction
+			if len(@roleIds) > 0
+			begin
+				delete from Role
+				where RoleID in ( select trim(value) from string_split(@roleIds, ',') where TRY_CAST(value as int) is not null)
+			end
+		commit
+	end try
+	begin catch
+		rollback;
+		throw;
+	end catch
+end
+
+create proc sp_UpdateRolePermission
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 DECLARE @ReturnValue VARCHAR(100);
 DECLARE @ReturnStatus int;

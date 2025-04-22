@@ -10,7 +10,7 @@ namespace api.Services
 {
     public class SystemSettingService : ISystemSetting
     {
-        public BaseResponse CreateRole(CreateRoleDto inputDto)
+        public async Task<BaseResponse> CreateRole(CreateRoleDto inputDto)
         {
             var res = new BaseResponse();
 
@@ -18,21 +18,38 @@ namespace api.Services
             {
                 using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
                 using (SqlCommand cmd = new SqlCommand("sp_CreateRole", conn))
+                using (SqlCommand cmd_perm = new SqlCommand("sp_UpdateRolePermission", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    conn.Open();
+                    await conn.OpenAsync();
 
                     cmd.Parameters.AddWithValue("@RoleName", inputDto.RoleName);
-                    cmd.Parameters.AddWithValue("@Description", inputDto.Description);
+                    cmd.Parameters.AddWithValue("@Description", Utils.DbNullIfNull(inputDto.Description));
                     var rtnStatus = new SqlParameter("@rtnStatus", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output,
                     };
-                    cmd.Parameters.Add(rtnStatus);
-                    cmd.ExecuteNonQuery();
-
-                    if((int)rtnStatus.Value == 1)
+                    var rtnValue = new SqlParameter("@rtnValue", SqlDbType.Int)
                     {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    cmd.Parameters.Add(rtnStatus);
+                    cmd.Parameters.Add(rtnValue);
+                    await cmd.ExecuteNonQueryAsync();
+
+                    if ((int)rtnStatus.Value == 1)
+                    {
+                        cmd_perm.CommandType = CommandType.StoredProcedure;
+                        cmd_perm.Parameters.AddWithValue("@roleID", rtnValue.Value);
+                        
+                        var listPermissionIds = (inputDto.PermissionIDs != null && inputDto.PermissionIDs.Count > 0) 
+                            ? string.Join(",", inputDto.PermissionIDs.Select(id => id == 15 ? "admin" : id.ToString())) 
+                            : string.Empty;
+
+                        cmd_perm.Parameters.AddWithValue("@permissionIDs", Utils.DbNullIfNull(listPermissionIds));
+                        await cmd_perm.ExecuteNonQueryAsync();
+
                         res.Message = "Tạo role thành công!";
                         res.Result = AppConstant.RESULT_SUCCESS;
                     }
@@ -51,8 +68,8 @@ namespace api.Services
 
             return res;
         }
-
-        public BaseResponse DeleteRole(DeleteRoleDto inputDto)
+               
+        public async Task<BaseResponse> DeleteRole(DeleteRoleDto inputDto)
         {
             var res = new BaseResponse();
 
@@ -62,26 +79,16 @@ namespace api.Services
                 using (SqlCommand cmd = new SqlCommand("sp_DeleteRole", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    conn.Open();
+                    await conn.OpenAsync();
 
-                    cmd.Parameters.AddWithValue("@RoleID", inputDto.RoleId);
-                    var rtnStatus = new SqlParameter("@rtnStatus", SqlDbType.Int)
-                    {
-                        Direction = ParameterDirection.Output,
-                    };
-                    cmd.Parameters.Add(rtnStatus);
-                    cmd.ExecuteNonQuery();
+                    var listId = string.Join(",", inputDto.RoleIds.Select(id => id == 1 ? "admin" : id.ToString()));
+                    cmd.Parameters.AddWithValue("@roleIds", listId);
 
-                    if ((int)rtnStatus.Value == 1)
-                    {
-                        res.Message = "Xoá role thành công!";
-                        res.Result = AppConstant.RESULT_SUCCESS;
-                    }
-                    else
-                    {
-                        res.Message = "Xoá role thất bại!";
-                        res.Result = AppConstant.RESULT_ERROR;
-                    }
+                    await cmd.ExecuteNonQueryAsync();
+
+                    res.Message = "Xoá role thành công!";
+                    res.Result = AppConstant.RESULT_SUCCESS;
+
                 }
             }
             catch (Exception ex)
@@ -92,23 +99,74 @@ namespace api.Services
 
             return res;
         }
-
-        public BaseResponse GetPasswordRule()
+               
+        public async Task<BaseResponse> GetListRole()
         {
             var res = new BaseResponse();
 
             try
             {
                 using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                using (SqlCommand cmd = new SqlCommand("sp_GetPasswordRules", conn))
-                using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                using (SqlCommand cmd = new SqlCommand("sp_GetRole", conn))
+                {
+                    await conn.OpenAsync();
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    DataTable dt = new DataTable();
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        dt.Load(reader);
+                    }
+
+                    res.Data = dt.ConvertToList<RoleDetail>();
+                    res.Message = "Get list role thanh cong";
+                    res.Result = AppConstant.RESULT_SUCCESS;
+                }
+            }catch(Exception ex)
+            {
+                res.Result = AppConstant.RESULT_ERROR;
+                res.Message = ex.Message;
+            }
+
+            return res;
+        }
+               
+        public async Task<BaseResponse> GetPasswordRule()
+        {
+            var res = new BaseResponse();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_GetSettingsByPrefix", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    conn.Open();
-                    DataTable dt = new DataTable();
-                    adapter.Fill(dt);
+                    await conn.OpenAsync();
 
-                    res.Data = dt.ConvertToList<PasswordRule>();
+                    cmd.Parameters.AddWithValue("@Prefix", "Password");
+                    cmd.Parameters.AddWithValue("@IsActive", DBNull.Value);
+
+                    DataTable dt = new DataTable();
+                    using (var reader = await cmd.ExecuteReaderAsync()) 
+                    {
+                        dt.Load(reader);
+                    }
+
+                    int minLength = AppConstant.MIN_PASSWORD_LENGTH;
+                    foreach(DataRow dr in dt.Rows)
+                    {
+                        if (dr["SettingKey"].ToString() == "Password.MinLength")
+                        {
+                            minLength = int.Parse(dr["SettingValue"].ToString());
+                            dt.Rows.Remove(dr);
+                            break;
+                        }
+                    }
+
+                    res.Data = new
+                    {
+                        minPasswordLength = minLength,
+                        rulePassword = dt.ConvertToList<PasswordRule>(),
+                    };
                     res.Message = "Get rule password thanh cong";
                     res.Result = AppConstant.RESULT_SUCCESS;
                 }
@@ -121,8 +179,8 @@ namespace api.Services
 
             return res;
         }
-
-        public BaseResponse UpdatePasswordRule(UpdatePasswordRuleDto inputDto)
+               
+        public async Task<BaseResponse> UpdatePasswordRule(UpdatePasswordRuleDto inputDto)
         {
             var res = new BaseResponse();
 
@@ -132,12 +190,19 @@ namespace api.Services
                 using (SqlCommand cmd = new SqlCommand("sp_UpdateSystemSetting", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    conn.Open();
+                    await conn.OpenAsync();
 
-                    cmd.Parameters.AddWithValue("@SettingKey", inputDto.SettingKey);
-                    cmd.Parameters.AddWithValue("@SettingValue", inputDto.SettingValue);
-                    cmd.Parameters.AddWithValue("@Description", inputDto.Description);
-                    cmd.ExecuteNonQuery();
+                    cmd.Parameters.AddWithValue("@SettingKey", "Password.MinLength");
+                    cmd.Parameters.AddWithValue("@SettingValue", inputDto.minLength);
+                    await cmd.ExecuteNonQueryAsync();
+
+                    foreach(var rule in inputDto.passwordRules)
+                    {
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@SettingKey", rule.SettingKey);
+                        cmd.Parameters.AddWithValue("@IsActive", rule.IsActive);
+                        await cmd.ExecuteNonQueryAsync();
+                    }
 
                     res.Message = "Update Password rule thanh cong!";
                     res.Result = AppConstant.RESULT_SUCCESS;
@@ -151,8 +216,8 @@ namespace api.Services
 
             return res;
         }
-
-        public BaseResponse UpdateRolePermission(UpdateRolePermissionDto inputDto)
+               
+        public async Task<BaseResponse> UpdateRolePermission(UpdateRolePermissionDto inputDto)
         {
             var res = new BaseResponse();
 
@@ -162,11 +227,11 @@ namespace api.Services
                 using (SqlCommand cmd = new SqlCommand("sp_UpdateRolePermissions", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    conn.Open();
+                    await conn.OpenAsync();
 
                     cmd.Parameters.AddWithValue("@RoleId", inputDto.RoleID);
-                    cmd.Parameters.AddWithValue("@PermissionIds", inputDto.PermissionIDs);
-                    cmd.ExecuteNonQuery();
+                    cmd.Parameters.AddWithValue("@PermissionIds", inputDto.PermissionIDs.Select(id => id == 15 ? "admin" : id.ToString()));
+                    await cmd.ExecuteNonQueryAsync();
 
                     res.Message = "Cập nhật thành công!";
                     res.Result = AppConstant.RESULT_SUCCESS;

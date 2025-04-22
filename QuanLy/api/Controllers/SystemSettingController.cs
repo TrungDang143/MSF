@@ -19,37 +19,44 @@ namespace api.Controllers
         }
 
         [HttpGet("GetPasswordRule")]
-        public BaseResponse GetPasswordRule()
+        public async Task<BaseResponse> GetPasswordRule()
         {
-            return _systemSetting.GetPasswordRule();
+            return await _systemSetting.GetPasswordRule();
         }
 
         [HttpPost("UpdatePasswordRule")]
-        public BaseResponse UpdatePasswordRule([FromBody] UpdatePasswordRuleDto inputDto)
+        public async Task<BaseResponse> UpdatePasswordRule([FromBody] UpdatePasswordRuleDto inputDto)
         {
-            return _systemSetting.UpdatePasswordRule(inputDto);
+            return await _systemSetting.UpdatePasswordRule(inputDto);
         }
 
 
         [HasPermission("create_roles")]
         [HttpPost("CreateRole")]
-        public BaseResponse CreateRole([FromBody] CreateRoleDto inputDto)
+        public async Task<BaseResponse> CreateRole([FromBody] CreateRoleDto inputDto)
         {
-            return _systemSetting.CreateRole(inputDto);
+            return await _systemSetting.CreateRole(inputDto);
         }
 
         [HasPermission("delete_roles")]
         [HttpPost("DeleteRole")]
-        public BaseResponse DeleteRole([FromBody] DeleteRoleDto inputDto)
+        public async Task<BaseResponse> DeleteRole([FromBody] DeleteRoleDto inputDto)
         {
-            return _systemSetting.DeleteRole(inputDto);
+            return await _systemSetting.DeleteRole(inputDto);
         }
 
         [HasPermission("edit_roles")]
         [HttpPost("UpdateRolePermission")]
-        public BaseResponse UpdateRolePermission([FromBody] UpdateRolePermissionDto inputDto)
+        public async Task<BaseResponse> UpdateRolePermission([FromBody] UpdateRolePermissionDto inputDto)
         {
-            return _systemSetting.UpdateRolePermission(inputDto);
+            return await _systemSetting.UpdateRolePermission(inputDto);
+        }
+
+        [HasPermission("view_roles")]
+        [HttpGet("GetListRole")]
+        public async Task<BaseResponse> GetListRole()
+        {
+            return await _systemSetting.GetListRole();
         }
     }
 }

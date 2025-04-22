@@ -68,7 +68,7 @@ namespace api.Services
                         {
                             cmd_permission.CommandType = CommandType.StoredProcedure;
                             cmd_permission.Parameters.AddWithValue("@UserID", (int)rtnValue.Value);
-                            var permissionIdsString = string.Join(",", inputDto.permissionIds);
+                            var permissionIdsString = string.Join(",", inputDto.permissionIds.Select(id => id == 15 ? "admin" : id.ToString()));
                             cmd_permission.Parameters.AddWithValue("@PermissionIDs", !string.IsNullOrEmpty(permissionIdsString) ? permissionIdsString : DBNull.Value);
                             cmd_permission.ExecuteNonQuery();
                         }
@@ -405,6 +405,11 @@ namespace api.Services
             return res;
         }
 
+        /// <summary>
+        /// lay tat ca quyen (role + extend)
+        /// </summary>
+        /// <param name="inputDto"></param>
+        /// <returns></returns>
         public BaseResponse GetAllUserPermission(GetAllUserPermissionDto inputDto)
         {
             var res = new BaseResponse();
@@ -425,7 +430,8 @@ namespace api.Services
                     List<int> listPermissionIDs = new List<int>();
                     foreach(DataRow dr in dt.Rows)
                     {
-                        listPermissionIDs.Add((int)dr[0]);
+                        if ((int)dr[0] != 15) //setting he thong
+                            listPermissionIDs.Add((int)dr[0]);
                     }
                     res.Data = listPermissionIDs;
                 }
@@ -479,7 +485,8 @@ namespace api.Services
 
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
-                    var permissionIdsString = string.Join(",", inputDto.PermissionIds);
+                    var permissionIdsString = string.Join(",", inputDto.PermissionIds.Select(id => id == 15 ? "admin" : id.ToString()));
+                    permissionIdsString.Replace("15", "admin");
                     cmd.Parameters.AddWithValue("@PermissionIDs", !string.IsNullOrEmpty(permissionIdsString) ? permissionIdsString : DBNull.Value);
 
                     cmd.ExecuteNonQuery();

@@ -4,6 +4,8 @@
     {
         public static string RESULT_SUCCESS = "1";
         public static string RESULT_ERROR = "0";
+        public static string RESULT_SYSTEM_ERROR = "2";
+        public static int MIN_PASSWORD_LENGTH = 6;
         public static string CONNECTION_STRING
         {
             get

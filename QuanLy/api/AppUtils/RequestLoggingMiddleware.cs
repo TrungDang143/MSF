@@ -31,12 +31,19 @@ namespace api.AppUtils
             string method = request.Method;
 
             // Lấy body
-            request.EnableBuffering();
             string body = "";
-            using (var reader = new StreamReader(request.Body, Encoding.UTF8, true, 1024, true))
+            if (request.Method.Equals("GET", StringComparison.OrdinalIgnoreCase))
             {
-                body = await reader.ReadToEndAsync();
-                request.Body.Position = 0;
+                body = request.QueryString.HasValue ? request.QueryString.Value : "";
+            }
+            else
+            {
+                request.EnableBuffering();
+                using (var reader = new StreamReader(request.Body, Encoding.UTF8, true, 1024, true))
+                {
+                    body = await reader.ReadToEndAsync();
+                    request.Body.Position = 0;
+                }
             }
 
             int statusCode = 200;

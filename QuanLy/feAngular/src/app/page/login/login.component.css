@@ -23,13 +23,12 @@
 
 .container .login {
   background-color: white;
-  display: flex;
-  align-self: center;
-  justify-self: center;
-  justify-content: center;
-  align-items: center;
+
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: 90px auto 220px;
+
   padding: 10px;
-  margin-right: 20px;
   background-color: rgba(255, 255, 255, 0.3); /* Màu trắng trong suốt */
   backdrop-filter: blur(10px); /* Hiệu ứng mờ nền phía sau */
   border-radius: 10px; /* Bo góc */
@@ -40,48 +39,105 @@
 
 .container .login .title {
   font-size: 40px;
-  margin-top: 30px;
-  padding-bottom: 20px;
   font-weight: 500;
-}
-
-.container .login td {
-  font-size: 20px;
-  padding: 5px;
-  text-align: left;
-}
-
-input[type="text"]:not(#inputCaptcha),
-input[type="password"] {
-  font-size: 20px;
-  border: 0px;
-  background-color: rgba(239, 239, 239, 0.305);
-  border-radius: 10px;
-  border: 1px solid black;
-  justify-content: center;
-  height: 40px;
-  padding: 5px;
-  width: 100%;
-}
-input[type="checkbox"] {
-  width: 15px;
-  height: 15px;
-  accent-color: #6a0dad;
-  vertical-align: middle;
-}
-.form-login{
   display: flex;
-  align-content: end;
-}
-.formLogin {
-  width: 100%;
-  height: 360px;
-  align-content: end;
+  justify-content: center;
+  grid-row-start: 1;
+  grid-row-end: 2;
+  padding-top: 20px;
 }
 
+.login .body {
+  grid-row-start: 2;
+  grid-row-end: 3;
+
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: repeat(1, auto);
+  gap: 10px;
+}
+
+::ng-deep .body .username-cell input {
+  width: 350px !important;
+  height: 50px;
+  padding-left: 12px;
+  padding-bottom: 10px;
+  
+}
+
+::ng-deep .body .password-cell input {
+  width: 350px !important;
+  height: 50px;
+}
+
+.body .username-cell {
+  grid-row-start: 1;
+  grid-row-end: 2;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 10px;
+}
+.body .password-cell {
+  grid-row-start: 2;
+  grid-row-end: 3;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.body .remember-me-cell {
+  grid-row-start: 2;
+  grid-row-end: 3;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  margin-left: 70px;
+}
+
+.body .remember-me-cell input {
+  height: 15px;
+  width: 15px;
+}
 .rememberMe {
-  font-size: 17px;
+  font-size: 16px;
   text-align: center;
+  padding-left: 5px;
+}
+
+.body .captcha-cell {
+  grid-row-start: 3;
+  grid-row-end: 4;
+  padding-left: 65px;
+  padding-right: 65px;
+  padding-top: 15px;
+}
+
+::ng-deep .body .captcha-cell input {
+  
+  height: 62px !important;
+}
+
+::ng-deep .body .image-captcha img{
+  max-height: 60px !important;
+  max-width: 130px !important;
+  border: 1px solid #ccc;
+}
+::ng-deep .body .captcha-cell p-inputgroup-addon{
+padding: 0;
+}
+
+.body #btn-regen:hover{
+  background-color: var(--p-surface-200);
+}
+
+.body .btn-cell{
+  grid-row-start: 4;
+  grid-row-end: 5;
+  display: flex;
+  justify-content: center;
 }
 
 .rounded-button {
@@ -104,24 +160,30 @@ input[type="checkbox"] {
 }
 .rounded-button:disabled {
   background-color: gray;
-  cursor: not-allowed; 
+  cursor: not-allowed;
   opacity: 0.6;
   pointer-events: none;
 }
+
+.errMsg-area {
+  min-height: 15px;
+  height: auto;
+}
 .errMsg {
   color: red;
-  padding-left: 5px;
-  min-height: 20px;
-}
-
-.btn {
-  text-align: center;
+  font-weight: 400;
+  width: 350px;
+  padding-left: 12px;
+  padding-bottom: 5px;
 }
 
 .social {
+  grid-row-start: 3;
+  grid-row-end: 4;
   margin-top: 5px;
   margin-bottom: 10px;
   justify-items: center;
+  padding-top: 15px;
 }
 
 .btn-gg {
@@ -164,4 +226,3 @@ input[type="checkbox"] {
 .social-btn:active {
   transform: scale(0.9); /* Nhấn xuống một chút */
 }
-

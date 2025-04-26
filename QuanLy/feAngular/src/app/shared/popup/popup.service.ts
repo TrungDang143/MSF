@@ -41,4 +41,9 @@ export class PopupService {
   showOkPopup(data: InfoDialogData) {
     this.infoDialogSubject.next(data);
   }
+
+  showSysErr(){
+    this.infoDialogSubject.next({header: "Lỗi", message: "Không thể kết nối tới Server!", icon: "pi pi-times-circle"});
+  }
+
 }

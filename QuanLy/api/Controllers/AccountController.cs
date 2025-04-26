@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -51,7 +52,8 @@ namespace api.Controllers
         [HttpPost("UpdateUser")]
         public BaseResponse UpdateUser([FromBody] UpdateUserDto inputDto)
         {
-            return _account.UpdateUser(inputDto);
+            var username = User.Identity?.Name;
+            return _account.UpdateUser(inputDto, username);
         }
 
         [HasPermission("delete_users")]
@@ -87,6 +89,13 @@ namespace api.Controllers
         public BaseResponse CreateUser([FromBody]CreateUserDto inputDto)
         {
             return _account.CreateUser(inputDto);
+        }
+
+        
+        [HttpGet("GetActivePasswordRule")]
+        public async Task<BaseResponse> GetActivePasswordRule()
+        {
+            return await _account.GetActivePasswordRule();
         }
     }
 }

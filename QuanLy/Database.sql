@@ -47,8 +47,8 @@ CREATE TABLE Role (
     RoleID INT IDENTITY(1,1) PRIMARY KEY,
     RoleName VARCHAR(50) NOT NULL UNIQUE,
     Description nvarchar(100),
-    CreatedAt DATETIME DEFAULT GETDATE(),
-    UpdatedAt DATETIME DEFAULT GETDATE()
+    CreatedAt DATETIME DEFAULT GETutcDATE(),
+    UpdatedAt DATETIME DEFAULT GETutcDATE()
 );
 
 INSERT INTO Role (RoleName, Description) VALUES
@@ -1075,6 +1075,9 @@ BEGIN
 END
 exec sp_GetSettingsByPrefix
 ----------------------------------------------------------------------------------------------------
+CREATE NONCLUSTERED INDEX IX_SystemLog_CreatedAt
+ON SystemLog (CreatedAt DESC);
+
 create proc sp_GetSystemLogsByPaging
 @PageSize int,
 @PageNumber int,
@@ -1167,9 +1170,20 @@ begin
 		throw;
 	end catch
 end
-
-create proc sp_UpdateRolePermission
 ----------------------------------------------------------------------------------------------------
+create proc sp_GetRoleDetailByRoleID
+@RoleID int,
+@rtnStatus int output
+as 
+begin
+	set @rtnStatus = 0;
+	if exists (select 1 from Role where @RoleID = RoleID)
+	begin
+		select top 1 * from Role where @RoleID = RoleID;
+		set @rtnStatus = 1;
+	end
+end
+exec sp_GetRoleDetailByRoleID 1
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 
@@ -1188,7 +1202,9 @@ SELECT FORMAT(ABS(CHECKSUM(NEWID())) % 10000, 'D4') AS RandomCode;
 
 DECLARE @ReturnValue NVARCHAR(100);
 exec sp_CreateUser 'admin3', 'password', 'abc1@gmail.com', N'đặng đức trung', default, default,default,default,default,default,default,default,  @ReturnValue output
+exec sp_rename 'dbo.sp_UpdateRolePermissions', 'sp_UpdateRole'
 
+exec sp_GetPermissionByRoleID 17
 
 
 

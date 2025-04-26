@@ -1,9 +1,11 @@
 ﻿using api.AppUtils;
+using api.DTO.Account;
 using api.DTO.SystemSetting;
 using api.DTO.UserSetting;
 using api.Interface;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 using System.Data;
 
 namespace api.Services
@@ -18,7 +20,7 @@ namespace api.Services
             {
                 using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
                 using (SqlCommand cmd = new SqlCommand("sp_CreateRole", conn))
-                using (SqlCommand cmd_perm = new SqlCommand("sp_UpdateRolePermission", conn))
+                using (SqlCommand cmd_perm = new SqlCommand("sp_UpdateRole", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     await conn.OpenAsync();
@@ -41,6 +43,8 @@ namespace api.Services
                     if ((int)rtnStatus.Value == 1)
                     {
                         cmd_perm.CommandType = CommandType.StoredProcedure;
+                        cmd_perm.Parameters.AddWithValue("@roleName", DBNull.Value);
+                        cmd_perm.Parameters.AddWithValue("@description", DBNull.Value);
                         cmd_perm.Parameters.AddWithValue("@roleID", rtnValue.Value);
                         
                         var listPermissionIds = (inputDto.PermissionIDs != null && inputDto.PermissionIDs.Count > 0) 
@@ -63,7 +67,7 @@ namespace api.Services
             catch (Exception ex)
             {
                 res.Message = ex.Message;
-                res.Result = AppConstant.RESULT_ERROR;
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
             }
 
             return res;
@@ -179,7 +183,53 @@ namespace api.Services
 
             return res;
         }
-               
+
+        public async Task<BaseResponse> GetRoleDetail(GetRoleDetailInDto inputDto)
+        {
+            var res = new BaseResponse();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_GetRoleDetailByRoleID", conn))
+                {
+                    await conn.OpenAsync();
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@RoleID", inputDto.RoleID);
+                    var rtnStatus = new SqlParameter("@rtnStatus", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    cmd.Parameters.Add(rtnStatus);
+
+                    DataTable dt = new DataTable();
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        dt.Load(reader);
+                    }
+
+                    if ((int)rtnStatus.Value == 1)
+                    {
+                        var data_out = dt.ConvertToList<RoleDetail>();
+                        res.Data = data_out;
+                        res.Message = "Get detail role thành công!";
+                        res.Result = AppConstant.RESULT_SUCCESS;
+                    }
+                    else
+                    {
+                        res.Message = "Lỗi lấy thông tin role!";
+                        res.Result = AppConstant.RESULT_ERROR;
+                    }
+                }
+            }catch(Exception ex)
+            {
+                res.Message = ex.Message;
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
+            }
+
+            return res;
+        }
+
         public async Task<BaseResponse> UpdatePasswordRule(UpdatePasswordRuleDto inputDto)
         {
             var res = new BaseResponse();
@@ -217,20 +267,34 @@ namespace api.Services
             return res;
         }
                
-        public async Task<BaseResponse> UpdateRolePermission(UpdateRolePermissionDto inputDto)
+        public async Task<BaseResponse> UpdateRole(UpdateRoleDto inputDto)
         {
             var res = new BaseResponse();
+            
+            if(inputDto.RoleID == 1)
+            {
+                res.Message = "Không thể sửa đổi role Admin!";
+                res.Result = AppConstant.RESULT_ERROR;
+                return res;
+            }
 
             try
             {
                 using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                using (SqlCommand cmd = new SqlCommand("sp_UpdateRolePermissions", conn))
+                using (SqlCommand cmd = new SqlCommand("sp_UpdateRole", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     await conn.OpenAsync();
 
-                    cmd.Parameters.AddWithValue("@RoleId", inputDto.RoleID);
-                    cmd.Parameters.AddWithValue("@PermissionIds", inputDto.PermissionIDs.Select(id => id == 15 ? "admin" : id.ToString()));
+                    cmd.Parameters.AddWithValue("@roleID", inputDto.RoleID);
+                    cmd.Parameters.AddWithValue("@roleName", Utils.DbNullIfNull(inputDto.RoleName));
+                    cmd.Parameters.AddWithValue("@description", Utils.DbNullIfNull(inputDto.Description));
+
+                    var listPermissionIds = (inputDto.PermissionIDs != null && inputDto.PermissionIDs.Count > 0)
+                            ? string.Join(",", inputDto.PermissionIDs.Select(id => id == 15 ? "admin" : id.ToString()))
+                            : string.Empty;
+
+                    cmd.Parameters.AddWithValue("@permissionIDs", Utils.DbNullIfNull(listPermissionIds));
                     await cmd.ExecuteNonQueryAsync();
 
                     res.Message = "Cập nhật thành công!";

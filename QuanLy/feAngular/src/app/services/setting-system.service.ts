@@ -34,4 +34,13 @@ export class SettingSystemService {
     const body = {roleName: newRole.roleName, description: newRole.description, permissionIDs: newRole.permissionIds};
     return this.http.post(environment.baseUrl + "SystemSetting/CreateRole", body, {headers: environment.headers})
   }
+
+  GetRoleDetail(roleID: number): Observable<any>{
+    return this.http.get(environment.baseUrl + "SystemSetting/GetRoleDetail", {params: {roleID}})
+  }
+
+  UpdateRole(role: {roleID: number, roleName: string, description?: string, permissionIds: number[]}): Observable<any>{
+    const body = {roleID: role.roleID, roleName: role.roleName, description: role.description, permissionIDs: role.permissionIds};
+    return this.http.post(environment.baseUrl + "SystemSetting/UpdateRole", body, {headers: environment.headers})
+  }
 }

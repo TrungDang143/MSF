@@ -1,183 +1,176 @@
 <div class="bg">
   <div class="container">
     <div class="login">
-      <div>
-        <div class="title">Đăng nhập tài khoản</div>
+      <div class="title">Đăng nhập tài khoản</div>
 
-        <form action method="post" [formGroup]="loginForm" class="form-login">
-          <table class="formLogin">
-            <tbody>
-              <tr></tr>
-              <tr style="height: 50px">
-                <td>
-                  <input
-                    type="text"
-                    id="UsernameOrEmail"
-                    formControlName="UsernameOrEmail"
-                    placeholder="Tên đăng nhập"
-                  />
-                  <div
-                    class="errMsg"
-                    *ngIf="
-                      loginForm['controls']['UsernameOrEmail'].dirty &&
-                      loginForm['controls']['UsernameOrEmail'].errors
-                    "
-                  >
-                    <small
-                      *ngIf="
-                        loginForm['controls']['UsernameOrEmail'].errors[
-                          'required'
-                        ]
-                      "
-                      >Nhập tên đăng nhập.</small
-                    >
-                    <small
-                      *ngIf="
-                        loginForm['controls']['UsernameOrEmail'].errors[
-                          'minlength'
-                        ]
-                      "
-                      >Tên đăng nhập tối thiểu 5 ký tự.</small
-                    >
-                    <small
-                      *ngIf="
-                        loginForm['controls']['UsernameOrEmail'].errors[
-                          'maxlength'
-                        ]
-                      "
-                      >Tên đăng nhập tối thiểu 40 ký tự</small
-                    >
-                  </div>
-                </td>
-              </tr>
+      <div class="body">
+        <form
+          action
+          method="post"
+          [formGroup]="loginForm"
+          (ngSubmit)="login()"
+        >
+          <div class="username-cell">
+            <p-floatlabel variant="in">
+              <input
+                #emailInput
+                pInputText
+                id="input_username"
+                formControlName="UsernameOrEmail"
+                autocomplete="off"
+              />
+              <label for="input_username">Tên đăng nhập</label>
+            </p-floatlabel>
+            <div class="errMsg-area">
+              <div
+                class="errMsg"
+                *ngIf="
+                  loginForm['controls']['UsernameOrEmail'].touched &&
+                  loginForm['controls']['UsernameOrEmail'].errors
+                "
+              >
+                <small
+                  *ngIf="
+                    loginForm['controls']['UsernameOrEmail'].errors['required']
+                  "
+                  >Nhập tên đăng nhập.</small
+                >
+                <small
+                  *ngIf="
+                    loginForm['controls']['UsernameOrEmail'].errors['minlength']
+                  "
+                  >Tên đăng nhập tối thiểu 5 ký tự.</small
+                >
+                <small
+                  *ngIf="
+                    loginForm['controls']['UsernameOrEmail'].errors['maxlength']
+                  "
+                  >Tên đăng nhập tối thiểu 40 ký tự</small
+                >
+              </div>
+            </div>
+          </div>
+          <div class="password-cell">
+            <p-floatlabel variant="in">
+              <p-password
+                formControlName="password"
+                autocomplete="new-password"
+                [toggleMask]="true"
+                [feedback]="false"
+              >
+              </p-password>
+              <label for="input_password">Mật khẩu</label>
+            </p-floatlabel>
+            <div class="errMsg-area">
+              <div
+                class="errMsg"
+                *ngIf="
+                  loginForm['controls']['password'].touched &&
+                  loginForm['controls']['password'].errors
+                "
+              >
+                <small
+                  *ngIf="loginForm['controls']['password'].errors['required']"
+                  >Nhập mật khẩu.</small
+                >
+              </div>
+            </div>
+          </div>
+          <div class="remember-me-cell">
+            <input
+              type="checkbox"
+              formControlName="rememberMe"
+              name="rememberMe"
+              id="rememberMe"
+            />
+            <label class="rememberMe" for="rememberMe">
+              Ghi nhớ đăng nhập
+            </label>
+          </div>
 
-              <tr style="height: 50px">
-                <td>
-                  <input
-                    type="password"
-                    id="password"
-                    formControlName="password"
-                    placeholder="Mật khẩu"
-                  />
-                  <div
-                    class="errMsg"
-                    *ngIf="
-                      loginForm['controls']['password'].dirty &&
-                      loginForm['controls']['password'].errors
-                    "
-                  >
-                    <small
-                      *ngIf="
-                        loginForm['controls']['password'].errors['required']
-                      "
-                      >Nhập mật khẩu.</small
-                    >
-                    <small
-                      *ngIf="
-                        loginForm['controls']['password'].errors['minlength']
-                      "
-                      >Mật khẩu tối thiểu 6 ký tự.</small
-                    >
-                  </div>
-                </td>
-              </tr>
-              <tr style="height: 23px">
-                <td>
-                  <input
-                    type="checkbox"
-                    formControlName="rememberMe"
-                    name="rememberMe"
-                    id="rememberMe"
-                  />
-                  <label class="rememberMe" for="rememberMe">
-                    Ghi nhớ đăng nhập
-                  </label>
-                </td>
-              </tr>
-              <tr >
-                <!-- <div
-                  class="g-recaptcha"
-                  data-sitekey="6Le83QQrAAAAALhsRbqrCJVGkM4U1kt-eLirmyM0 "
-                  style="padding-left: 5px"
-                ></div> -->
-                <p-inputgroup class="w-full md:!w-[30rem]">
-                  <input id="inputCaptcha" type="text" pInputText formControlName="Captcha" placeholder="Nhập CAPTCHA..." style="padding: 5px;">
-                  <p-inputgroup-addon>
-                    <img [src]="captchaImage" alt="Captcha" style="height: 50px; border:1px solid #ccc;">
-                  </p-inputgroup-addon>
-                  <p-inputgroup-addon>
-                    <i class="pi pi-undo" (click)="loadCaptcha()"></i>
-                  </p-inputgroup-addon>
-              </p-inputgroup>
+          <div class="captcha-cell">
+            <p-inputgroup class="w-full md:!w-[30rem]">
+              <input
+                id="inputCaptcha"
+                type="text"
+                pInputText
+                formControlName="Captcha"
+                placeholder="Nhập CAPTCHA..."
+                style="padding: 5px"
+              />
+              <p-inputgroup-addon>
+                <img
+                  [src]="captchaImage"
+                  alt="Captcha"
+                  class="image-captcha"
+                />
+              </p-inputgroup-addon>
+              <p-inputgroup-addon id="btn-regen">
+                 <i  class="pi pi-undo" (click)="loadCaptcha()"></i>
+              </p-inputgroup-addon>
+            </p-inputgroup>
+            <div class="errMsg-area">
+              <div
+                class="errMsg"
+                *ngIf="
+                  loginForm['controls']['Captcha'].touched &&
+                  loginForm['controls']['Captcha'].errors
+                "
+              >
+                <small
+                  *ngIf="loginForm['controls']['Captcha'].errors['required']"
+                  >Nhập Captcha.</small
+                >
+              </div>
+            </div>
+          </div>
 
-                <!-- <div style="text-align:center;">
-                  <img [src]="captchaImage" alt="Captcha" style="margin-bottom: 10px; border:1px solid #ccc;"><br>
-                  <input type="text" formControlName="Captcha" placeholder="Nhập CAPTCHA..." style="padding: 5px;">
-                  <button (click)="verifyCaptcha()">Xác minh</button>
-                  <button (click)="loadCaptcha()">Tải lại</button>
-                  <p>{{ resultMessage }}</p>
-                </div> -->
-                
-
-              </tr>
-              <tr style="height: 56px">
-                <td>
-                  <div class="btn">
-                    <button
-                      id="login-btn"
-                      type="submit"
-                      class="rounded-button"
-                      (click)="login()"
-                      [disabled]="disableLoginBtn"
-                    >
-                      Đăng nhập
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </form>
-
-        <div class="social">
-          <p>
-            Chưa có tài khoản?
-            <a [routerLink]="['/sign-up']">Đăng ký tài khoản mới</a>
-          </p>
-          <p style="margin-top: 5px">
-            Quên mật khẩu?
-            <a [routerLink]="['/forgot']">Lấy lại mật khẩu</a>
-          </p>
-          <p style="margin-top: 15px">Hoặc đăng nhập bằng</p>
-          <div class="btn-social">
-            <!-- <button class="btn-gg social-btn" (click)="loginWithGoogle()">
-              <i class="pi pi-google" style="font-size: 1.5rem"></i>
-            </button> -->
-            <div
-              id="g_id_onload"
-              data-client_id="229505907553-3elspp0steq01qbnr3tjbo6mm71jip5i.apps.googleusercontent.com"
-              data-callback="handleCredentialResponse"
-              data-login_uri="https://localhost:4200/login"
-              data-auto_prompt="false"
-              data-use_fedcm_for_prompt="true"
-            ></div>
-            <div
-              class="g_id_signin social-btn"
-              data-type="icon"
-              data-size="large"
-              data-theme="outline"
-              data-text="sign_in_with"
-              data-shape="circle"
-              data-logo_alignment="left"
-            ></div>
-            <button class="btn-fb social-btn" (click)="loginWithFacebook()">
-              <i class="pi pi-facebook" style="font-size: 1.5rem"></i>
+          <div class="btn-cell">
+            <button
+              id="login-btn"
+              type="submit"
+              class="rounded-button"
+              [disabled]="disableLoginBtn"
+            >
+              Đăng nhập
             </button>
           </div>
+        </form>
+      </div>
+
+      <div class="social">
+        <p>
+          Chưa có tài khoản?
+          <a [routerLink]="['/sign-up']">Đăng ký tài khoản mới</a>
+        </p>
+        <p style="margin-top: 5px">
+          Quên mật khẩu?
+          <a [routerLink]="['/forgot']">Lấy lại mật khẩu</a>
+        </p>
+        <p style="margin-top: 15px">Hoặc đăng nhập bằng</p>
+        <div class="btn-social">
+          <div
+            id="g_id_onload"
+            data-client_id="229505907553-3elspp0steq01qbnr3tjbo6mm71jip5i.apps.googleusercontent.com"
+            data-callback="handleCredentialResponse"
+            data-login_uri="https://localhost:4200/login"
+            data-auto_prompt="false"
+            data-use_fedcm_for_prompt="true"
+          ></div>
+          <div
+            class="g_id_signin social-btn"
+            data-type="icon"
+            data-size="large"
+            data-theme="outline"
+            data-text="sign_in_with"
+            data-shape="circle"
+            data-logo_alignment="left"
+          ></div>
+          <button class="btn-fb social-btn" (click)="loginWithFacebook()">
+            <i class="pi pi-facebook" style="font-size: 1.5rem"></i>
+          </button>
         </div>
       </div>
     </div>
-    <!-- <button mat-button (click)="showOkPopup()">Hiển thị Popup OK</button>
-<button mat-button (click)="showYesNoPopup()">Hiển thị Popup Yes/No</button> -->
   </div>
 </div>

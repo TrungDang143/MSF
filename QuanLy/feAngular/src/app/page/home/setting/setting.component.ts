@@ -45,75 +45,98 @@ import { PermissionService } from '../../../services/permission.service';
     CommonModule,
     DatePickerModule,
     FormsModule,
-    PaginatorModule,CheckboxModule,InputNumberModule,DialogModule,FloatLabelModule, TreeModule
+    PaginatorModule,
+    CheckboxModule,
+    InputNumberModule,
+    DialogModule,
+    FloatLabelModule,
+    TreeModule,
   ],
   templateUrl: './setting.component.html',
   styleUrl: './setting.component.css',
 })
 export class SettingComponent implements OnInit {
-  constructor(private apiSetting: SettingSystemService, private apiPermission: PermissionService, private pop: PopupService){}
+  constructor(
+    private apiSetting: SettingSystemService,
+    private apiPermission: PermissionService,
+    private pop: PopupService
+  ) {}
 
   SettingPasswordForm: FormGroup = new FormGroup({
     minLength: new FormControl(6, [Validators.required]),
     selectedRule: new FormControl([]),
   });
-  
-  rulePassword: any[] = []
+
+  rulePassword: any[] = [];
 
   ngOnInit() {
     this.loadSettingPasswordData();
     this.loadListRole();
   }
 
-  loadSettingPasswordData(){
+  loadSettingPasswordData() {
     this.apiSetting.GetPasswordRule().subscribe({
-      next: res =>{
-        if(res.result == '1'){
-          this.rulePassword = res.data.rulePassword
-          this.SettingPasswordForm.patchValue({minLength: res.data.minPasswordLength})
+      next: (res) => {
+        if (res.result == '1') {
+          this.rulePassword = res.data.rulePassword;
+          this.SettingPasswordForm.patchValue({
+            minLength: res.data.minPasswordLength,
+          });
 
           let selectedRule: any[] = [];
-          this.rulePassword.forEach(rule=>{
-            if(rule.isActive == true){
+          this.rulePassword.forEach((rule) => {
+            if (rule.isActive == true) {
               selectedRule.push(rule);
             }
-          })
-          this.SettingPasswordForm.get("selectedRule")?.setValue(selectedRule);
-        }else{
-          this.pop.showOkPopup({message: "Lỗi lấy password rules!"})
+          });
+          this.SettingPasswordForm.get('selectedRule')?.setValue(selectedRule);
+        } else {
+          this.pop.showOkPopup({ message: 'Lỗi lấy password rules!' });
           console.log(res.message);
         }
-      }
-    })
+      },
+    });
   }
-  saveSettingPassword(){
-    for(let rule of this.rulePassword){
-      if(this.SettingPasswordForm.get("selectedRule")?.value.some((s:any) => s.settingKey === rule.settingKey)){
+  saveSettingPassword() {
+    for (let rule of this.rulePassword) {
+      if (
+        this.SettingPasswordForm.get('selectedRule')?.value.some(
+          (s: any) => s.settingKey === rule.settingKey
+        )
+      ) {
         rule.isActive = true;
         continue;
       }
       rule.isActive = false;
     }
 
-    console.log(this.rulePassword)
-    if(!this.SettingPasswordForm.valid){
-      this.pop.showOkPopup({message: "Vui lòng điền đầy đủ thông tin!"});
+    console.log(this.rulePassword);
+    if (!this.SettingPasswordForm.valid) {
+      this.pop.showOkPopup({ message: 'Vui lòng điền đầy đủ thông tin!' });
       return;
-    }else{
-      this.apiSetting.UpdatePasswordRule(this.SettingPasswordForm.get("minLength")?.value, this.rulePassword).subscribe({
-        next: res =>{
-          if(res.result == '1'){
-            this.pop.showOkPopup({message: res.message})
-          }else{
-            this.pop.showOkPopup({message: "Lỗi update password rules!"})
-            console.log(res.message);
-          }
-        },
-        error: err =>{
-          this.pop.showOkPopup({header: "Lỗi", message: "Lỗi cập nhật password rule!"});
-          console.log(err);
-        }
-      })
+    } else {
+      this.apiSetting
+        .UpdatePasswordRule(
+          this.SettingPasswordForm.get('minLength')?.value,
+          this.rulePassword
+        )
+        .subscribe({
+          next: (res) => {
+            if (res.result == '1') {
+              this.pop.showOkPopup({ message: res.message });
+            } else {
+              this.pop.showOkPopup({ message: 'Lỗi update password rules!' });
+              console.log(res.message);
+            }
+          },
+          error: (err) => {
+            this.pop.showOkPopup({
+              header: 'Lỗi',
+              message: 'Lỗi cập nhật password rule!',
+            });
+            console.log(err);
+          },
+        });
     }
   }
 
@@ -127,40 +150,39 @@ export class SettingComponent implements OnInit {
       ($event.target as HTMLInputElement).value,
       stringVal
     );
-    this.selectedRoles.length = 0
+    this.selectedRoles.length = 0;
   }
- 
-  loadListRole(){
+
+  loadListRole() {
     this.apiSetting.GetListRole().subscribe({
-      next: res =>{
-        if(res.result == '1'){
+      next: (res) => {
+        if (res.result == '1') {
           this.roles = res.data;
-          console.log(this.roles)
-        }else{
+        } else {
           this.pop.showOkPopup({
-            message: "Lỗi lấy danh sách role!"
-          })
+            message: 'Lỗi lấy danh sách role!',
+          });
         }
       },
-      error: err =>{
-        this.pop.showOkPopup({header: "Lỗi",message:"Lỗi kết nối server!"});
-      } 
-    })
+      error: (err) => {
+        this.pop.showOkPopup({ header: 'Lỗi', message: 'Lỗi kết nối server!' });
+      },
+    });
   }
 
   refresh() {
     this.selectedRoles.length = 0;
     this.loadListRole();
-    }
+  }
 
-  selectedRoleIds: number[] = []
+  selectedRoleIds: number[] = [];
 
   handleDeleteRoles() {
-    if(this.selectedRoles.length == 0){
-      this.pop.showOkPopup({message: "Vui lòng chọn 1 vai trò để xoá!"});
-    }else{
-      if (this.selectedRoleIds.indexOf(1) < 0){
-        this.pop.showOkPopup({message: "Không thể xoá role Admin!"});
+    if (this.selectedRoles.length == 0) {
+      this.pop.showOkPopup({ message: 'Vui lòng chọn 1 vai trò để xoá!' });
+    } else {
+      if (this.selectedRoleIds.includes(1)) {
+        this.pop.showOkPopup({ message: 'Không thể xoá role Admin!' });
         return;
       }
 
@@ -174,62 +196,68 @@ export class SettingComponent implements OnInit {
           console.log('huy');
         },
       });
-    } 
+    }
   }
 
-  deleteRole(){
-    this.selectedRoles.forEach(element => {
-      this.selectedRoleIds.push(element.roleID)
+  deleteRole() {
+    this.selectedRoles.forEach((element) => {
+      this.selectedRoleIds.push(element.roleID);
     });
 
     this.apiSetting.DeleteRoles(this.selectedRoleIds).subscribe({
-      next: res=>{
-        if(res.result == '1'){
-          this.pop.showOkPopup({message: res.message});
+      next: (res) => {
+        if (res.result == '1') {
+          this.pop.showOkPopup({ message: res.message });
           this.selectedRoles.length = 0;
           this.selectedRoleIds.length = 0;
           this.loadListRole();
-        }else{
-          this.pop.showOkPopup({message: "Lỗi xoá role!"});
+        } else {
+          this.pop.showOkPopup({ message: 'Lỗi xoá role!' });
           console.log(res.message);
         }
       },
-      error: err=>{
-        this.pop.showOkPopup({message: "Không thể kết nối server!"})
+      error: (err) => {
+        this.pop.showOkPopup({ message: 'Không thể kết nối server!' });
         console.log(err);
       },
-      
-    })
+    });
   }
 
   displayDialogNewRole = false;
 
   createRoleForm: FormGroup = new FormGroup({
-    roleName: new FormControl('', [Validators.required, Validators.maxLength(50)]),
+    roleName: new FormControl('', [
+      Validators.required,
+      Validators.maxLength(50),
+    ]),
     description: new FormControl('', [Validators.maxLength(100)]),
-    permissionIds: new FormControl([])
-  })
+    permissionIds: new FormControl([]),
+  });
 
-  showCreateRoleForm(){
+  showCreateRoleForm() {
     this.displayDialogNewRole = true;
     this.createRoleForm.reset();
   }
-  closeCreateRoleForm(){
+  closeCreateRoleForm() {
     this.displayDialogNewRole = false;
   }
 
   disableBtnNewRole = false;
 
-  handleCreateRole(){
-    if(!this.createRoleForm.valid){
-      this.pop.showOkPopup({message: "Vui lòng điền đầy đủ thông tin!"})
+  handleCreateRole() {
+    if (!this.createRoleForm.valid) {
+      this.pop.showOkPopup({ message: 'Vui lòng điền đầy đủ thông tin!' });
       return;
-    }else{
+    } else {
       if (this.disableBtnNewRole) return;
-      
-      this.disableBtnNewRole = true;
-      this.createRole()
 
+      this.pop.showYesNoPopup({message: "Bạn chắc chắn muốn tạo role mới chứ?",
+        onAccept: () =>{
+          this.disableBtnNewRole = true;
+          this.createRole();
+        }
+      })
+      
     }
   }
 
@@ -523,9 +551,148 @@ export class SettingComponent implements OnInit {
         ids.push(node.data.permissionID);
       }
     });
-    
-    this.createRoleForm.patchValue({"permissionIds": ids});
-    this.displayPopupPermission = false;
+
+    if (!this.displayDialogUpdateRole) {
+      this.createRoleForm.patchValue({ permissionIds: ids });
+      this.displayPopupPermission = false;
+    } else {
+      this.updateRoleForm.patchValue({ permissionIds: ids });
+      this.displayPopupPermission = false;
+    }
+  }
+
+  mockupRolePermission(permissionIds: number[]) {
+    const permissionGroups = [
+      {
+        nodes: this.permission_User,
+        selected: this.permission_User_Selected,
+      },
+      {
+        nodes: this.permission_Role,
+        selected: this.permission_Role_Selected,
+      },
+      {
+        nodes: this.permission_Permission,
+        selected: this.permission_Permission_Selected,
+      },
+      {
+        nodes: this.permission_Content,
+        selected: this.permission_Content_Selected,
+      },
+      {
+        nodes: this.permission_System,
+        selected: this.permission_System_Selected,
+      },
+    ];
+
+    this.toggleAllPermissionByIds(permissionGroups, permissionIds);
+
+    this.updateParentSelection(
+      this.permission_User,
+      this.permission_User_Selected
+    );
+    this.updateParentSelection(
+      this.permission_Role,
+      this.permission_Role_Selected
+    );
+    this.updateParentSelection(
+      this.permission_Permission,
+      this.permission_Permission_Selected
+    );
+    this.updateParentSelection(
+      this.permission_Content,
+      this.permission_Content_Selected
+    );
+    this.updateParentSelection(
+      this.permission_System,
+      this.permission_System_Selected
+    );
+
+    for (let i = 1; i <= 5; i++) {
+      this.onDetailSelectionChange(i);
+    }
+  }
+
+  mockupPermission(data: any) {
+    this.permission_User = [
+      {
+        label: 'User',
+        data: 'permission_User',
+        expanded: true,
+        children: this.convertToTreeNodes(data.permission_User),
+      },
+    ];
+    this.permission_Role = [
+      {
+        label: 'Role',
+        data: 'permission_Role',
+        expanded: true,
+        children: this.convertToTreeNodes(data.permission_Role),
+      },
+    ];
+
+    this.permission_Content = [
+      {
+        label: 'Content',
+        data: 'permission_Content',
+        expanded: true,
+        children: this.convertToTreeNodes(data.permission_Content),
+      },
+    ];
+
+    this.permission_Permission = [
+      {
+        label: 'Permission',
+        data: 'permission_Permission',
+        expanded: true,
+        children: this.convertToTreeNodes(data.permission_Permission),
+      },
+    ];
+
+    this.permission_System = [
+      {
+        label: 'System',
+        data: 'permission_System',
+        expanded: true,
+        children: this.convertToTreeNodes(data.permission_System),
+      },
+    ];
+  }
+
+  toggleAllPermissionByIds(
+    permissionGroups: { nodes: TreeNode[]; selected: TreeNode[] }[],
+    selectedIds: number[]
+  ) {
+    for (let group of permissionGroups) {
+      this.markSelectedNodes(group.nodes, selectedIds, group.selected);
+    }
+  }
+
+  private markSelectedNodes(
+    nodes: TreeNode[],
+    selectedIds: number[],
+    selectedList: TreeNode[]
+  ) {
+    for (let node of nodes) {
+      this.markNodeRecursive(node, selectedIds, selectedList);
+    }
+  }
+
+  private markNodeRecursive(
+    node: TreeNode,
+    selectedIds: number[],
+    selectedList: TreeNode[]
+  ) {
+    const id = node.data?.permissionID;
+    if (id && selectedIds.includes(id)) {
+      selectedList.push(node);
+    }
+
+    if (node.children) {
+      for (let child of node.children) {
+        this.markNodeRecursive(child, selectedIds, selectedList);
+      }
+    }
   }
 
   showDialogRolePermission() {
@@ -533,50 +700,39 @@ export class SettingComponent implements OnInit {
       next: (res) => {
         if (res.result == '1') {
           this.showPermission();
-          this.permission_User = [
-            {
-              label: 'User',
-              data: 'permission_User',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_User),
-            },
-          ];
-          this.permission_Role = [
-            {
-              label: 'Role',
-              data: 'permission_Role',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_Role),
-            },
-          ];
+          this.mockupPermission(res.data);
 
-          this.permission_Content = [
-            {
-              label: 'Content',
-              data: 'permission_Content',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_Content),
-            },
-          ];
-
-          this.permission_Permission = [
-            {
-              label: 'Permission',
-              data: 'permission_Permission',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_Permission),
-            },
-          ];
-
-          this.permission_System = [
-            {
-              label: 'System',
-              data: 'permission_System',
-              expanded: true,
-              children: this.convertToTreeNodes(res.data.permission_System),
-            },
-          ];
-
+          if (this.displayDialogUpdateRole) {
+            let permissionIds: [];
+            if (this.updateRoleForm.get('permissionIds')?.value) {
+              permissionIds = this.updateRoleForm.get('permissionIds')?.value;
+              this.mockupRolePermission(permissionIds);
+            } else {
+              this.apiPermission
+                .getPermissionByRoleID(this.updateRoleForm.get('roleID')?.value)
+                .subscribe({
+                  next: (res) => {
+                    if (res.result == '1') {
+                      permissionIds = res.data;
+                      this.mockupRolePermission(permissionIds);
+                    } else {
+                      this.pop.showOkPopup({ message: res.message });
+                    }
+                  },
+                  error: (err) => {
+                    this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
+                    console.log(err);
+                  },
+                });
+            }
+          }
+          else if(this.displayDialogNewRole){
+            let permissionIds: [];
+            if (this.createRoleForm.get('permissionIds')?.value) {
+              permissionIds = this.createRoleForm.get('permissionIds')?.value;
+              this.mockupRolePermission(permissionIds);
+            } 
+          }
           this.getPermission(this.cateloryPermission[0]);
         } else {
           this.pop.showOkPopup({ message: res.message });
@@ -587,32 +743,104 @@ export class SettingComponent implements OnInit {
           header: 'Lỗi',
           message: 'Không thể kết nối với server!',
         });
+        this.displayPopupPermission = false;
         console.log(err);
       },
     });
   }
 
-  createRole(){
+  createRole() {
     this.apiSetting.CreateRole(this.createRoleForm.value).subscribe({
-      next: res => {
-        if(res.result == '1'){
-          this.pop.showOkPopup({message: res.message});
+      next: (res) => {
+        if (res.result == '1') {
+          this.pop.showOkPopup({ message: res.message });
           this.displayDialogNewRole = false;
           this.loadListRole();
-        }else{
-          this.pop.showOkPopup({message: res.message});
+        } else {
+          this.pop.showOkPopup({ message: res.message });
         }
         this.disableBtnNewRole = false;
       },
-      error: err=>{
+      error: (err) => {
         this.pop.showOkPopup({
           header: 'Lỗi',
           message: 'Không thể kết nối với server!',
         });
         console.log(err);
         this.disableBtnNewRole = false;
-      }
-    })
+      },
+    });
   }
-  
+
+  displayDialogUpdateRole = false;
+  updateRoleForm: FormGroup = new FormGroup({
+    roleID: new FormControl(''),
+    roleName: new FormControl('', [
+      Validators.required,
+      Validators.maxLength(50),
+    ]),
+    description: new FormControl('', [Validators.maxLength(100)]),
+    permissionIds: new FormControl([]),
+  });
+  showDialogUpdateRole(roleID: number) {
+    this.updateRoleForm.reset();
+
+    if (roleID == 1) {
+      this.pop.showOkPopup({ message: 'Không thể chỉnh sửa role Admin!' });
+    } else {
+      this.displayDialogUpdateRole = true;
+
+      this.apiSetting.GetRoleDetail(roleID).subscribe({
+        next: (res) => {
+          if (res.result == '1') {
+            this.updateRoleForm.patchValue(res.data[0]);
+            console.log(this.updateRoleForm.value);
+          } else {
+            this.pop.showOkPopup({ message: res.message });
+          }
+        },
+        error: (err) => {
+          this.pop.showSysErr();
+        },
+      });
+    }
+  }
+  closeUpdateRoleForm() {
+    this.displayDialogUpdateRole = false;
+  }
+
+  disableBtnUpdateRole = false;
+
+  handleUpdateRole() {
+    if (!this.updateRoleForm.valid) {
+      this.pop.showOkPopup({ message: 'Vui lòng điền đầy đủ thông tin!' });
+      return;
+    } else {
+      if (this.disableBtnUpdateRole) return;
+
+      this.disableBtnUpdateRole = true;
+      this.updateRole();
+    }
+  }
+
+  updateRole() {
+    this.apiSetting.UpdateRole(this.updateRoleForm.value).subscribe({
+      next: (res) => {
+        if (res.result == 1) {
+          this.pop.showOkPopup({ message: res.message });
+          this.displayDialogUpdateRole = false;
+          this.disableBtnUpdateRole = false;
+          this.loadListRole();
+        } else {
+          this.pop.showOkPopup({ message: res.data });
+          this.disableBtnUpdateRole = false;
+        }
+      },
+      error: (err) => {
+        this.pop.showSysErr();
+        console.log(err);
+        this.disableBtnUpdateRole = false;
+      },
+    });
+  }
 }

@@ -45,9 +45,9 @@ namespace api.Controllers
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
                 string username = res.Data.ToString();
-                var roleID = _tokenService.GetUserRoleID(username);
-                var rolename = _tokenService.GetUserRoleName(username);
-                var permissions = _tokenService.GetPermissionName(roleID);
+                int roleID = _tokenService.GetUserRoleID(username);
+                string rolename = _tokenService.GetUserRoleName(username);
+                List<string> permissions = _tokenService.GetPermissionName(roleID);
                 string token = _tokenService.GenerateToken(username, rolename, permissions);
                 res.Data = new
                 {

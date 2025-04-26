@@ -133,9 +133,14 @@ namespace api.Services
                         res.Data = rtnValue.Value;
                         res.Result = AppConstant.RESULT_SUCCESS;
                     }
+                    else if ((int)status.Value == 3)
+                    {
+                        res.Message = "Tài khoản bị khoá hoặc bị xoá!";
+                        res.Result = AppConstant.RESULT_ERROR;
+                    }
                     else
                     {
-                        res.Message = "Đăng ký không thành công!";
+                        res.Message = rtnValue.Value.ToString();
                         res.Result = AppConstant.RESULT_ERROR;
                     }
                 }
@@ -197,6 +202,11 @@ namespace api.Services
                         res.Message = "Success!";
                         res.Data = rtnValue.Value;
                         res.Result = AppConstant.RESULT_SUCCESS;
+                    }
+                    else if ((int)status.Value == 3)
+                    {
+                        res.Message = "Tài khoản bị khoá hoặc bị xoá!";
+                        res.Result = AppConstant.RESULT_ERROR;
                     }
                     else
                     {

@@ -9,6 +9,7 @@ using System.Text;
 using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.DependencyInjection;
 using api.AppUtils;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +67,19 @@ builder.Services
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                IToken token = context.HttpContext.RequestServices.GetRequiredService<IToken>();
+                string? username = context.Principal?.Identity?.Name;
+
+                if (username == null || !await token.IsValidUser(username))
+                {
+                    context.Fail("Unauthorized");
+                }
+            }
         };
     });
 

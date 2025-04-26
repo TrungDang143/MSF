@@ -62,4 +62,8 @@ export class AccountService {
   CreateUser(userInfo: any): Observable<any>{
     return this.http.post(environment.baseUrl + "Account/CreateUser", userInfo, {headers: environment.headers})
   }
+
+  GetPasswordRule():Observable<any>{
+    return this.http.get(environment.baseUrl + "Account/GetActivePasswordRule")
+  }
 }

@@ -53,6 +53,26 @@
   },
   {
     "ContainingType": "api.Controllers.AccountController",
+    "Method": "GetActivePasswordRule",
+    "RelativePath": "api/Account/GetActivePasswordRule",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.AccountController",
     "Method": "GetAllRole",
     "RelativePath": "api/Account/GetAllRole",
     "HttpMethod": "GET",
@@ -707,6 +727,32 @@
   },
   {
     "ContainingType": "api.Controllers.SystemSettingController",
+    "Method": "GetRoleDetail",
+    "RelativePath": "api/SystemSetting/GetRoleDetail",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "RoleID",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.SystemSettingController",
     "Method": "UpdatePasswordRule",
     "RelativePath": "api/SystemSetting/UpdatePasswordRule",
     "HttpMethod": "POST",
@@ -733,15 +779,15 @@
   },
   {
     "ContainingType": "api.Controllers.SystemSettingController",
-    "Method": "UpdateRolePermission",
-    "RelativePath": "api/SystemSetting/UpdateRolePermission",
+    "Method": "UpdateRole",
+    "RelativePath": "api/SystemSetting/UpdateRole",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "inputDto",
-        "Type": "api.DTO.SystemSetting.UpdateRolePermissionDto",
+        "Type": "api.DTO.SystemSetting.UpdateRoleDto",
         "IsRequired": true
       }
     ],

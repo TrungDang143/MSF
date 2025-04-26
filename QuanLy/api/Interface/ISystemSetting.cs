@@ -7,8 +7,9 @@ namespace api.Interface
         public Task<BaseResponse> UpdatePasswordRule(UpdatePasswordRuleDto inputDto);
         public Task<BaseResponse> GetPasswordRule();
         public Task<BaseResponse> CreateRole(CreateRoleDto inputDto);
-        public Task<BaseResponse> UpdateRolePermission(UpdateRolePermissionDto inputDto);
+        public Task<BaseResponse> UpdateRole(UpdateRoleDto inputDto);
         public Task<BaseResponse> DeleteRole(DeleteRoleDto inputDto);
         public Task<BaseResponse> GetListRole();
+        public Task<BaseResponse> GetRoleDetail(GetRoleDetailInDto inputDto);
     }
 }

@@ -14,5 +14,6 @@ namespace api.Interface
         public string GetUserRoleName(string username);
         public int GetUserRoleID(string username);
         public List<string> GetPermissionName(int roleID);
+        public Task<bool> IsValidUser(string username);
     }
 }

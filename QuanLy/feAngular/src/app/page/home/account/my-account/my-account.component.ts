@@ -30,26 +30,40 @@ import { AccountService } from '../../../../services/account.service';
 
 @Component({
   selector: 'app-my-account',
-  imports: [FloatLabelModule,
+  imports: [
+    FloatLabelModule,
     DatePickerModule,
     SelectModule,
     ImageModule,
     MessageModule,
     InplaceModule,
-    FileUploadModule, ButtonModule, DialogModule, InputTextModule, CommonModule, FormsModule, ReactiveFormsModule, ImageCropperComponent],
+    FileUploadModule,
+    ButtonModule,
+    DialogModule,
+    InputTextModule,
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ImageCropperComponent,
+  ],
   templateUrl: './my-account.component.html',
   styleUrl: './my-account.component.css',
 })
-
 export class MyAccountComponent implements OnInit {
-  constructor(private http: HttpClient, private page404: Page404Service, private pop: PopupService, private apiAccount: AccountService) {}
+  constructor(
+    private http: HttpClient,
+    private page404: Page404Service,
+    private pop: PopupService,
+    private apiAccount: AccountService
+  ) {}
 
   ngOnInit(): void {
     this.getUserInfo();
   }
 
   getUserInfo() {
-    let username = localStorage.getItem('user') ?? sessionStorage.getItem('user');
+    let username =
+      localStorage.getItem('user') ?? sessionStorage.getItem('user');
     this.apiAccount.GetDetailUserInfoByUsername(username!).subscribe({
       next: (res) => {
         const data = res.data;
@@ -63,17 +77,13 @@ export class MyAccountComponent implements OnInit {
         }
       },
       error: (err) => {
-        if (err.status === 401) {
-
-        } else if (err.status === 403) {
-
-          this.page404.show404('Bạn không có quyền truy cập trang này!');
-        } else {
-
-        }
+        this.pop.showOkPopup({
+          header: 'Lỗi',
+          message: 'Không thể kết nối với server!',
+        });
+        console.log(err.message);
       },
     });
-    
   }
 
   disabledBtnSave = false;
@@ -89,7 +99,7 @@ export class MyAccountComponent implements OnInit {
     dateOfBirth: new FormControl(null),
     gender: new FormControl(null),
     address: new FormControl(null, [Validators.maxLength(100)]),
-    statusID: new FormControl(null),
+    statusName: new FormControl(null),
     googleID: new FormControl(null),
     facebookID: new FormControl(null),
     roleID: new FormControl(null),
@@ -147,16 +157,12 @@ export class MyAccountComponent implements OnInit {
         }
       },
       error: (err) => {
-        if (err.status === 403) {
-          this.pop.showOkPopup({ message: 'Bạn không có quyền này!' });
-        } else {
-          this.pop.showOkPopup({
-            header: 'Lỗi',
-            message: 'Không thể kết nối với server!',
-          });
-          this.disabledBtnSave = false;
-          console.log(err.message);
-        }
+        this.pop.showOkPopup({
+          header: 'Lỗi',
+          message: 'Không thể kết nối với server!',
+        });
+        this.disabledBtnSave = false;
+        console.log(err.message);
       },
     });
     //fileUpload.clear();

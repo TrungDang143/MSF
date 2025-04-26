@@ -1,5 +1,6 @@
 ﻿using api.AppUtils;
 using api.DTO.Account;
+using api.DTO.SystemSetting;
 using api.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
@@ -14,6 +15,13 @@ namespace api.Services
         public BaseResponse CreateUser(CreateUserDto inputDto)
         {
             var res = new BaseResponse();
+
+            if (inputDto.roleId == 1)
+            {
+                res.Message = "Không thể set role Admin!";
+                res.Result = AppConstant.RESULT_ERROR;
+                return res;
+            }
 
             try
             {
@@ -62,14 +70,21 @@ namespace api.Services
                     conn.Open();
                     cmd.ExecuteNonQuery();
 
-                    if((int)rtnStatus.Value == 1)
+                    if ((int)rtnStatus.Value == 1)
                     {
                         if (inputDto.permissionIds != null)
                         {
                             cmd_permission.CommandType = CommandType.StoredProcedure;
                             cmd_permission.Parameters.AddWithValue("@UserID", (int)rtnValue.Value);
-                            var permissionIdsString = string.Join(",", inputDto.permissionIds.Select(id => id == 15 ? "admin" : id.ToString()));
-                            cmd_permission.Parameters.AddWithValue("@PermissionIDs", !string.IsNullOrEmpty(permissionIdsString) ? permissionIdsString : DBNull.Value);
+                            if (inputDto.permissionIds != null)
+                            {
+                                string permissionIdsString = string.Join(",", inputDto.permissionIds.Select(id => id == 15 ? "admin" : id.ToString()));
+                                cmd_permission.Parameters.AddWithValue("@PermissionIDs", !string.IsNullOrEmpty(permissionIdsString) ? permissionIdsString : DBNull.Value);
+                            }
+                            else
+                            {
+                                cmd_permission.Parameters.AddWithValue("@PermissionIDs", DBNull.Value);
+                            }
                             cmd_permission.ExecuteNonQuery();
                         }
 
@@ -113,7 +128,7 @@ namespace api.Services
                 res.Result = AppConstant.RESULT_SUCCESS;
                 res.Message = "Xoa thanh cong";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 res.Result = AppConstant.RESULT_ERROR;
                 res.Message = ex.Message;
@@ -164,12 +179,12 @@ namespace api.Services
                                 }
                                 if (!string.IsNullOrEmpty(dt.Rows[i]["roleID"]?.ToString()))
                                 {
-                                    
+
                                     dt.Rows[i]["RoleName"] = getRoleName(dt_role, dt.Rows[i]["roleID"].ToString());
                                 }
                                 if (!string.IsNullOrEmpty(dt.Rows[i]["Status"]?.ToString()))
                                 {
-                                    
+
                                     dt.Rows[i]["StatusName"] = getStatusName(dt_status, dt.Rows[i]["Status"].ToString());
                                 }
                                 //dt.Rows[i]["GoogleID"] = !string.IsNullOrEmpty(dt.Rows[i]["GoogleID"]?.ToString()) ? true : false;
@@ -203,7 +218,7 @@ namespace api.Services
         private string getRoleName(DataTable dt, string roleID)
         {
             string result = string.Empty;
-            foreach(DataRow dr in dt.Rows)
+            foreach (DataRow dr in dt.Rows)
             {
                 if (dr[0].ToString() == roleID)
                 {
@@ -252,6 +267,13 @@ namespace api.Services
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
 
+                    if (dt.Rows.Count != 1)
+                    {
+                        res.Message = "User không tồn tại!";
+                        res.Result = AppConstant.RESULT_ERROR;
+                        return res;
+                    }
+
                     model.UserID = (int)dt.Rows[0]["UserID"];
                     model.Username = dt.Rows[0]["Username"].ToString();
                     //model.PasswordHash = dt.Rows[0]["PasswordHash"].ToString();
@@ -275,6 +297,7 @@ namespace api.Services
                     var locktime = dt.Rows[0]["LockTime"] != DBNull.Value ? (DateTime)dt.Rows[0]["LockTime"] : new DateTime();
                     model.LockTime = locktime > new DateTime() ? locktime.ToString("hh:mm:ss dd-MM-yyyy") : "###";
                     model.RemainTime = dt.Rows[0]["RemainTime"] != DBNull.Value ? (byte?)dt.Rows[0]["RemainTime"] : null;
+                    model.IsExternalAvatar = dt.Rows[0]["IsExternalAvatar"] != DBNull.Value ? (bool)dt.Rows[0]["IsExternalAvatar"] : false;
 
                     dt.Clear();
                     cmd_role.CommandType = CommandType.StoredProcedure;
@@ -337,7 +360,7 @@ namespace api.Services
                     model.Username = dt.Rows[0]["Username"].ToString();
                     model.Status = dt.Rows[0]["Status"] != DBNull.Value ? (byte)dt.Rows[0]["Status"] : null;
                     model.FacebookID = !string.IsNullOrEmpty(dt.Rows[0]["FacebookID"].ToString());
-                    model.GoogleID= !string.IsNullOrEmpty(dt.Rows[0]["GoogleID"].ToString());
+                    model.GoogleID = !string.IsNullOrEmpty(dt.Rows[0]["GoogleID"].ToString());
                     model.RoleID = dt.Rows[0]["roleID"] != DBNull.Value ? (int)dt.Rows[0]["roleID"] : null;
 
                     dt.Clear();
@@ -357,8 +380,8 @@ namespace api.Services
             }
             return res;
         }
-        
-        public BaseResponse UpdateUser(UpdateUserDto inputDto)
+
+        public BaseResponse UpdateUser(UpdateUserDto inputDto, string username)
         {
             var res = new BaseResponse();
             try
@@ -369,27 +392,43 @@ namespace api.Services
                     conn.Open();
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
-                    if (!string.IsNullOrEmpty(inputDto.Avatar))
+                    if (!string.IsNullOrEmpty(inputDto.Avatar) && inputDto.isExternalAvatar == false)
                     {
-                        inputDto.Avatar = ImageBase64Helper.SaveAvatar(inputDto.Avatar);
+                        try
+                        {
+                            inputDto.Avatar = ImageBase64Helper.SaveAvatar(inputDto.Avatar);
+                            cmd.Parameters.AddWithValue("@IsExternalAvatar", inputDto.isExternalAvatar);
+                        }
+                        catch
+                        {
+                            inputDto.Avatar = AppConstant.DEFAULT_AVATAR;
+                            cmd.Parameters.AddWithValue("@IsExternalAvatar", false);
+                        }
                     }
                     else
                     {
-                        inputDto.Avatar = AppConstant.DEFAULT_AVATAR;
+                        cmd.Parameters.AddWithValue("@IsExternalAvatar", true);
                     }
 
+                    if (username != inputDto.Username)
+                    {
+                        if (inputDto.roleID == null || inputDto.roleID == 1) inputDto.roleID = null;
+                        cmd.Parameters.AddWithValue("@roleID", Utils.DbNullIfNull(inputDto.roleID));
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@roleID", Utils.DbNullIfNull(null));
+                    }
                     cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
-                    cmd.Parameters.AddWithValue("@FullName"     , Utils.DbNullIfNull(inputDto.FullName)); //DBNull.Value
-                    cmd.Parameters.AddWithValue("@PhoneNumber"  , Utils.DbNullIfNull(inputDto.PhoneNumber));
-                    cmd.Parameters.AddWithValue("@Avatar"       , Utils.DbNullIfNull(inputDto.Avatar));
-                    cmd.Parameters.AddWithValue("@DateOfBirth"  , Utils.DbNullIfNull(inputDto.DateOfBirth));
-                    cmd.Parameters.AddWithValue("@Gender"       , Utils.DbNullIfNull(inputDto.Gender));
-                    cmd.Parameters.AddWithValue("@Address"      , Utils.DbNullIfNull(inputDto.Address));
-                    cmd.Parameters.AddWithValue("@Status"       , Utils.DbNullIfNull(inputDto.statusID));
-                    cmd.Parameters.AddWithValue("@GoogleID"     , Utils.DbNullIfNull(inputDto.GoogleID));
-                    cmd.Parameters.AddWithValue("@FacebookID"   , Utils.DbNullIfNull(inputDto.FacebookID));
-                    if (inputDto.roleID != null && inputDto.roleID == 1) inputDto.roleID = null;
-                    cmd.Parameters.AddWithValue("@roleID"       , Utils.DbNullIfNull(inputDto.roleID));
+                    cmd.Parameters.AddWithValue("@FullName", Utils.DbNullIfNull(inputDto.FullName)); //DBNull.Value
+                    cmd.Parameters.AddWithValue("@PhoneNumber", Utils.DbNullIfNull(inputDto.PhoneNumber));
+                    cmd.Parameters.AddWithValue("@Avatar", Utils.DbNullIfNull(inputDto.Avatar));
+                    cmd.Parameters.AddWithValue("@DateOfBirth", Utils.DbNullIfNull(inputDto.DateOfBirth));
+                    cmd.Parameters.AddWithValue("@Gender", Utils.DbNullIfNull(inputDto.Gender));
+                    cmd.Parameters.AddWithValue("@Address", Utils.DbNullIfNull(inputDto.Address));
+                    cmd.Parameters.AddWithValue("@Status", Utils.DbNullIfNull(inputDto.status));
+                    cmd.Parameters.AddWithValue("@GoogleID", Utils.DbNullIfNull(inputDto.GoogleID));
+                    cmd.Parameters.AddWithValue("@FacebookID", Utils.DbNullIfNull(inputDto.FacebookID));
 
                     cmd.ExecuteNonQuery();
 
@@ -428,7 +467,7 @@ namespace api.Services
                     adapter.Fill(dt);
 
                     List<int> listPermissionIDs = new List<int>();
-                    foreach(DataRow dr in dt.Rows)
+                    foreach (DataRow dr in dt.Rows)
                     {
                         if ((int)dr[0] != 15) //setting he thong
                             listPermissionIDs.Add((int)dr[0]);
@@ -474,7 +513,7 @@ namespace api.Services
 
                     if ((int)resultParam.Value != null)
                     {
-                        if( (int)resultParam.Value == 1)
+                        if ((int)resultParam.Value == 1)
                         {
                             res.Message = "Không thể thay đổi quyền của role Admin!";
                             res.Result = AppConstant.RESULT_ERROR;
@@ -485,9 +524,16 @@ namespace api.Services
 
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
-                    var permissionIdsString = string.Join(",", inputDto.PermissionIds.Select(id => id == 15 ? "admin" : id.ToString()));
-                    permissionIdsString.Replace("15", "admin");
-                    cmd.Parameters.AddWithValue("@PermissionIDs", !string.IsNullOrEmpty(permissionIdsString) ? permissionIdsString : DBNull.Value);
+                    if (inputDto.PermissionIds != null)
+                    {
+                        var permissionIdsString = string.Join(",", inputDto.PermissionIds.Select(id => id == 15 ? "admin" : id.ToString()));
+                        permissionIdsString.Replace("15", "admin");
+                        cmd.Parameters.AddWithValue("@PermissionIDs", !string.IsNullOrEmpty(permissionIdsString) ? permissionIdsString : DBNull.Value);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@PermissionIDs", DBNull.Value);
+                    }
 
                     cmd.ExecuteNonQuery();
 
@@ -497,7 +543,7 @@ namespace api.Services
             }
             catch (Exception ex)
             {
-                res.Result = AppConstant.RESULT_ERROR;
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
                 res.Message = ex.Message;
             }
 
@@ -573,7 +619,58 @@ namespace api.Services
                     res.Message = "Gen role status gender thanh cong";
                     res.Result = AppConstant.RESULT_SUCCESS;
                 }
-            }catch( Exception ex)
+            }
+            catch (Exception ex)
+            {
+                res.Message = ex.Message;
+                res.Result = AppConstant.RESULT_ERROR;
+            }
+
+            return res;
+        }
+
+        public async Task<BaseResponse> GetActivePasswordRule()
+        {
+            var res = new BaseResponse();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_GetSettingsByPrefix", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    await conn.OpenAsync();
+
+                    cmd.Parameters.AddWithValue("@Prefix", "Password");
+                    cmd.Parameters.AddWithValue("@IsActive", 1);
+
+                    DataTable dt = new DataTable();
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        dt.Load(reader);
+                    }
+
+                    int minLength = AppConstant.MIN_PASSWORD_LENGTH;
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        if (dr["SettingKey"].ToString() == "Password.MinLength")
+                        {
+                            minLength = int.Parse(dr["SettingValue"].ToString());
+                            dr["Description"] += minLength.ToString();
+                            break;
+                        }
+                    }
+
+                    res.Data = new
+                    {
+                        minPasswordLength = minLength,
+                        rulePassword = dt.ConvertToList<PasswordRule>(),
+                    };
+                    res.Message = "Get active rule password thanh cong";
+                    res.Result = AppConstant.RESULT_SUCCESS;
+                }
+            }
+            catch (Exception ex)
             {
                 res.Message = ex.Message;
                 res.Result = AppConstant.RESULT_ERROR;

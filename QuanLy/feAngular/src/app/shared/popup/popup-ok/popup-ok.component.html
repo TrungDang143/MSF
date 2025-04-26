@@ -9,8 +9,9 @@
 >
   <div
     class="p-d-flex p-ai-start"
-    style="gap: 1rem; padding: 1rem 0;"
+    style="gap: 1rem; padding: 1rem 0; display: flex; align-items: center;"
     *ngIf="data?.icon"
+
   >
     <i [class]="data?.icon" style="font-size: 2rem; color: #f39c12"></i>
     <div style="flex: 1;">{{ data?.message }}</div>

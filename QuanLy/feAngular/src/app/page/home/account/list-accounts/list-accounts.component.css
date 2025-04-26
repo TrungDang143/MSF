@@ -15,12 +15,13 @@
 .filter {
   display: flex;
   margin: 5px;
+  justify-content:space-between;
 }
 ::ng-deep .filter p-select {
   margin-left: 10px;
 }
 
-.action{
+.filter .action{
   justify-self: flex-end;
 }
 
@@ -46,7 +47,7 @@
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(7, 1fr);
   gap: 5px;
-  width: 1200;
+  width: 1200px;
   max-height: 500px;
 }
 
@@ -104,7 +105,7 @@
   grid-row-start: 1;
   grid-row-end: 4;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: end;
 }
 
@@ -120,7 +121,7 @@
   grid-column: span 2 / span 2;
   grid-column-start: 7;
   grid-row-start: 4;
-  grid-row-end: 9;
+  grid-row-end: 7;
 }
 ::ng-deep .custom-detail-pmessage {
   margin-bottom: 10px;
@@ -273,11 +274,24 @@
 }
 
 .rule-password {
-  padding-left: 0.5rem;   /* pl-2 */
-  margin-left: 0.5rem;    /* ml-2 */
+  padding-left: 0.2rem;   /* pl-2 */
+  margin-left: 0.2rem;    /* ml-2 */
   margin-top: 0rem;       /* my-0 = mt-0 + mb-0 */
   margin-bottom: 0rem;
   line-height: 1.5;       /* leading-normal */
+  list-style-type: none;
+}
+.rule-password li{
+  list-style-type: none !important;
+}
+
+.rule-password .detail-pass{
+   color: green !important;
+}
+
+.rule-password .detail-fail{
+  color: red !important;
+  font-weight: 500;
 }
 
 .popup-create-user .date {
@@ -395,4 +409,51 @@
   overflow-y: auto;
   display: grid;
   gap: 50px;
+}
+
+.popup-change-password{
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-rows: repeat(4, 1fr);
+}
+
+::ng-deep .popup-change-password input{
+  width: 350px;
+  height: 50px;
+}
+
+.popup-change-password .user-info-cell{
+  grid-row-start: 1;
+  grid-row-end: 2;
+}
+.popup-change-password .old-password-cell{
+  grid-row-start: 1;
+  grid-row-end: 2;
+}
+.popup-change-password .new-password-cell{
+  grid-row-start: 2;
+  grid-row-end: 3;
+}
+.popup-change-password .confirm-password-cell{
+  grid-row-start: 3;
+  grid-row-end: 4;
+}
+.popup-change-password .action-btn-cell{
+  grid-row-start: 4;
+  grid-row-end: 5;
+  display: flex;
+  margin-top: 10px;
+  justify-content: space-between;
+}
+
+.errMsg-area {
+  min-height: 15px;
+  height: auto;
+}
+.errMsg {
+  color: red;
+  font-weight: 400;
+  width: 350px;
+  padding-left: 12px;
+  padding-bottom: 5px;
 }

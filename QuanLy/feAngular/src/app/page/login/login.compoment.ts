@@ -1,9 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  CUSTOM_ELEMENTS_SCHEMA,
-  OnInit,
-} from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -24,6 +19,10 @@ import { environment } from '../../shared/environment';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { catchError, Observable, of } from 'rxjs';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from 'primeng/button';
 
 declare var grecaptcha: any;
 @Component({
@@ -37,6 +36,9 @@ declare var grecaptcha: any;
     SocialLoginModule,
     InputGroupModule,
     InputGroupAddonModule,
+    FloatLabelModule,
+    InputTextModule,
+    PasswordModule,ButtonModule
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
@@ -68,10 +70,7 @@ export class LoginComponent implements AfterViewInit, OnInit {
       Validators.minLength(5),
       Validators.maxLength(40),
     ]),
-    password: new FormControl('', [
-      Validators.required,
-      Validators.minLength(6),
-    ]),
+    password: new FormControl('', Validators.required),
     rememberMe: new FormControl(false),
     Captcha: new FormControl('', Validators.required),
   });
@@ -83,9 +82,10 @@ export class LoginComponent implements AfterViewInit, OnInit {
 
   login() {
     if (this.loginForm.invalid) {
-      this.pop.showOkPopup(
-        {message: 'Kiểm tra lại thông tin đăng nhập: ' + this.getInvalidControl()}
-      );
+      this.pop.showOkPopup({
+        message:
+          'Kiểm tra lại thông tin đăng nhập: ' + this.getInvalidControl(),
+      });
       this.loadCaptcha();
       //this.focusInvalidControl();
       return;
@@ -98,7 +98,7 @@ export class LoginComponent implements AfterViewInit, OnInit {
     // }
     this.verifyCaptcha().subscribe((res) => {
       if (!res) {
-        this.pop.showOkPopup({message: "Vui lòng xác nhận lại CAPTCHA!"})
+        this.pop.showOkPopup({ message: 'Vui lòng xác nhận lại CAPTCHA!' });
         this.loadCaptcha();
         return;
       }
@@ -130,16 +130,16 @@ export class LoginComponent implements AfterViewInit, OnInit {
             this.router.navigate(['/home']);
           } else {
             console.warn('⚠️ Có lỗi logic trong API:', response.message);
-            this.pop.showOkPopup({message: response.message});
+            this.pop.showOkPopup({ message: response.message });
             this.disableLoginBtn = false;
             this.loadCaptcha();
           }
         },
         error: (error) => {
           console.error('❌ Gọi API thất bại!', error);
-          this.pop.showOkPopup(
-            {message: 'Không thể kết nối đến server. Vui lòng thử lại sau!'}
-          );
+          this.pop.showOkPopup({
+            message: 'Không thể kết nối đến server. Vui lòng thử lại sau!',
+          });
           this.disableLoginBtn = false;
           this.loadCaptcha();
         },
@@ -217,7 +217,7 @@ export class LoginComponent implements AfterViewInit, OnInit {
         }),
         catchError((err) => {
           console.log(err.error.message);
-          this.pop.showOkPopup({message: err.error.message});
+          this.pop.showOkPopup({ message: err.error.message });
           return of(false);
           //this.loadCaptcha(); // Tải lại CAPTCHA khi sai
         })
@@ -234,42 +234,47 @@ export class LoginComponent implements AfterViewInit, OnInit {
 
     this.auth
       .signInWithFacebook()
-      .then(response => {
-        console.log(response);
+      .then(
+        (response) => {
+          console.log(response);
 
-        userInfo.ID = response.id;
-        userInfo.Fullname = response.name;
-        userInfo.Email = response.email;
-        userInfo.Avatar = response.photoUrl;
+          userInfo.ID = response.id;
+          userInfo.Fullname = response.name;
+          userInfo.Email = response.email;
+          userInfo.Avatar = response.photoUrl;
 
-        this.apiLogin.loginWithFB(userInfo).subscribe({
-          next: (res) => {
-            if (res.result == '1') {
-              console.log('✅ Đăng nhập thành công! (Facebook)', res);
-              this.auth.saveUserData(
-                res.data.token,
-                true
-              );
-              this.router.navigate(['/home']);
-            } else {
-              console.warn(
-                '⚠️ Có lỗi logic trong API (Facebook):',
-                res.message
-              );
-              this.pop.showOkPopup({message: res.message});
-            }
-          },
-          error: (err) => {
-            console.error('❌ Gọi API thất bại! (Facebook)', err);
-            this.pop.showOkPopup(
-              {message: 'Không thể kết nối đến server. Vui lòng thử lại sau!'}
-            );
-          },
-        });
-      }, (error) => {console.log(error)})
+          this.apiLogin.loginWithFB(userInfo).subscribe({
+            next: (res) => {
+              if (res.result == '1') {
+                console.log('✅ Đăng nhập thành công! (Facebook)', res);
+                this.auth.saveUserData(res.data.token, true);
+                this.router.navigate(['/home']);
+              } else {
+                console.warn(
+                  '⚠️ Có lỗi logic trong API (Facebook):',
+                  res.message
+                );
+                this.pop.showOkPopup({ message: res.message });
+              }
+            },
+            error: (err) => {
+              console.error('❌ Gọi API thất bại! (Facebook)', err);
+              this.pop.showOkPopup({
+                message: 'Không thể kết nối đến server. Vui lòng thử lại sau!',
+              });
+            },
+          });
+        },
+        (error) => {
+          console.log(error);
+        }
+      )
       .catch((error) => {
         console.error('❌ Facebook sign-in error:', error);
-        this.pop.showOkPopup({header:'Lỗi kết nối với Facebook', message: error});
+        this.pop.showOkPopup({
+          header: 'Lỗi kết nối với Facebook',
+          message: error,
+        });
       });
   }
 
@@ -278,21 +283,18 @@ export class LoginComponent implements AfterViewInit, OnInit {
       next: (res) => {
         if (res.result == '1') {
           console.log('✅ Đăng nhập thành công! (Google)', res);
-          this.auth.saveUserData(
-            res.data.token,
-            true
-          );
+          this.auth.saveUserData(res.data.token, true);
           this.router.navigate(['/home']);
         } else {
           console.warn('⚠️ Có lỗi logic trong API (Google):', res.message);
-          this.pop.showOkPopup({message: res.message});
+          this.pop.showOkPopup({ message: res.message });
         }
       },
       error: (err) => {
         console.error('❌ Gọi API thất bại! (Google)', err);
-        this.pop.showOkPopup(
-          {message: 'Không thể kết nối đến server. Vui lòng thử lại sau!'}
-        );
+        this.pop.showOkPopup({
+          message: 'Không thể kết nối đến server. Vui lòng thử lại sau!',
+        });
       },
     });
   }

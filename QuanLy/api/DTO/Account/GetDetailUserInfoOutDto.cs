@@ -21,6 +21,7 @@
         public int? RoleID { get; set; }
         public string? LockTime { get; set; }
         public byte? RemainTime { get; set; }
+        public bool IsExternalAvatar { get; set; }
         public List<Role> ListRole { get; set; }
         public List<Status> ListStatus { get; set; }
         public List<Gender> ListGender { get; set; }

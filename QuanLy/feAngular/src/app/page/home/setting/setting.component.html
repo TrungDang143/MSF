@@ -120,7 +120,8 @@
                   <td>{{ role.createdAt }}</td>
                   <td>{{ role.updatedAt }}</td>
                   <td>
-                    <p-button label="Edit" icon="pi pi-pencil" [raised]="true" severity="secondary"></p-button>
+                    <p-button *ngIf="role.roleID != 1" label="Edit" icon="pi pi-pencil" [raised]="true" 
+                    severity="secondary" (click) = "showDialogUpdateRole(role.roleID)"></p-button>
                   </td>
                 </tr>
               </ng-template>
@@ -160,6 +161,29 @@
             </div>
         </form>
     </div>
+</p-dialog>
+
+<p-dialog header="Update role" [modal]="true" [(visible)]="displayDialogUpdateRole" [style]="{ width: '400px', height:'370px'}">
+  <div class="form-new-role">
+      <form action="" method="post" [formGroup]="updateRoleForm">
+          <div class="content">
+              <p-floatlabel variant="on">
+                  <input pInputText id="roleName" formControlName="roleName" autocomplete="off" />
+                  <label for="roleName">Tên vai trò</label>
+              </p-floatlabel>
+              <p-floatlabel variant="on">
+                  <input pInputText id="description" formControlName="description" autocomplete="off" />
+                  <label for="description">Mô tả vai trò</label>
+              </p-floatlabel>
+              <p>Phân quyền cho role:</p>
+              <p-button label="Phân quyền" icon="pi pi-shield" [raised]="true" severity="secondary" (click)="showDialogRolePermission()"></p-button>
+          </div>
+          <div class="action-btn">
+              <p-button label="Cập nhật" [raised]="true" severity="success" [disabled]="disableBtnUpdateRole" (click)="handleUpdateRole()"></p-button>
+              <p-button label="Huỷ" [raised]="true" severity="danger" (click)="closeUpdateRoleForm()"></p-button>
+          </div>
+      </form>
+  </div>
 </p-dialog>
 
 <p-dialog

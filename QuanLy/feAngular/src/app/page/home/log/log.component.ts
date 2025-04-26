@@ -72,7 +72,7 @@ export class LogComponent implements OnInit {
   }
   loadSysLogsLazy() {
     this.loading = true;
-    
+
     if (this.first !== undefined && this.rows !== undefined) {
       const page = this.first / this.rows! + 1;
       const pageSize = this.rows!;
@@ -97,12 +97,9 @@ export class LogComponent implements OnInit {
             }
           },
           error: (err) => {
-            if (err === 403) {
-              this.pop.showOkPopup({ message: 'Bạn không có quyền truy cập!' });
-            } else {
-              this.pop.showOkPopup({ message: 'Lỗi kết nối tới server!' });
-              console.log(err);
-            }
+            this.pop.showOkPopup({ message: 'Lỗi kết nối tới server!' });
+            console.log(err);
+
             this.loading = false;
           },
         });
@@ -136,12 +133,12 @@ export class LogComponent implements OnInit {
     this.loadSysLogsLazy();
   }
 
-  selectedLogIds: number[] = []
+  selectedLogIds: number[] = [];
 
   handleDeleteLogs() {
-    if(this.selectedLogs.length == 0){
-      this.pop.showOkPopup({message: "Vui lòng chọn 1 log để xoá!"});
-    }else{
+    if (this.selectedLogs.length == 0) {
+      this.pop.showOkPopup({ message: 'Vui lòng chọn 1 log để xoá!' });
+    } else {
       this.pop.showYesNoPopup({
         header: 'Xác nhận',
         message: 'Bạn có chắc chắn muốn xoá Logs?',
@@ -152,29 +149,28 @@ export class LogComponent implements OnInit {
           console.log('huy');
         },
       });
-    } 
+    }
   }
   deleteSelectedLogs() {
-    this.selectedLogs.forEach(element => {
-      this.selectedLogIds.push(element.id)
+    this.selectedLogs.forEach((element) => {
+      this.selectedLogIds.push(element.id);
     });
     this.apiLog.DeleteLogByIds(this.selectedLogIds).subscribe({
-      next: res=>{
-        if(res.result == '1'){
-          this.pop.showOkPopup({message: res.message});
+      next: (res) => {
+        if (res.result == '1') {
+          this.pop.showOkPopup({ message: res.message });
           this.selectedLogs.length = 0;
           this.selectedLogIds.length = 0;
           this.loadSysLogsLazy();
-        }else{
-          this.pop.showOkPopup({message: "Lỗi xoá log!"});
+        } else {
+          this.pop.showOkPopup({ message: 'Lỗi xoá log!' });
           console.log(res.message);
         }
       },
-      error: err=>{
-        this.pop.showOkPopup({message: "Không thể kết nối server!"})
+      error: (err) => {
+        this.pop.showOkPopup({ message: 'Không thể kết nối server!' });
         console.log(err);
       },
-      
-    })
+    });
   }
 }

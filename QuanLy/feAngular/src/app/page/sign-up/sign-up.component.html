@@ -1,204 +1,160 @@
 <div class="bg">
   <div class="container">
-    <div class="sign-up">
-      <div>
-        <div class="title">Đăng ký tài khoản</div>
-
-        <form action method="post" [formGroup]="signUpForm" class="form-sign-up">
-          <table class="formSignUp">
-            <tbody>
-              
-              <tr style="height: 50px;">
-                <td>
-                  <input
-                    type="text"
-                    id="username"
-                    formControlName="username"
-                    placeholder="Tên đăng nhập"
-                  />
-                  <div
-                    class="errMsg"
-                    *ngIf="
-                      signUpForm['controls']['username'].dirty &&
-                      signUpForm['controls']['username'].errors
-                    "
-                  >
-                    <small
-                      *ngIf="
-                        signUpForm['controls']['username'].errors[
-                          'required'
-                        ]
+    <div class="dialog">
+      <div class="title">Đăng ký tài khoản</div>
+      <div class="popup-create-user">
+        <form action method="post" [formGroup]="signUpForm">
+          <div class="popup-create-user-cell username">
+            <p-floatlabel variant="in">
+              <input
+                #emailInput
+                pInputText
+                id="input_username"
+                formControlName="username"
+                autocomplete="off"
+              />
+              <label for="input_username">Tên đăng nhập</label>
+            </p-floatlabel>
+            <div class="errMsg-area">
+              <div
+                class="errMsg"
+                *ngIf="
+                  signUpForm['controls']['username'].touched &&
+                  signUpForm['controls']['username'].errors
+                "
+              >
+                <small
+                  *ngIf="signUpForm['controls']['username'].errors['required']"
+                  >Nhập tên đăng nhập.</small
+                >
+                <small
+                  *ngIf="signUpForm['controls']['username'].errors['minlength']"
+                  >Tên đăng nhập tối thiểu 5 ký tự.</small
+                >
+                <small
+                  *ngIf="signUpForm['controls']['username'].errors['maxlength']"
+                  >Tên đăng nhập tối đa 40 ký tự</small
+                >
+              </div>
+            </div>
+          </div>
+          <div class="popup-create-user-cell email">
+            <p-floatlabel variant="in">
+              <input
+                #emailInput
+                pInputText
+                id="input_email"
+                formControlName="email"
+                autocomplete="off"
+              />
+              <label for="input_email">Email</label>
+            </p-floatlabel>
+            <div class="errMsg-area">
+              <div
+                class="errMsg"
+                *ngIf="
+                  signUpForm['controls']['email'].touched &&
+                  signUpForm['controls']['email'].errors
+                "
+              >
+                <small
+                  *ngIf="signUpForm['controls']['email'].errors['required']"
+                  >Nhập email.</small
+                >
+                <small *ngIf="signUpForm['controls']['email'].errors['email']"
+                  >Nhập email đúng định dạng.</small
+                >
+              </div>
+            </div>
+          </div>
+          <div class="popup-create-user-cell password">
+            <p-floatlabel variant="in">
+              <p-password
+                formControlName="password"
+                autocomplete="new-password"
+                appendTo="body"
+                [toggleMask]="true"
+                promptLabel="Nhập mật khẩu"
+                weakLabel="Độ bảo mật: Thấp"
+                mediumLabel="Độ bảo mật: Trung bình"
+                strongLabel="Độ bảo mật: Cao"
+              >
+                <ng-template #footer>
+                  <p-divider />
+                  <ul class="rule-password">
+                    <li
+                      *ngFor="let item of passwordRules"
+                      [ngClass]="
+                        !passwordErrors.hasOwnProperty(item.settingKey) &&
+                        !passwordTouched
+                          ? ''
+                          : passwordErrors[item.settingKey]
+                          ? 'rule-password detail-fail'
+                          : 'rule-password detail-pass'
                       "
-                      >Nhập tên đăng nhập.</small
                     >
-                    <small
-                      *ngIf="
-                        signUpForm['controls']['username'].errors[
-                          'minlength'
-                        ]
-                      "
-                      >Tên đăng nhập tối thiểu 5 ký tự.</small
-                    >
-                    <small
-                      *ngIf="
-                        signUpForm['controls']['username'].errors[
-                          'maxlength'
-                        ]
-                      "
-                      >Tên đăng nhập tối thiểu 40 ký tự</small
-                    >
-                  </div>
-                </td>
-              </tr>
-
-              <!-- <tr style="height: 50px;">
-                <td>
-                  <input
-                    type="text"
-                    id="fullname"
-                    formControlName="fullname"
-                    placeholder="Họ tên"
-                  />
-                  <div
-                    class="errMsg"
-                    *ngIf="
-                      signUpForm['controls']['fullname'].dirty &&
-                      signUpForm['controls']['fullname'].errors
-                    "
-                  >
-                    <small
-                      *ngIf="
-                        signUpForm['controls']['fullname'].errors[
-                          'required'
-                        ]
-                      "
-                      >Nhập họ tên.</small
-                    >
-                    <small
-                      *ngIf="
-                        signUpForm['controls']['fullname'].errors[
-                          'minlength'
-                        ]
-                      "
-                      >Họ tên tối thiểu 10 ký tự.</small
-                    >
-                    <small
-                      *ngIf="
-                        signUpForm['controls']['fullname'].errors[
-                          'maxlength'
-                        ]
-                      "
-                      >Họ tên tối thiểu 40 ký tự</small
-                    >
-                  </div>
-                </td>
-              </tr> -->
-
-              <tr style="height: 50px;">
-                <td>
-                  <input
-                    type="text"
-                    id="email"
-                    formControlName="email"
-                    placeholder="Email"
-                  />
-                  <div
-                    class="errMsg"
-                    *ngIf="
-                      signUpForm['controls']['email'].dirty &&
-                      signUpForm['controls']['email'].errors
-                    "
-                  >
-                    <small
-                      *ngIf="signUpForm['controls']['email'].errors['required']"
-                      >Nhập email.</small
-                    >
-                    <small *ngIf="signUpForm['controls']['email'].errors['email']"
-                      >Nhập email đúng định dạng.</small
-                    >
-                  </div>
-                </td>
-              </tr>
-
-              <tr style="height: 50px;">
-                <td>
-                  <input
-                    type="password"
-                    id="password"
-                    formControlName="password"
-                    placeholder="Mật khẩu"
-                  />
-                  <div
-                    class="errMsg"
-                    *ngIf="
-                      signUpForm['controls']['password'].dirty &&
-                      signUpForm['controls']['password'].errors
-                    "
-                  >
-                    <small
-                      *ngIf="
-                        signUpForm['controls']['password'].errors['required']
-                      "
-                      >Nhập mật khẩu.</small
-                    >
-                    <small
-                      *ngIf="
-                        signUpForm['controls']['password'].errors['minlength']
-                      "
-                      >Mật khẩu tối thiểu 6 ký tự.</small
-                    >
-                  </div>
-                </td>
-              </tr>
-              
-              <tr style="height: 50px;">
-                <td>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    formControlName="confirmPassword"
-                    placeholder="Xác nhận mật khẩu"
-                  />
-                  <div
-                    class="errMsg"
-                    *ngIf="signUpForm.errors?.['passwordMismatch'] && signUpForm.get('confirmPassword')?.touched"
-                  >
-                    <small>Mật khẩu nhập lại không khớp.</small>
-                  </div>
-                </td>
-              </tr>
-
-              <tr style="height: 56px;">
-                <td>
-                  <div class="btn">
-                    <button
-                    id="login-btn"
-                      type="submit"
-                      class="rounded-button"
-                      (click)="signup()"
-                      [disabled]="disableBtn"
-                    >
-                      Đăng ký
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                      <i
+                        [ngClass]="
+                          !passwordErrors.hasOwnProperty(item.settingKey) &&
+                          !passwordTouched
+                            ? ''
+                            : passwordErrors[item.settingKey]
+                            ? 'pi pi-times text-danger'
+                            : 'pi pi-check text-success'
+                        "
+                      ></i>
+                      {{ item.description }}
+                    </li>
+                  </ul>
+                </ng-template>
+              </p-password>
+              <label for="input_password">Mật khẩu</label>
+            </p-floatlabel>
+            <div class="errMsg-area">
+              <div class="errMsg" *ngIf="!signUpForm.get('password')?.valid && passwordTouched">
+                <small>Nhập mật khẩu theo quy tắc.</small>
+              </div>
+            </div>
+          </div>
+          <div class="popup-create-user-cell confirm-password">
+            <p-floatlabel variant="in">
+              <input
+                #emailInput
+                pInputText
+                id="input_confirmPassword"
+                formControlName="confirmPassword"
+                autocomplete="off"
+              />
+              <label for="input_confirmPassword">Xác nhận mật khẩu</label>
+            </p-floatlabel>
+            <div class="errMsg-area">
+              <div
+                class="errMsg"
+                *ngIf="signUpForm.errors?.['passwordMismatch'] || signUpForm.get('confirmPassword')?.touched"
+              >
+                <small>Mật khẩu nhập lại không khớp.</small>
+              </div>
+            </div>
+          </div>
         </form>
-
-        <div class="social">
-          <p>
-            Đã có tài khoản?
-            <a [routerLink]="['/login']">Đăng nhập</a>
-          </p>
-          
+      </div>
+      <div class="footer">
+        <div class="btn" style="text-align: center">
+          <button
+            id="login-btn"
+            type="submit"
+            class="rounded-button"
+            (click)="signup()"
+            [disabled]="disableBtn"
+          >
+            Đăng ký
+          </button>
         </div>
+        <p>
+          Đã có tài khoản?
+          <a [routerLink]="['/login']">Đăng nhập</a>
+        </p>
       </div>
     </div>
-    <!-- <button mat-button (click)="showOkPopup()">Hiển thị Popup OK</button>
-<button mat-button (click)="showYesNoPopup()">Hiển thị Popup Yes/No</button> -->
   </div>
 </div>
-
-

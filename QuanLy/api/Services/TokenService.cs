@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Data.SqlClient;
 using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System.Data;
@@ -320,6 +321,39 @@ namespace api.Services
                 throw ex;
             }
             return listPermission;
+        }
+
+        public async Task<bool> IsValidUser(string username)
+        {
+            bool isValid = false;
+            if (string.IsNullOrEmpty(username)) return isValid;
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_IsValidUser", conn))
+                {
+                    await conn.OpenAsync();
+
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@username", username);
+                    SqlParameter rtnValue = new SqlParameter("@rtnValue", SqlDbType.Bit)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    cmd.Parameters.Add(rtnValue);
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    isValid = (bool)rtnValue.Value;
+                }
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+
+            return isValid;
         }
     }
 }

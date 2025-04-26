@@ -13,31 +13,34 @@
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
     [showCurrentPageReport]="true"
     [filters]="filters"
-    [scrollable]="true" scrollHeight="420px"
+    [scrollable]="true"
+    scrollHeight="420px"
   >
     <ng-template #caption>
       <div class="filter">
-        <p-iconfield iconPosition="left" class="ml-auto">
-          <p-inputicon>
-            <i class="pi pi-search"></i>
-          </p-inputicon>
-          <input
-            pInputText
-            type="text"
-            [(ngModel)]="globalFilterValue"
-            (input)="applyFilterGlobal($event, 'contains')"
-            placeholder="Tìm kiếm"
-          />
-        </p-iconfield>
-        <p-select
-          [options]="listRole"
-          optionLabel="roleName"
-          optionValue="roleName"
-          [(ngModel)]="selectedRole"
-          placeholder="Lọc theo role"
-          (onChange)="dt2.filter($event.value, 'roleName', 'equals')"
-          [showClear]="true"
-        ></p-select>
+        <div style="display: flex; margin-right: 5px">
+          <p-iconfield iconPosition="left" class="ml-auto">
+            <p-inputicon>
+              <i class="pi pi-search"></i>
+            </p-inputicon>
+            <input
+              pInputText
+              type="text"
+              [(ngModel)]="globalFilterValue"
+              (input)="applyFilterGlobal($event, 'contains')"
+              placeholder="Tìm kiếm"
+            />
+          </p-iconfield>
+          <p-select
+            [options]="listRole"
+            optionLabel="roleName"
+            optionValue="roleName"
+            [(ngModel)]="selectedRole"
+            placeholder="Lọc theo role"
+            (onChange)="dt2.filter($event.value, 'roleName', 'equals')"
+            [showClear]="true"
+          ></p-select>
+        </div>
         <div class="action">
           <p-button
             severity="success"
@@ -49,17 +52,32 @@
     </ng-template>
     <ng-template #header>
       <tr>
-        <th pResizableColumn >Avatar</th>
-        <th pResizableColumn >Username</th>
-        <th pResizableColumn >Fullname</th>
-        <th pResizableColumn >Email</th>
-        <th pResizableColumn >Role</th>
-        <th pResizableColumn >Status</th>
-        <th pResizableColumn >Action</th>
+        <th pResizableColumn style="width: 80px">Action</th>
+        <th pResizableColumn style="width: 100px">Avatar</th>
+        <th pResizableColumn>Username</th>
+        <th pResizableColumn>Fullname</th>
+        <th pResizableColumn>Email</th>
+        <th pResizableColumn>Role</th>
+        <th pResizableColumn style="width: 100px">Status</th>
       </tr>
     </ng-template>
     <ng-template #body let-user>
       <tr>
+        <td style="text-align: center">
+          <p-menu
+            #menu
+            [model]="menuAccountActions"
+            [popup]="true"
+            appendTo="body"
+          />
+          <p-button
+            (click)="openMenuAction($event, menu, user.userID, user.username)"
+            icon="pi pi-list"
+            severity="primary"
+            label="Action"
+          />
+        </td>
+
         <td>
           <img
             src="{{ user.avatar }}"
@@ -82,13 +100,6 @@
             <span>{{ user.statusName }}</span>
           </p-message>
         </td>
-        <td style="text-align: center">
-          <p-button
-            label="Detail"
-            severity="info"
-            (click)="viewDetail(user.userID)"
-          />
-        </td>
       </tr>
     </ng-template>
   </p-table>
@@ -98,7 +109,8 @@
   header="Chi tiết tài khoản"
   [(visible)]="displayDetail"
   [modal]="true"
-  [style]="{ width: '85%' }"
+  [style]="{ width: '85%', 'max-width': '1250px' }"
+  (onHide)="closeDialogDetail()"
 >
   <ng-template #content>
     <form action method="post" [formGroup]="detailAccountForm">
@@ -329,13 +341,17 @@
               icon="pi pi-check"
               iconPos="right"
               (onClick)="save()"
-              [disabled]="!hasPermission('edit_users')"
+              [disabled]="
+                !detailAccountForm.dirty ||
+                detailAccountForm.invalid ||
+                !hasPermission('edit_users')
+              "
             />
             <p-button
               label="Cancel"
               icon="pi pi-times"
               iconPos="right"
-              (onClick)="closeDialog()"
+              (onClick)="closeDialogDetail()"
             />
           </div>
           <div class="popup-cell setting-btn">
@@ -606,6 +622,7 @@
   [(visible)]="displayPopupCreateUser"
   [modal]="true"
   [style]="{ width: '85%' }"
+  (onHide)="closeDialogCreateUser()"
 >
   <ng-template #content>
     <form
@@ -661,17 +678,37 @@
                 autocomplete="new-password"
                 appendTo="body"
                 [toggleMask]="true"
+                promptLabel="Nhập mật khẩu"
+                weakLabel="Độ bảo mật: Thấp"
+                mediumLabel="Độ bảo mật: Trung bình"
+                strongLabel="Độ bảo mật: Cao"
               >
-                <ng-template #header>
-                  <div class="font-semibold text-xm mb-4">Pick a password</div>
-                </ng-template>
                 <ng-template #footer>
                   <p-divider />
                   <ul class="rule-password">
-                    <li>At least one lowercase</li>
-                    <li>At least one uppercase</li>
-                    <li>At least one numeric</li>
-                    <li>Minimum 8 characters</li>
+                    <li
+                      *ngFor="let item of passwordRules"
+                      [ngClass]="
+                        !passwordErrors_createAccount.hasOwnProperty(item.settingKey) &&
+                        !passwordDirtied_createAccount
+                          ? ''
+                          : passwordErrors_createAccount[item.settingKey]
+                          ? 'rule-password detail-fail'
+                          : 'rule-password detail-pass'
+                      "
+                    >
+                      <i
+                        [ngClass]="
+                          !passwordErrors_createAccount.hasOwnProperty(item.settingKey) &&
+                          !passwordDirtied_createAccount
+                            ? ''
+                            : passwordErrors_createAccount[item.settingKey]
+                            ? 'pi pi-times text-danger'
+                            : 'pi pi-check text-success'
+                        "
+                      ></i>
+                      {{ item.description }}
+                    </li>
                   </ul>
                 </ng-template>
               </p-password>
@@ -728,8 +765,10 @@
           </div>
           <div class="popup-create-user-cell avatar">
             <img
-            [src]="createAccountForm.get('avatar')?.value || 'avatar/default-avatar.jpg'"
-
+              [src]="
+                createAccountForm.get('avatar')?.value ||
+                'avatar/default-avatar.jpg'
+              "
               alt="Image"
               width="150px"
               height="150px"
@@ -778,7 +817,7 @@
               label="Cancel"
               icon="pi pi-times"
               iconPos="right"
-              (onClick)="closeDialog()"
+              (onClick)="closeDialogCreateUser()"
             />
           </div>
           <div class="popup-create-user-cell setting-btn">
@@ -795,4 +834,130 @@
       </div>
     </form>
   </ng-template>
+</p-dialog>
+
+<p-dialog header="Đổi mật khẩu" [(visible)]="displayChangePassword" [modal]="true" 
+[style]="{'width': '400px', 'height': '420px'}" (onHide)="closeDialogChangePassword()">
+<form action="" method="post" [formGroup]="changePasswordForm">
+  <div class="popup-change-password">
+      <div class="user-info-cell" *ngIf="!isMe(userNameSeleted)">
+        <h3>User: {{userNameSeleted}}</h3>
+      </div>
+      <div class="old-password-cell" *ngIf="isMe(userNameSeleted)">
+        <p-floatlabel variant="in">
+          <p-password
+            formControlName="oldPassword"
+            autocomplete="off"
+            [toggleMask]="true"
+            [feedback]="false"
+          >
+          </p-password>
+          <label for="input_password">Mật khẩu cũ</label>
+        </p-floatlabel>
+        <div class="errMsg-area">
+          <div
+            class="errMsg"
+            *ngIf="
+              changePasswordForm['controls']['oldPassword'].touched &&
+              changePasswordForm['controls']['oldPassword'].errors
+            "
+          >
+            <small
+              *ngIf="changePasswordForm['controls']['oldPassword'].errors['required']"
+              >Nhập mật khẩu.</small
+            >
+          </div>
+        </div>
+      </div>
+      <div class="new-password-cell">
+        <p-floatlabel variant="on">
+          <p-password
+            formControlName="newPassword"
+            autocomplete="off"
+            appendTo="body"
+            [toggleMask]="true"
+            promptLabel="Nhập mật khẩu"
+            weakLabel="Độ bảo mật: Thấp"
+            mediumLabel="Độ bảo mật: Trung bình"
+            strongLabel="Độ bảo mật: Cao"
+          >
+            <ng-template #footer>
+              <p-divider />
+              <ul class="rule-password">
+                <li
+                  *ngFor="let item of passwordRules"
+                  [ngClass]="
+                    !passwordErrors_changePassword.hasOwnProperty(item.settingKey) &&
+                    !passwordDirtied_changePassword
+                      ? ''
+                      : passwordErrors_changePassword[item.settingKey]
+                      ? 'rule-password detail-fail'
+                      : 'rule-password detail-pass'
+                  "
+                >
+                  <i
+                    [ngClass]="
+                      !passwordErrors_changePassword.hasOwnProperty(item.settingKey) &&
+                      !passwordDirtied_changePassword
+                        ? ''
+                        : passwordErrors_changePassword[item.settingKey]
+                        ? 'pi pi-times text-danger'
+                        : 'pi pi-check text-success'
+                    "
+                  ></i>
+                  {{ item.description }}
+                </li>
+              </ul>
+            </ng-template>
+          </p-password>
+          <label for="input_password">Mật khẩu mới</label>
+        </p-floatlabel>
+      </div>
+      <div class="confirm-password-cell">
+        <p-floatlabel variant="in">
+          <p-password
+            formControlName="confirmNewPassword"
+            autocomplete="off"
+            [toggleMask]="true"
+            [feedback]="false"
+          >
+          </p-password>
+          <label for="input_password">Xác nhận mật khẩu</label>
+        </p-floatlabel>
+        <div class="errMsg-area">
+          <div
+            class="errMsg"
+            *ngIf="
+              changePasswordForm['controls']['oldPassword'].touched &&
+              changePasswordForm['controls']['oldPassword'].errors
+            "
+          >
+            <small
+              *ngIf="changePasswordForm['controls']['oldPassword'].errors['required']"
+              >Mật khẩu không khớp.</small
+            >
+          </div>
+        </div>
+      </div>
+      <div class="action-btn-cell">
+        <p-button
+          label="Save"
+          icon="pi pi-check"
+          iconPos="right"
+          (onClick)="changePassword()"
+          [disabled]="
+            !detailAccountForm.dirty ||
+            detailAccountForm.invalid ||
+            !hasPermission('edit_users')
+          "
+        />
+        <p-button
+          label="Cancel"
+          icon="pi pi-times"
+          iconPos="right"
+          (onClick)="closeDialogChangePassword()"
+        />
+      </div>
+    </div>
+  </form>
 </p-dialog>

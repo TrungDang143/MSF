@@ -1,4 +1,4 @@
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf, NgClass } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Account } from '../../../../model/account/account.model';
 import { AccountService } from '../../../../services/account.service';
@@ -6,10 +6,13 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import {
+  AbstractControl,
   FormControl,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -35,12 +38,15 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { PermissionService } from '../../../../services/permission.service';
 import { PasswordModule } from 'primeng/password';
 import { DividerModule } from 'primeng/divider';
+import { MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
 
 @Component({
   selector: 'app-list-accounts',
   imports: [
     NgIf,
     NgFor,
+    NgClass,
     ButtonModule,
     DialogModule,
     InputTextModule,
@@ -61,6 +67,7 @@ import { DividerModule } from 'primeng/divider';
     CheckboxModule,
     PasswordModule,
     DividerModule,
+    Menu,
   ],
   templateUrl: './list-accounts.component.html',
   styleUrl: './list-accounts.component.css',
@@ -73,6 +80,49 @@ export class ListAccountsComponent implements OnInit {
     private authService: AuthService,
     private apiPermission: PermissionService
   ) {}
+
+  userIdSeleted: number = 0;
+  userNameSeleted: string = '###';
+  menuAccountActions: MenuItem[] = [];
+
+  updateMenuActions() {
+    this.menuAccountActions = [
+      {
+        label: 'User: ' + this.userNameSeleted,
+        items: [
+          {
+            label: 'Xem chi tiết',
+            icon: 'pi pi-user-edit',
+            command: () => this.viewDetail(this.userIdSeleted),
+          },
+          {
+            label: 'Đổi mật khẩu',
+            icon: 'pi pi-lock',
+            command: () => {
+              this.showDialogChangePassword();
+            },
+          },
+          {
+            label: 'Đăng nhập',
+            icon: 'pi pi-sign-in',
+            command: () => {},
+          },
+          {
+            label: 'Đăng xuất user',
+            icon: 'pi pi-sign-out',
+            command: () => {},
+          },
+        ],
+      },
+    ];
+  }
+
+  openMenuAction(event: Event, menu: Menu, userId: number, userName: string) {
+    this.userIdSeleted = userId;
+    this.userNameSeleted = userName;
+    this.updateMenuActions();
+    menu.toggle(event);
+  }
 
   hasPermission(permission: string): boolean {
     return this.authService.hasPermission(permission);
@@ -88,6 +138,10 @@ export class ListAccountsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+  }
+
+  isMe(username: string): boolean {
+    return this.authService.getUser() == username;
   }
 
   loadData() {
@@ -109,17 +163,8 @@ export class ListAccountsComponent implements OnInit {
         }
       },
       error: (err) => {
-        if (err.status === 403) {
-          // Không có quyền
-          this.pop.showOkPopup({
-            message: 'Bạn không có quyền truy cập chức năng này.',
-          });
-          // Option: redirect
-          // this.router.navigate(['/unauthorized']);
-        } else {
-          this.pop.showOkPopup({ message: 'Lỗi lấy danh sách users' });
-          console.log(err);
-        }
+        this.pop.showOkPopup({ message: 'Lỗi lấy danh sách users' });
+        console.log(err);
       },
     });
   }
@@ -157,26 +202,34 @@ export class ListAccountsComponent implements OnInit {
     roleID: new FormControl(null),
     lockTime: new FormControl(null),
     remainTime: new FormControl(null),
+    isExternalAvatar: new FormControl(false),
+    permissionIds: new FormControl<number[]>([]),
   });
 
   viewDetail(id: any) {
     this.apiAccount.GetDetailUserInfo(id).subscribe({
       next: (res) => {
-        this.detailAccountForm.reset();
-        this.displayDetail = true;
-        this.displayPopupCreateUser = false;
+        this.showDialogDetail();
+
         const data = res.data;
         this.genders = data.listGender;
         this.roles = data.listRole;
         this.status = data.listStatus;
 
         this.detailAccountForm.patchValue(data);
+        if (this.isMe(this.detailAccountForm.get('username')?.value)) {
+          this.detailAccountForm.get('roleID')?.disable();
+        } else {
+          this.detailAccountForm.get('roleID')?.enable();
+        }
 
         var dateOfBirth: Date | null;
         if (data.dateOfBirth) {
           dateOfBirth = this.parseDateFromString(data.dateOfBirth);
           this.detailAccountForm.patchValue({ dateOfBirth: dateOfBirth });
         }
+
+        this.detailAccountForm.markAsPristine();
       },
       error: (err) => {
         console.log(err);
@@ -233,7 +286,7 @@ export class ListAccountsComponent implements OnInit {
   acceptUpdate() {
     if (this.disabledBtnSave) return;
     this.disabledBtnSave = true;
-
+    console.log(this.detailAccountForm.value);
     const birht = this.detailAccountForm.get('dateOfBirth');
     if (birht && birht.value) {
       let convertDate = this.formatDateToString(birht.value);
@@ -242,34 +295,60 @@ export class ListAccountsComponent implements OnInit {
     this.apiAccount.UpdateUser(this.detailAccountForm.getRawValue()).subscribe({
       next: (res) => {
         if (res.result == '1') {
-          this.pop.showOkPopup({ message: 'Cập nhật thành công!' });
-          this.disabledBtnSave = false;
-          this.displayDetail = false;
           this.loadData();
+          this.apiAccount
+            .UpdateUserPermission(
+              this.detailAccountForm.get('userID')?.value,
+              this.detailAccountForm.get('permissionIds')?.value
+            )
+            .subscribe({
+              next: (res) => {
+                if (res.result == '1') {
+                  // this.pop.showOkPopup({ message: res.message });
+
+                  this.pop.showOkPopup({ message: 'Cập nhật thành công!' });
+                  this.disabledBtnSave = false;
+                  this.closeDialogDetail();
+
+                  this.displayPopupPermission = false;
+                } else {
+                  this.pop.showOkPopup({ message: res.message });
+                }
+              },
+              error: (err) => {
+                this.pop.showOkPopup({
+                  header: 'Lỗi',
+                  message: 'Lỗi kết nối server, không thể update permission!',
+                });
+                console.log(err);
+              },
+            });
         } else {
           this.pop.showOkPopup({ message: 'Lỗi cập nhật thông tin!' });
           this.disabledBtnSave = false;
         }
       },
       error: (err) => {
-        if (err.status === 403) {
-          this.pop.showOkPopup({ message: 'Bạn không có quyền này!' });
-        } else {
-          this.pop.showOkPopup({
-            header: 'Lỗi',
-            message: 'Không thể kết nối với server!',
-          });
-          this.disabledBtnSave = false;
-          console.log(err.message);
-        }
+        this.pop.showOkPopup({
+          header: 'Lỗi',
+          message: 'Không thể kết nối với server!',
+        });
+        this.disabledBtnSave = false;
+        console.log(err.message);
       },
     });
     //fileUpload.clear();
   }
 
-  closeDialog() {
+  closeDialogDetail() {
     this.displayDetail = false;
-    this.displayPopupCreateUser = false;
+    this.detailAccountForm.reset();
+  }
+  showDialogDetail() {
+    this.isChangedRole = false;
+    this.displayDetail = true;
+    this.closeDialogCreateUser();
+    this.detailAccountForm.reset();
   }
 
   deleteUser(userID: number) {
@@ -285,17 +364,18 @@ export class ListAccountsComponent implements OnInit {
       next: (res) => {
         if (res.result == '1') {
           this.pop.showOkPopup({ message: 'Xoá thành công!' });
-          this.displayDetail = false;
+          this.closeDialogDetail();
           this.loadData();
         } else {
           this.pop.showOkPopup({ message: 'Lỗi khi xoá user!' });
         }
       },
       error: (err) => {
-        if (err.status === 403) {
-          this.pop.showOkPopup({ message: 'Bạn không có quyền này!' });
-        } else this.pop.showOkPopup({ message: 'Lỗi kết nối đến server!' });
-        console.log(err);
+        this.pop.showOkPopup({
+          header: 'Lỗi',
+          message: 'Không thể kết nối với server!',
+        });
+        console.log(err.message);
       },
     });
   }
@@ -330,9 +410,13 @@ export class ListAccountsComponent implements OnInit {
   }
   submitToServer() {
     if (this.croppedImage) {
-      if (this.displayPopupCreateUser)
+      if (this.displayPopupCreateUser) {
         this.createAccountForm.patchValue({ avatar: this.croppedImage });
-      else this.detailAccountForm.patchValue({ avatar: this.croppedImage });
+        this.createAccountForm.markAsDirty();
+      } else if (this.displayDetail) {
+        this.detailAccountForm.patchValue({ avatar: this.croppedImage });
+        this.detailAccountForm.markAsDirty();
+      }
     }
 
     this.displayPopupAvatar = false;
@@ -583,7 +667,7 @@ export class ListAccountsComponent implements OnInit {
     this.permissionSelected.length = 0;
   }
 
-  mockupUserPermission(permissionIds: number[]){
+  mockupUserPermission(permissionIds: number[]) {
     const permissionGroups = [
       {
         nodes: this.permission_User,
@@ -635,7 +719,7 @@ export class ListAccountsComponent implements OnInit {
     }
   }
 
-  mockupPermission(data: any){
+  mockupPermission(data: any) {
     this.permission_User = [
       {
         label: 'User',
@@ -681,37 +765,41 @@ export class ListAccountsComponent implements OnInit {
     ];
   }
 
-
   isChangedRole = false;
 
+  //detail user
   //show permission cua user
   userPermission(userID: number) {
     this.apiPermission.getAllPermission().subscribe({
       next: (res) => {
         if (res.result == '1') {
           this.showPermission();
-          this.mockupPermission(res.data)
+          this.mockupPermission(res.data);
 
-          console.log(this.isChangedRole);
-          if(!this.isChangedRole){
-            //lay tat ca quyen (role + extend)
-            this.apiAccount.GetAllUserPermission(userID).subscribe({
-              next: (res) => {
-                if (res.result == '1') {
-                  let permissionIds: [] = res.data;
-  
-                  this.mockupUserPermission(permissionIds);
-  
-                } else {
-                  this.pop.showOkPopup({ message: res.message });
-                }
-              },
-              error: (err) => {
-                this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
-                console.log(err);
-              },
-            });
-          }else{
+          if (!this.isChangedRole) {
+            if (this.detailAccountForm.get('permissionIds')?.value) {
+              let permissionIds: [] =
+                this.detailAccountForm.get('permissionIds')?.value;
+              this.mockupUserPermission(permissionIds);
+            } else {
+              //lay tat ca quyen (role + extend)
+              this.apiAccount.GetAllUserPermission(userID).subscribe({
+                next: (res) => {
+                  if (res.result == '1') {
+                    let permissionIds: [] = res.data;
+
+                    this.mockupUserPermission(permissionIds);
+                  } else {
+                    this.pop.showOkPopup({ message: res.message });
+                  }
+                },
+                error: (err) => {
+                  this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
+                  console.log(err);
+                },
+              });
+            }
+          } else {
             this.apiPermission
               .getPermissionByRoleID(
                 this.detailAccountForm.get('roleID')?.value
@@ -720,7 +808,7 @@ export class ListAccountsComponent implements OnInit {
                 next: (res) => {
                   if (res.result == '1') {
                     let permissionIds: [] = res.data;
-                    this.mockupUserPermission(permissionIds)
+                    this.mockupUserPermission(permissionIds);
                   } else {
                     this.pop.showOkPopup({ message: res.message });
                   }
@@ -742,6 +830,7 @@ export class ListAccountsComponent implements OnInit {
           header: 'Lỗi',
           message: 'Không thể kết nối với server!',
         });
+        this.displayPopupPermission = false;
         console.log(err);
       },
     });
@@ -841,28 +930,11 @@ export class ListAccountsComponent implements OnInit {
       this.pop.showOkPopup({
         message: 'Không thể chỉnh sửa quyền của role Admin!!',
       });
-    } else {
-      this.apiAccount
-        .UpdateUserPermission(this.detailAccountForm.get('userID')?.value, ids)
-        .subscribe({
-          next: (res) => {
-            if (res.result == '1') {
-              this.pop.showOkPopup({ message: res.message });
-              this.displayPopupPermission = false;
-              this.loadData();
-            } else {
-              this.pop.showOkPopup({ message: res.message });
-            }
-          },
-          error: (err) => {
-            this.pop.showOkPopup({
-              header: 'Lỗi',
-              message: 'Lỗi kết nối server!',
-            });
-            console.log(err);
-          },
-        });
+      return;
     }
+    this.detailAccountForm.patchValue({ permissionIds: ids });
+    this.displayPopupPermission = false;
+    this.detailAccountForm.markAsDirty();
   }
 
   displayPopupCreateUser: boolean = false;
@@ -876,7 +948,7 @@ export class ListAccountsComponent implements OnInit {
     email: new FormControl('', [Validators.required]),
     password: new FormControl('', [
       Validators.required,
-      Validators.minLength(6),
+      this.passwordRulesValidator(),
     ]),
     fullName: new FormControl(null, [Validators.maxLength(100)]),
     phoneNumber: new FormControl(null, [Validators.maxLength(15)]),
@@ -891,16 +963,32 @@ export class ListAccountsComponent implements OnInit {
     permissionIds: new FormControl(''),
   });
 
+  showDialogCreateUser() {
+    this.isChangedRole = false;
+    this.displayPopupCreateUser = true;
+    this.closeDialogDetail();
+    this.createAccountForm.reset();
+  }
+  closeDialogCreateUser() {
+    this.displayPopupCreateUser = false;
+    this.createAccountForm.reset();
+  }
   createUserPopup() {
+    this.closeDialogDetail();
+
     this.apiAccount.GetRoleGenderStatus().subscribe({
       next: (res) => {
         if (res.result == '1') {
           this.createAccountForm.reset();
-          this.listRole_Create = res.data.listRole;
+          this.listRole_Create = res.data.listRole.filter(
+            (role: any) => role.roleID != 1
+          );
           this.listGender_Create = res.data.listGender;
           this.listStatus_Create = res.data.listStatus;
-          this.displayPopupCreateUser = true;
-          this.displayDetail = false;
+
+          this.getPasswordRule();
+
+          this.showDialogCreateUser();
         } else {
           this.pop.showOkPopup({ message: 'Lỗi khởi tạo form create!' });
         }
@@ -911,8 +999,16 @@ export class ListAccountsComponent implements OnInit {
       },
     });
   }
+
   changeRole() {
+    if (this.displayDetail) {
+      if (this.detailAccountForm.get('roleID')?.value == 1) {
+        this.pop.showOkPopup({ message: 'Không thể set role Admin cho user!' });
+        this.detailAccountForm.get('roleID')?.reset();
+      }
+    }
     this.createAccountForm.get('permissionIds')?.setValue([]);
+    this.detailAccountForm.get('permissionIds')?.setValue([]);
     this.isChangedRole = true;
   }
 
@@ -921,7 +1017,7 @@ export class ListAccountsComponent implements OnInit {
       next: (res) => {
         if (res.result == '1') {
           this.showPermission();
-          this.mockupPermission(res.data)
+          this.mockupPermission(res.data);
 
           if (this.createAccountForm.get('roleID')?.value) {
             this.apiPermission
@@ -931,23 +1027,23 @@ export class ListAccountsComponent implements OnInit {
               .subscribe({
                 next: (res) => {
                   if (res.result == '1') {
-                    let userPermissionIds: [] = res.data;
+                    let rolePermissionIds: [] = res.data;
                     let lastSetPermissionIds = this.createAccountForm.get(
                       'permissionIds'
                     )?.value as number[];
-
+                    console.log(this.createAccountForm.get('permissionIds'));
                     let permissionIds: number[];
                     if (lastSetPermissionIds) {
                       permissionIds = [
                         ...new Set([
-                          ...userPermissionIds,
+                          ...rolePermissionIds,
                           ...lastSetPermissionIds,
                         ]),
                       ];
                     } else {
-                      permissionIds = [...userPermissionIds];
+                      permissionIds = [...rolePermissionIds];
                     }
-                    this.mockupUserPermission(permissionIds)
+                    this.mockupUserPermission(permissionIds);
                   } else {
                     this.pop.showOkPopup({ message: res.message });
                   }
@@ -972,6 +1068,7 @@ export class ListAccountsComponent implements OnInit {
           header: 'Lỗi',
           message: 'Không thể kết nối với server!',
         });
+        this.displayPopupPermission = false;
         console.log(err);
       },
     });
@@ -1001,8 +1098,6 @@ export class ListAccountsComponent implements OnInit {
       this.pop.showOkPopup({ message: 'Kiểm tra lại thông tin user!' });
       return;
     }
-
-    console.log(this.createAccountForm.value);
     if (this.disableBtnCreateUser) return;
     this.disableBtnCreateUser = true;
 
@@ -1016,7 +1111,9 @@ export class ListAccountsComponent implements OnInit {
       next: (res) => {
         if (res.result == '1') {
           this.pop.showOkPopup({ message: res.message });
-          this.displayPopupCreateUser = false;
+
+          this.closeDialogCreateUser();
+
           this.loadData();
         } else {
           this.pop.showOkPopup({ message: res.message });
@@ -1030,4 +1127,134 @@ export class ListAccountsComponent implements OnInit {
       },
     });
   }
+
+  passwordRules: { settingKey: string; description: string }[] = [];
+  minPasswordLength = 6;
+
+  requiredUpper: boolean = true;
+  requiredLower: boolean = true;
+  requiredDigit: boolean = true;
+  requiredSpecial: boolean = true;
+
+  get passwordErrors_createAccount() {
+    const control = this.createAccountForm.get('password');
+    if (!control) return {};
+
+    // Chỉ hiển thị lỗi nếu người dùng đã chạm vào (touched) hoặc sửa (dirty)
+    if (!(control.touched || control.dirty)) return {};
+
+    return control.errors || {};
+  }
+  get passwordDirtied_createAccount() {
+    const control = this.createAccountForm.get('password');
+    return control?.dirty;
+  }
+
+  getPasswordRule() {
+    this.apiAccount.GetPasswordRule().subscribe({
+      next: (res) => {
+        if (res.result == '1') {
+          res.data.rulePassword.forEach((element: any) => {
+            if (element.settingKey == 'Password.RequireUpper')
+              this.requiredUpper = true;
+            else if (element.settingKey == 'Password.RequireLower')
+              this.requiredLower = true;
+            else if (element.settingKey == 'Password.RequireSpecial')
+              this.requiredSpecial = true;
+            else if (element.settingKey == 'Password.RequireDigit')
+              this.requiredDigit = true;
+          });
+
+          this.passwordRules = res.data.rulePassword;
+
+          this.minPasswordLength = res.data.minPasswordLength;
+        } else {
+          this.pop.showOkPopup({ message: 'Lỗi khi lấy password rule!' });
+        }
+      },
+      error: (err) => {
+        this.pop.showSysErr();
+        console.log(err);
+      },
+    });
+  }
+
+  passwordRulesValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const password = control.value;
+
+      if (typeof password !== 'string') return null;
+
+      const errors: ValidationErrors = {};
+
+      if (this.requiredUpper && !/[A-Z]/.test(password)) {
+        errors['Password.RequireUpper'] = true;
+      }
+      if (this.requiredLower && !/[a-z]/.test(password)) {
+        errors['Password.RequireLower'] = true;
+      }
+      if (this.requiredDigit && !/\d/.test(password)) {
+        errors['Password.RequireDigit'] = true;
+      }
+      if (
+        this.requiredSpecial &&
+        !/[!@#$%^&*(),.?":{}|<>_\-+=\\[\]\/]/.test(password)
+      ) {
+        errors['Password.RequireSpecial'] = true;
+      }
+      if (password.length < this.minPasswordLength) {
+        errors['Password.MinLength'] = {
+          requiredLength: this.minPasswordLength,
+          actualLength: password.length,
+        };
+      }
+
+      return Object.keys(errors).length ? errors : null;
+    };
+  }
+
+
+  displayChangePassword = false;
+  changePasswordForm = new FormGroup(
+    {
+      oldPassword: new FormControl('', [Validators.required]),
+      newPassword: new FormControl('', [
+        Validators.required,
+        this.passwordRulesValidator(),
+      ]),
+      confirmNewPassword: new FormControl('', [Validators.required]),
+    },
+    { validators: this.matchPassword }
+  );
+  showDialogChangePassword() {
+    this.displayChangePassword = true;
+    this.changePasswordForm.reset();
+    this.getPasswordRule();
+  }
+  closeDialogChangePassword() {
+    this.displayChangePassword = false;
+  }
+
+  matchPassword(form: AbstractControl) {
+    const password = form.get('newPassword')?.value;
+    const confirmPassword = form.get('confirmNewPassword')?.value;
+    return password === confirmPassword ? null : { passwordMismatch: true };
+  }
+
+  get passwordErrors_changePassword() {
+    const control = this.changePasswordForm.get('newPassword');
+    if (!control) return {};
+
+    // Chỉ hiển thị lỗi nếu người dùng đã chạm vào (touched) hoặc sửa (dirty)
+    if (!(control.touched || control.dirty)) return {};
+
+    return control.errors || {};
+  }
+  get passwordDirtied_changePassword() {
+    const control = this.changePasswordForm.get('newPassword');
+    return control?.dirty;
+  }
+
+
+  changePassword() {}
 }

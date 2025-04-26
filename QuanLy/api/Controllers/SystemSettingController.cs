@@ -46,10 +46,10 @@ namespace api.Controllers
         }
 
         [HasPermission("edit_roles")]
-        [HttpPost("UpdateRolePermission")]
-        public async Task<BaseResponse> UpdateRolePermission([FromBody] UpdateRolePermissionDto inputDto)
+        [HttpPost("UpdateRole")]
+        public async Task<BaseResponse> UpdateRole([FromBody] UpdateRoleDto inputDto)
         {
-            return await _systemSetting.UpdateRolePermission(inputDto);
+            return await _systemSetting.UpdateRole(inputDto);
         }
 
         [HasPermission("view_roles")]
@@ -57,6 +57,13 @@ namespace api.Controllers
         public async Task<BaseResponse> GetListRole()
         {
             return await _systemSetting.GetListRole();
+        }
+
+        [HasPermission("view_roles")]
+        [HttpGet("GetRoleDetail")]
+        public async Task<BaseResponse> GetRoleDetail([FromQuery]GetRoleDetailInDto inputDto)
+        {
+            return await _systemSetting.GetRoleDetail(inputDto);
         }
     }
 }

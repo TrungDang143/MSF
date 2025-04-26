@@ -21,58 +21,115 @@
     font-optical-sizing: auto;
   }
   
-  .container .sign-up {
+  .container .dialog {
     background-color: white;
-    display: flex;
-    align-self: center;
-    justify-self: center;
-    justify-content: center;
+    
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 70px 340px 90px;
+
     align-items: center;
+
     padding: 10px;
     margin-right: 20px;
     background-color: rgba(255, 255, 255, 0.3); /* Màu trắng trong suốt */
     backdrop-filter: blur(10px); /* Hiệu ứng mờ nền phía sau */
     border-radius: 10px; /* Bo góc */
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    height: 80%;
-    width: 40%;
+    height: 520px;
+    width: 430px;
   }
   
-  .container .sign-up .title {
-    font-size: 40px;
-    margin-top: 20px;
-    padding-bottom: 20px;
+  .container .dialog .title{
+    grid-row-start: 1;
+    grid-row-end: 2;
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+    font-size: 35px;
     font-weight: 500;
   }
-  
-  .container .sign-up td {
-    font-size: 20px;
-    padding: 5px;
-    text-align: left;
-  }
-  
-  input[type="text"],
-  input[type="password"] {
-    font-size: 20px;
-    border: 0px;
-    background-color: rgba(239, 239, 239, 0.305);
-    border-radius: 10px;
-    border: 1px solid black;
-    justify-content: center;
-    height: 35px;
-    padding: 5px;
-    width: 100%;
+
+  .container .dialog .popup-create-user{
+    grid-row-start: 2;
+    grid-row-end:3; 
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: repeat(4, auto);
+    gap: 10px;
+    padding-top: 30px;
+    width: 1200;
   }
 
-  .form-sign-up{
+  .popup-create-user .username {
+    grid-row-start: 1;
     display: flex;
-    align-content: end;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
   }
-  .formSignUp {
-    width: 100%;
-    /* height: 410px; */
-    align-content: end;
+  
+  .popup-create-user .email {
+    grid-row-start: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
   }
+  .popup-create-user .password {
+    grid-row-start: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  .popup-create-user .confirm-password {
+    grid-row-start: 4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  ::ng-deep .popup-create-user input{
+    width: 300px !important;
+    height: 50px;
+    padding: 12px;
+  }
+  
+  .rule-password {
+    padding-left: 0.5rem;   /* pl-2 */
+    margin-left: 0.2rem;    /* ml-2 */
+    margin-top: 0rem;       /* my-0 = mt-0 + mb-0 */
+    margin-bottom: 0rem;
+    line-height: 1.5;       /* leading-normal */
+    list-style-type: none;
+
+  }
+  .rule-password li{
+    list-style-type: none !important;
+    padding: 2px;
+    margin-right: 20px;
+  }
+  
+  .rule-password .detail-pass{
+     color: green !important;
+  }
+  
+  .rule-password .detail-fail{
+    color: red !important;
+    font-weight: 500;
+  }
+
+
+ .container .dialog .footer{
+  grid-row-start: 3;
+  grid-row-end: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  margin-bottom: 10px;
+ }
   
   .rounded-button {
     background-color: #6a0dad;
@@ -84,6 +141,7 @@
     cursor: pointer;
     transition: 0.3s;
     margin-top: 5px;
+    margin-bottom: 5px;
   }
   
   .rounded-button:hover {
@@ -98,17 +156,17 @@
     opacity: 0.6;
     pointer-events: none;
   }
-  .errMsg {
+
+  .errMsg-area{
+    min-height: 15px;
+    height: auto;
+  }
+  .errMsg{
     color: red;
-    padding-left: 5px;
-    min-height: 20px;
-  }
-  .social {
-    margin-top: 5px;
-    justify-items: center;
-  }
-  .btn {
-    text-align: center;
+    font-weight: 400;
+    width: 300px;
+    padding-left: 12px;
+    padding-bottom: 10px;
   }
   
   

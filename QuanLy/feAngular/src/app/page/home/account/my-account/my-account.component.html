@@ -49,6 +49,7 @@
               showIcon
               iconDisplay="input"
               dateFormat="dd/mm/yy"
+              appendTo="body"
             />
             <label for="input_date">Date of birth</label>
           </p-floatlabel>
@@ -104,7 +105,7 @@
             >Role: {{ detailAccountForm.value.roleID }}</p-message
           >
           <p-message severity="success" styleClass="p-message"
-            >Status: {{ detailAccountForm.value.statusID }}</p-message
+            >Status: {{ detailAccountForm.value.statusName }}</p-message
           >
         </div>
 

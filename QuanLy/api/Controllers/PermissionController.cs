@@ -3,6 +3,7 @@ using api.DTO.Perrmission;
 using api.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace api.Controllers
 {
@@ -21,14 +22,16 @@ namespace api.Controllers
         [HttpGet("GetAllPermission")]
         public BaseResponse GetAllPermission()
         {
-            return _permission.GetAllPermission();
+            int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
+            return _permission.GetAllPermission(roleID);
         }
 
         [HasPermission("view_permissions")]
         [HttpGet("GetPermissionByRoleID")]
         public BaseResponse GetPermissionByRoleID([FromQuery]GetPermissionByRoleIDDto inputDto)
         {
-            return _permission.GetPermissionByRoleID(inputDto);
+            int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
+            return _permission.GetPermissionByRoleID(inputDto, roleID);
         }
     }
 }

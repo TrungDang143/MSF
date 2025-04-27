@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
-    [HasPermission("manage_settings")]
+    [HasPermission("view_settings")]
     [Route("api/[controller]")]
     [ApiController]
     public class UserSettingController : ControllerBase
@@ -17,7 +17,7 @@ namespace api.Controllers
             _userSetting = userSetting;
         }
 
-        [HasPermission("assign_permissions")]
+        [HasPermission("assign_user_permissions")]
         [HttpPost("SetUserPermission")]
         public BaseResponse SetUserPermission([FromQuery]SetUserPermissionDto inputDto)
         {

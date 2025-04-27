@@ -55,6 +55,7 @@
   grid-template-columns: auto;
   grid-template-rows: repeat(1, auto);
   gap: 10px;
+
 }
 
 ::ng-deep .body .username-cell input {

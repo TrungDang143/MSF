@@ -90,10 +90,10 @@ export class SignUpComponent implements OnInit {
   passwordRules: { settingKey: string; description: string }[] = [];
   minPasswordLength = 6;
 
-  requiredUpper: boolean = true;
-  requiredLower: boolean = true;
-  requiredDigit: boolean = true;
-  requiredSpecial: boolean = true;
+  requiredUpper: boolean = false;
+  requiredLower: boolean = false;
+  requiredDigit: boolean = false;
+  requiredSpecial: boolean = false;
 
   get passwordErrors() {
     const control = this.signUpForm.get('password');
@@ -109,14 +109,19 @@ export class SignUpComponent implements OnInit {
     return control?.touched || control?.dirty;
   }
 
-  isTouched(event: AbstractControl) {
-    return event?.touched || event?.dirty;
-  }
+  // isTouched(event: AbstractControl) {
+  //   return event?.touched || event?.dirty;
+  // }
 
   getPasswordRule() {
     this.apiAccount.GetPasswordRule().subscribe({
       next: (res) => {
         if (res.result == '1') {
+          this.requiredUpper = false;
+          this.requiredLower = false;
+          this.requiredDigit = false;
+          this.requiredSpecial = false;
+
           res.data.rulePassword.forEach((element: any) => {
             if (element.settingKey == 'Password.RequireUpper')
               this.requiredUpper = true;
@@ -149,20 +154,19 @@ export class SignUpComponent implements OnInit {
       if (typeof password !== 'string') return null;
 
       const errors: ValidationErrors = {};
-
-      if (this.requiredUpper && !/[A-Z]/.test(password)) {
+      if ((this.requiredUpper && !/[A-Z]/.test(password)) || password.length == 0) {
         errors['Password.RequireUpper'] = true;
       }
-      if (this.requiredLower && !/[a-z]/.test(password)) {
+      if ((this.requiredLower && !/[a-z]/.test(password)) || password.length == 0) {
         errors['Password.RequireLower'] = true;
       }
-      if (this.requiredDigit && !/\d/.test(password)) {
+      if ((this.requiredDigit && !/\d/.test(password)) || password.length == 0) {
         errors['Password.RequireDigit'] = true;
       }
-      if (
+      if ((
         this.requiredSpecial &&
         !/[!@#$%^&*(),.?":{}|<>_\-+=\\[\]\/]/.test(password)
-      ) {
+      ) || password.length == 0) {
         errors['Password.RequireSpecial'] = true;
       }
       if (password.length < this.minPasswordLength) {
@@ -171,12 +175,6 @@ export class SignUpComponent implements OnInit {
           actualLength: password.length,
         };
       }
-      console.log('Password Rule Flags:', password);
-      console.log('Require Uppercase:', this.requiredUpper);
-      console.log('Require Lowercase:', this.requiredLower);
-      console.log('Require Digit:', this.requiredDigit);
-      console.log('Require Special Character:', this.requiredSpecial);
-
       return Object.keys(errors).length ? errors : null;
     };
   }

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
 {
-    [HasPermission("manage_settings")]
+    [HasPermission("view_settings")]
     [Route("api/[controller]")]
     [ApiController]
     public class SystemSettingController : ControllerBase
@@ -24,28 +24,28 @@ namespace api.Controllers
             return await _systemSetting.GetPasswordRule();
         }
 
+        [HasPermission("admin.manage_password")]
         [HttpPost("UpdatePasswordRule")]
         public async Task<BaseResponse> UpdatePasswordRule([FromBody] UpdatePasswordRuleDto inputDto)
         {
             return await _systemSetting.UpdatePasswordRule(inputDto);
         }
 
-
-        [HasPermission("create_roles")]
+        [HasPermission("admin.create_roles")]
         [HttpPost("CreateRole")]
         public async Task<BaseResponse> CreateRole([FromBody] CreateRoleDto inputDto)
         {
             return await _systemSetting.CreateRole(inputDto);
         }
 
-        [HasPermission("delete_roles")]
+        [HasPermission("admin.delete_roles")]
         [HttpPost("DeleteRole")]
         public async Task<BaseResponse> DeleteRole([FromBody] DeleteRoleDto inputDto)
         {
             return await _systemSetting.DeleteRole(inputDto);
         }
 
-        [HasPermission("edit_roles")]
+        [HasPermission("admin.edit_roles")]
         [HttpPost("UpdateRole")]
         public async Task<BaseResponse> UpdateRole([FromBody] UpdateRoleDto inputDto)
         {

@@ -267,7 +267,7 @@ export class SettingComponent implements OnInit {
     'Quản lý vai trò',
     'Quản lý phân quyền',
     'Quản lý nội dung',
-    'Quản lý hệ thống',
+    'Phân quyền Admin',
   ];
 
   permission_User: TreeNode[] = [];

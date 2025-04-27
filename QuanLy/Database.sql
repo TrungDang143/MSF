@@ -25,6 +25,12 @@ CREATE TABLE Users (
 
 alter table users
 add IsExternalAvatar bit default 0 
+alter table users
+add IsDeleted bit default 0 
+alter table users
+add ReLogin bit default 0 
+update users
+set ReLogin = 0
 
 --SELECT name
 --FROM sys.check_constraints
@@ -1185,8 +1191,40 @@ begin
 end
 exec sp_GetRoleDetailByRoleID 1
 ----------------------------------------------------------------------------------------------------
+create proc sp_GetActivePasswordRule
+as
+begin
+	select Description form SystemSettings where 
+end
 ----------------------------------------------------------------------------------------------------
+create proc sp_IsValidUser
+@username varchar(100),
+@rtnValue bit output
+as
+begin
+	set @rtnValue = 1;
+	if exists (select 1 from users where Username = @username or Email = @username)
+	begin
+		declare @isActive bit;
+		declare @isDeleted bit;
 
+		set @isActive = (select top 1 Status from Users where Username = @username or Email = @username)
+		set @isDeleted = (select top 1 isDeleted from Users where Username = @username or Email = @username)
+
+		if (@isActive = 2 or @isDeleted = 1) 
+		begin
+			set @rtnValue = 0; 
+			return
+		end;
+
+		set @rtnValue = 1;
+		return
+	end
+end
+
+declare @rtnValue bit;
+exec sp_IsValidUser 'ddtrung143@gmail.com', @rtnValue output
+select @rtnValue
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -1201,12 +1239,12 @@ select * from Users
 SELECT FORMAT(ABS(CHECKSUM(NEWID())) % 10000, 'D4') AS RandomCode;
 
 DECLARE @ReturnValue NVARCHAR(100);
-exec sp_CreateUser 'admin3', 'password', 'abc1@gmail.com', N'đặng đức trung', default, default,default,default,default,default,default,default,  @ReturnValue output
+exec sp_CreateUser 'admin', 'bcb15f821479b4d5772bd0ca866c00ad5f926e3580720659cc80d39c9d09802a', 'admin@gmail.com', N'đặng đức trung', default, default,default,default,default,default,default,default,  @ReturnValue output
 exec sp_rename 'dbo.sp_UpdateRolePermissions', 'sp_UpdateRole'
 
 exec sp_GetPermissionByRoleID 17
 
-
+insert into Users (username, email, PasswordHash, roleid, status) values ('admin','admin@gmail.com','bcb15f821479b4d5772bd0ca866c00ad5f926e3580720659cc80d39c9d09802a', 1, 1)
 
 
 

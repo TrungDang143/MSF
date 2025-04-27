@@ -9,7 +9,7 @@ namespace api.Services
 {
     public class PermissionService : IPermission
     {
-        public BaseResponse GetAllPermission()
+        public BaseResponse GetAllPermission(int? roleID)
         {
             var res = new BaseResponse();
             GetAllPermissionOutDto model = new GetAllPermissionOutDto();
@@ -32,26 +32,31 @@ namespace api.Services
 
                     foreach(DataRow dr in dt.Rows)
                     {
-                        if ((int)dr[0] == 15) continue;//setting he thong
-
-                        if (dr[1].ToString().Contains("users"))
+                        if (dr[1].ToString().Contains("admin."))
                         {
-                            dt_user.ImportRow(dr);
-                        }else if (dr[1].ToString().Contains("roles"))
+                            if(roleID !=null && roleID == 1)
+                                dt_sys.ImportRow(dr);
+                        }
+                        else if (dr[1].ToString().Contains("_roles"))
                         {
                             dt_role.ImportRow(dr);
                         }
-                        else if (dr[1].ToString().Contains("content"))
+                        else if (dr[1].ToString().Contains("_content"))
                         {
                             dt_content.ImportRow(dr);
                         }
-                        else if (dr[1].ToString().Contains("permissions"))
+                        else if (dr[1].ToString().Contains("_permissions"))
                         {
                             dt_permission.ImportRow(dr);
                         }
+                        else if (dr[1].ToString().Contains("_users"))
+                        {
+                            dt_user.ImportRow(dr);                    
+                        }
                         else
                         {
-                            dt_sys.ImportRow(dr);
+                            if (roleID != null && roleID == 1)
+                                dt_sys.ImportRow(dr);
                         }
                     }
 
@@ -74,7 +79,7 @@ namespace api.Services
             return res;
         }
 
-        public BaseResponse GetPermissionByRoleID(GetPermissionByRoleIDDto inputDto)
+        public BaseResponse GetPermissionByRoleID(GetPermissionByRoleIDDto inputDto, int? roleID)
         {
             var res = new BaseResponse();
 
@@ -87,6 +92,7 @@ namespace api.Services
                     conn.Open();
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@RoleID", inputDto.RoleID);
+                    cmd.Parameters.AddWithValue("@isAdmin", roleID != null && roleID == 1 ? true : false);
 
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
@@ -94,8 +100,7 @@ namespace api.Services
                     List<int> listPermissionIDs = new List<int>();
                     foreach (DataRow dr in dt.Rows)
                     {
-                        if ((int)dr[0] != 15) //setting he thong
-                            listPermissionIDs.Add((int)dr[0]);
+                        listPermissionIDs.Add((int)dr[0]);
                     }
                     res.Data = listPermissionIDs;
                 }

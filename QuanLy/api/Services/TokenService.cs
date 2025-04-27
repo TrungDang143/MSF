@@ -64,7 +64,7 @@ namespace api.Services
                 return false;
             }
         }
-        public string GenerateToken(string username, string roleName, List<string> permissionNames)
+        public string GenerateToken(string username, int roleID, List<string> permissionNames)
         {
             var jwtSettings = _config.GetSection("Jwt");
             var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
@@ -72,7 +72,7 @@ namespace api.Services
             var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, roleName),
+            new Claim(ClaimTypes.Role, roleID.ToString()),
             new Claim("permissions", string.Join(",", permissionNames)),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
@@ -305,6 +305,7 @@ namespace api.Services
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.Add(roleIDParam);
+                        cmd.Parameters.AddWithValue("@isAdmin", true);
 
                         DataTable dt = new DataTable();
                         adapter.Fill(dt);

@@ -138,6 +138,7 @@ export class ListAccountsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+    this.getPasswordRule();
   }
 
   isMe(username: string): boolean {
@@ -428,7 +429,7 @@ export class ListAccountsComponent implements OnInit {
     'Quản lý vai trò',
     'Quản lý phân quyền',
     'Quản lý nội dung',
-    'Quản lý hệ thống',
+    'Phân quyền Admin',
   ];
 
   permission_User: TreeNode[] = [];
@@ -757,7 +758,7 @@ export class ListAccountsComponent implements OnInit {
 
     this.permission_System = [
       {
-        label: 'System',
+        label: 'Admin',
         data: 'permission_System',
         expanded: true,
         children: this.convertToTreeNodes(data.permission_System),
@@ -1154,6 +1155,11 @@ export class ListAccountsComponent implements OnInit {
     this.apiAccount.GetPasswordRule().subscribe({
       next: (res) => {
         if (res.result == '1') {
+          this.requiredUpper = false;
+          this.requiredLower = false;
+          this.requiredDigit = false;
+          this.requiredSpecial = false;
+
           res.data.rulePassword.forEach((element: any) => {
             if (element.settingKey == 'Password.RequireUpper')
               this.requiredUpper = true;
@@ -1183,22 +1189,36 @@ export class ListAccountsComponent implements OnInit {
     return (control: AbstractControl): ValidationErrors | null => {
       const password = control.value;
 
+      console.log('this.requiredUpper = ',this.requiredUpper);
+      console.log('this.requiredLower = ',this.requiredLower);
+      console.log('this.requiredDigit = ',this.requiredDigit);
+      console.log('this.requiredSpecial = ',this.requiredSpecial);
+
       if (typeof password !== 'string') return null;
 
       const errors: ValidationErrors = {};
-
-      if (this.requiredUpper && !/[A-Z]/.test(password)) {
+      if (
+        (this.requiredUpper && !/[A-Z]/.test(password)) ||
+        password.length == 0
+      ) {
         errors['Password.RequireUpper'] = true;
       }
-      if (this.requiredLower && !/[a-z]/.test(password)) {
+      if (
+        (this.requiredLower && !/[a-z]/.test(password)) ||
+        password.length == 0
+      ) {
         errors['Password.RequireLower'] = true;
       }
-      if (this.requiredDigit && !/\d/.test(password)) {
+      if (
+        (this.requiredDigit && !/\d/.test(password)) ||
+        password.length == 0
+      ) {
         errors['Password.RequireDigit'] = true;
       }
       if (
-        this.requiredSpecial &&
-        !/[!@#$%^&*(),.?":{}|<>_\-+=\\[\]\/]/.test(password)
+        (this.requiredSpecial &&
+          !/[!@#$%^&*(),.?":{}|<>_\-+=\\[\]\/]/.test(password)) ||
+        password.length == 0
       ) {
         errors['Password.RequireSpecial'] = true;
       }
@@ -1208,11 +1228,10 @@ export class ListAccountsComponent implements OnInit {
           actualLength: password.length,
         };
       }
-
+      console.log('validator = ',errors);
       return Object.keys(errors).length ? errors : null;
     };
   }
-
 
   displayChangePassword = false;
   changePasswordForm = new FormGroup(
@@ -1227,9 +1246,9 @@ export class ListAccountsComponent implements OnInit {
     { validators: this.matchPassword }
   );
   showDialogChangePassword() {
+    this.getPasswordRule();
     this.displayChangePassword = true;
     this.changePasswordForm.reset();
-    this.getPasswordRule();
   }
   closeDialogChangePassword() {
     this.displayChangePassword = false;
@@ -1247,14 +1266,12 @@ export class ListAccountsComponent implements OnInit {
 
     // Chỉ hiển thị lỗi nếu người dùng đã chạm vào (touched) hoặc sửa (dirty)
     if (!(control.touched || control.dirty)) return {};
-
     return control.errors || {};
   }
   get passwordDirtied_changePassword() {
     const control = this.changePasswordForm.get('newPassword');
-    return control?.dirty;
+    return control?.touched || control?.dirty;
   }
-
 
   changePassword() {}
 }

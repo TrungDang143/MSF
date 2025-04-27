@@ -5,10 +5,10 @@ using api.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace api.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -52,7 +52,7 @@ namespace api.Controllers
         [HttpPost("UpdateUser")]
         public BaseResponse UpdateUser([FromBody] UpdateUserDto inputDto)
         {
-            var username = User.Identity?.Name;
+            string? username = User.Identity?.Name;
             return _account.UpdateUser(inputDto, username);
         }
 
@@ -67,10 +67,11 @@ namespace api.Controllers
         [HttpGet("GetAllUserPermission")]
         public BaseResponse GetAllUserPermission([FromQuery] GetAllUserPermissionDto inputDto)
         {
-            return _account.GetAllUserPermission(inputDto);
+            int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
+            return _account.GetAllUserPermission(inputDto, roleID);
         }
 
-        [HasPermission("assign_permissions")]
+        [HasPermission("assign_user_permissions")]
         [HttpPost("UpdateUserPermission")]
         public BaseResponse UpdateUserPermission([FromBody] UpdateUserPermissionDto inputDto)
         {

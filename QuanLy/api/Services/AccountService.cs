@@ -381,7 +381,7 @@ namespace api.Services
             return res;
         }
 
-        public BaseResponse UpdateUser(UpdateUserDto inputDto, string username)
+        public BaseResponse UpdateUser(UpdateUserDto inputDto, string? username)
         {
             var res = new BaseResponse();
             try
@@ -410,7 +410,7 @@ namespace api.Services
                         cmd.Parameters.AddWithValue("@IsExternalAvatar", true);
                     }
 
-                    if (username != inputDto.Username)
+                    if (!string.IsNullOrEmpty(username) && (username != inputDto.Username))
                     {
                         if (inputDto.roleID == null || inputDto.roleID == 1) inputDto.roleID = null;
                         cmd.Parameters.AddWithValue("@roleID", Utils.DbNullIfNull(inputDto.roleID));
@@ -449,7 +449,7 @@ namespace api.Services
         /// </summary>
         /// <param name="inputDto"></param>
         /// <returns></returns>
-        public BaseResponse GetAllUserPermission(GetAllUserPermissionDto inputDto)
+        public BaseResponse GetAllUserPermission(GetAllUserPermissionDto inputDto, int roleID)
         {
             var res = new BaseResponse();
 
@@ -462,6 +462,7 @@ namespace api.Services
                     conn.Open();
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
+                    cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
 
                     DataTable dt = new DataTable();
                     adapter.Fill(dt);
@@ -469,8 +470,7 @@ namespace api.Services
                     List<int> listPermissionIDs = new List<int>();
                     foreach (DataRow dr in dt.Rows)
                     {
-                        if ((int)dr[0] != 15) //setting he thong
-                            listPermissionIDs.Add((int)dr[0]);
+                        listPermissionIDs.Add((int)dr[0]);
                     }
                     res.Data = listPermissionIDs;
                 }

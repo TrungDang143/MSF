@@ -522,7 +522,7 @@
         >
         </p-checkbox>
         <label for="allDetailSelected" style="margin-left: 2px"
-          >Cấp tất cả quyền System</label
+          >Cấp tất cả quyền Admin</label
         >
       </div>
     </div>
@@ -837,7 +837,7 @@
 </p-dialog>
 
 <p-dialog header="Đổi mật khẩu" [(visible)]="displayChangePassword" [modal]="true" 
-[style]="{'width': '400px', 'height': '420px'}" (onHide)="closeDialogChangePassword()">
+[style]="{'width': '400px', 'height': '400px'}" (onHide)="closeDialogChangePassword()">
 <form action="" method="post" [formGroup]="changePasswordForm">
   <div class="popup-change-password">
       <div class="user-info-cell" *ngIf="!isMe(userNameSeleted)">
@@ -890,9 +890,9 @@
                     !passwordErrors_changePassword.hasOwnProperty(item.settingKey) &&
                     !passwordDirtied_changePassword
                       ? ''
-                      : passwordErrors_changePassword[item.settingKey]
-                      ? 'rule-password detail-fail'
-                      : 'rule-password detail-pass'
+                      : passwordErrors_changePassword[item.settingKey] == false
+                      ? 'rule-password detail-pass'
+                      : 'rule-password detail-fail'
                   "
                 >
                   <i
@@ -912,6 +912,11 @@
           </p-password>
           <label for="input_password">Mật khẩu mới</label>
         </p-floatlabel>
+        <div class="errMsg-area">
+          <div class="errMsg" *ngIf="!changePasswordForm.get('newPassword')?.valid && passwordDirtied_changePassword">
+            <small>Nhập mật khẩu theo quy tắc.</small>
+          </div>
+        </div>
       </div>
       <div class="confirm-password-cell">
         <p-floatlabel variant="in">
@@ -927,15 +932,9 @@
         <div class="errMsg-area">
           <div
             class="errMsg"
-            *ngIf="
-              changePasswordForm['controls']['oldPassword'].touched &&
-              changePasswordForm['controls']['oldPassword'].errors
-            "
+            *ngIf="changePasswordForm.errors?.['passwordMismatch'] || changePasswordForm.get('confirmNewPassword')?.touched"
           >
-            <small
-              *ngIf="changePasswordForm['controls']['oldPassword'].errors['required']"
-              >Mật khẩu không khớp.</small
-            >
+            <small>Mật khẩu nhập lại không khớp.</small>
           </div>
         </div>
       </div>

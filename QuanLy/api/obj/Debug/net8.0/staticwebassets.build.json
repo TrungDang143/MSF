@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "roIEhgzN0UzB6qBRcTk6senVhmCy7WKhWpKf9rLMwjI=",
+  "Hash": "zQrjwCqpD4S7lGch8xG0QBcGnjdPoajxL0H7shMObIQ=",
   "Source": "api",
   "BasePath": "_content/api",
   "Mode": "Default",
@@ -851,6 +851,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\uploads\\avatars\\ad6738e9-3bfa-4518-90de-db0cd53aeedf.png"
+    },
+    {
+      "Identity": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\b84cac11-a941-4ee6-94c2-d7efe001825b.png",
+      "SourceId": "api",
+      "SourceType": "Discovered",
+      "ContentRoot": "E:\\MSF\\QuanLy\\api\\wwwroot\\",
+      "BasePath": "_content/api",
+      "RelativePath": "uploads/avatars/b84cac11-a941-4ee6-94c2-d7efe001825b.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\avatars\\b84cac11-a941-4ee6-94c2-d7efe001825b.png"
     },
     {
       "Identity": "E:\\MSF\\QuanLy\\api\\wwwroot\\uploads\\avatars\\bcb099fb-2b9b-4e78-800f-238a09e38565.png",

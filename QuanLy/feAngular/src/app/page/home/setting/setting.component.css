@@ -98,3 +98,8 @@
 ::ng-deep .overview-permission .catelory-permission-btn{
   width: 100% !important;
 }
+
+.detail-permission{
+  overflow-y: auto;
+  height: 320px;
+}

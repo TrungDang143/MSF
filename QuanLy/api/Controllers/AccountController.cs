@@ -75,7 +75,8 @@ namespace api.Controllers
         [HttpPost("UpdateUserPermission")]
         public BaseResponse UpdateUserPermission([FromBody] UpdateUserPermissionDto inputDto)
         {
-            return _account.UpdateUserPermission(inputDto);
+            int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
+            return _account.UpdateUserPermission(inputDto, roleID);
         }
 
         [HasPermission("create_users")]
@@ -89,7 +90,8 @@ namespace api.Controllers
         [HttpPost("CreateUser")]
         public BaseResponse CreateUser([FromBody]CreateUserDto inputDto)
         {
-            return _account.CreateUser(inputDto);
+            int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
+            return _account.CreateUser(inputDto, roleID);
         }
 
         
@@ -97,6 +99,40 @@ namespace api.Controllers
         public async Task<BaseResponse> GetActivePasswordRule()
         {
             return await _account.GetActivePasswordRule();
+        }
+
+        [HasPermission("edit_users")]
+        [HttpPost("ChangeUserPassword")]
+        public async Task<BaseResponse> ChangeUserPassword([FromBody] ChangeUserPasswordDto inputDto)
+        {
+            return await _account.ChangeUserPassword(inputDto);
+        }
+
+        [HasPermission("edit_users")]
+        [HttpPost("ChangeMyPassword")]
+        public async Task<BaseResponse> ChangeMyPassword([FromBody] ChangeMyPasswordDto inputDto)
+        {
+            return await _account.ChangeMyPassword(inputDto);
+        }
+
+        [HasPermission("admin.logout_users")]
+        [HttpGet("LogoutUser")]
+        public async Task<BaseResponse> LogoutUser([FromQuery] LogoutUserDto inputDto)
+        {
+            string? username = User.Identity?.Name;
+            return await _account.LogoutUser(inputDto, username);
+        }
+
+        [HasPermission("admin.login_users")]
+        [HttpGet("LoginUser")]
+        public BaseResponse LoginUser([FromQuery] LoginUserDto inputDto)
+        {
+            string? username = User.Identity?.Name;
+            string token = _tokenService.GenerateToken(inputDto.username, true);
+
+            inputDto.token = token;
+
+            return _account.LoginUser(inputDto, username);
         }
     }
 }

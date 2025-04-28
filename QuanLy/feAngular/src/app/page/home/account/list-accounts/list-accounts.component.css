@@ -235,6 +235,11 @@
   width: 100% !important;
 }
 
+.detail-permission{
+  overflow-y: auto;
+  height: 320px;
+}
+
 .popup-create-user {
   overflow-y: auto;
   display: grid;
@@ -447,7 +452,7 @@
 }
 
 .errMsg-area {
-  min-height: 15px;
+  min-height: 25px;
   height: auto;
 }
 .errMsg {
@@ -455,5 +460,5 @@
   font-weight: 400;
   width: 350px;
   padding-left: 12px;
-  padding-bottom: 5px;
+  padding-bottom: 10px;
 }

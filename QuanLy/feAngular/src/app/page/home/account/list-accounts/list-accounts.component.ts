@@ -5,6 +5,7 @@ import { AccountService } from '../../../../services/account.service';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+
 import {
   AbstractControl,
   FormControl,
@@ -40,6 +41,8 @@ import { PasswordModule } from 'primeng/password';
 import { DividerModule } from 'primeng/divider';
 import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
+import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-list-accounts',
@@ -78,7 +81,8 @@ export class ListAccountsComponent implements OnInit {
     private apiAccount: AccountService,
     private pop: PopupService,
     private authService: AuthService,
-    private apiPermission: PermissionService
+    private apiPermission: PermissionService,
+    private router: Router
   ) {}
 
   userIdSeleted: number = 0;
@@ -105,12 +109,12 @@ export class ListAccountsComponent implements OnInit {
           {
             label: 'Đăng nhập',
             icon: 'pi pi-sign-in',
-            command: () => {},
+            command: () => {this.LoginAsUser()},
           },
           {
             label: 'Đăng xuất user',
             icon: 'pi pi-sign-out',
-            command: () => {},
+            command: () => {this.LogoutUser()},
           },
         ],
       },
@@ -141,8 +145,9 @@ export class ListAccountsComponent implements OnInit {
     this.getPasswordRule();
   }
 
-  isMe(username: string): boolean {
-    return this.authService.getUser() == username;
+  isMe(username?: string): boolean {
+    if (username) return this.authService.getUser() == username;
+    return this.authService.getUser() == this.userNameSeleted;
   }
 
   loadData() {
@@ -312,8 +317,12 @@ export class ListAccountsComponent implements OnInit {
                   this.closeDialogDetail();
 
                   this.displayPopupPermission = false;
-                } else {
+                } else if (res.result == '1'){
                   this.pop.showOkPopup({ message: res.message });
+                }
+                else{
+                  this.pop.showSysErr();
+                  console.log(res.message);
                 }
               },
               error: (err) => {
@@ -770,7 +779,7 @@ export class ListAccountsComponent implements OnInit {
 
   //detail user
   //show permission cua user
-  userPermission(userID: number) {
+  userPermission() {
     this.apiPermission.getAllPermission().subscribe({
       next: (res) => {
         if (res.result == '1') {
@@ -784,27 +793,27 @@ export class ListAccountsComponent implements OnInit {
               this.mockupUserPermission(permissionIds);
             } else {
               //lay tat ca quyen (role + extend)
-              this.apiAccount.GetAllUserPermission(userID).subscribe({
-                next: (res) => {
-                  if (res.result == '1') {
-                    let permissionIds: [] = res.data;
+              this.apiAccount
+                .GetAllUserPermission(this.userIdSeleted)
+                .subscribe({
+                  next: (res) => {
+                    if (res.result == '1') {
+                      let permissionIds: [] = res.data;
 
-                    this.mockupUserPermission(permissionIds);
-                  } else {
-                    this.pop.showOkPopup({ message: res.message });
-                  }
-                },
-                error: (err) => {
-                  this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
-                  console.log(err);
-                },
-              });
+                      this.mockupUserPermission(permissionIds);
+                    } else {
+                      this.pop.showOkPopup({ message: res.message });
+                    }
+                  },
+                  error: (err) => {
+                    this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
+                    console.log(err);
+                  },
+                });
             }
           } else {
             this.apiPermission
-              .getPermissionByRoleID(
-                this.detailAccountForm.get('roleID')?.value
-              )
+              .getPermissionByRoleID(this.userIdSeleted)
               .subscribe({
                 next: (res) => {
                   if (res.result == '1') {
@@ -1189,46 +1198,49 @@ export class ListAccountsComponent implements OnInit {
     return (control: AbstractControl): ValidationErrors | null => {
       const password = control.value;
 
-      console.log('this.requiredUpper = ',this.requiredUpper);
-      console.log('this.requiredLower = ',this.requiredLower);
-      console.log('this.requiredDigit = ',this.requiredDigit);
-      console.log('this.requiredSpecial = ',this.requiredSpecial);
-
-      if (typeof password !== 'string') return null;
-
       const errors: ValidationErrors = {};
-      if (
-        (this.requiredUpper && !/[A-Z]/.test(password)) ||
-        password.length == 0
-      ) {
-        errors['Password.RequireUpper'] = true;
+
+      if (typeof password !== 'string') {
+        if (this.requiredUpper) {
+          errors['Password.RequireUpper'] = true;
+        }
+        if (this.requiredLower) {
+          errors['Password.RequireLower'] = true;
+        }
+        if (this.requiredDigit) {
+          errors['Password.RequireDigit'] = true;
+        }
+        if (this.requiredSpecial) {
+          errors['Password.RequireSpecial'] = true;
+        }
+        errors['Password.MinLength'] = true;
+      } else {
+        if (
+          (this.requiredUpper && !/[A-Z]/.test(password)) ||
+          password.length == 0
+        ) {
+          errors['Password.RequireUpper'] = true;
+        }
+        if (this.requiredLower && !/[a-z]/.test(password)) {
+          errors['Password.RequireLower'] = true;
+        }
+        if (this.requiredDigit && !/\d/.test(password)) {
+          errors['Password.RequireDigit'] = true;
+        }
+        if (
+          this.requiredSpecial &&
+          !/[!@#$%^&*(),.?":{}|<>_\-+=\\[\]\/]/.test(password)
+        ) {
+          errors['Password.RequireSpecial'] = true;
+        }
+        if (password.length < this.minPasswordLength) {
+          errors['Password.MinLength'] = {
+            requiredLength: this.minPasswordLength,
+            actualLength: password.length,
+          };
+        }
       }
-      if (
-        (this.requiredLower && !/[a-z]/.test(password)) ||
-        password.length == 0
-      ) {
-        errors['Password.RequireLower'] = true;
-      }
-      if (
-        (this.requiredDigit && !/\d/.test(password)) ||
-        password.length == 0
-      ) {
-        errors['Password.RequireDigit'] = true;
-      }
-      if (
-        (this.requiredSpecial &&
-          !/[!@#$%^&*(),.?":{}|<>_\-+=\\[\]\/]/.test(password)) ||
-        password.length == 0
-      ) {
-        errors['Password.RequireSpecial'] = true;
-      }
-      if (password.length < this.minPasswordLength) {
-        errors['Password.MinLength'] = {
-          requiredLength: this.minPasswordLength,
-          actualLength: password.length,
-        };
-      }
-      console.log('validator = ',errors);
+
       return Object.keys(errors).length ? errors : null;
     };
   }
@@ -1236,17 +1248,22 @@ export class ListAccountsComponent implements OnInit {
   displayChangePassword = false;
   changePasswordForm = new FormGroup(
     {
-      oldPassword: new FormControl('', [Validators.required]),
-      newPassword: new FormControl('', [
+      oldPassword: new FormControl<string>('', [Validators.required]),
+      newPassword: new FormControl<string>('', [
         Validators.required,
         this.passwordRulesValidator(),
       ]),
-      confirmNewPassword: new FormControl('', [Validators.required]),
+      confirmNewPassword: new FormControl<string>('', [Validators.required]),
     },
     { validators: this.matchPassword }
   );
+
   showDialogChangePassword() {
     this.getPasswordRule();
+    if (!this.isMe()) this.changePasswordForm.get('oldPassword')?.disable();
+    else {
+      this.changePasswordForm.get('oldPassword')?.enable();
+    }
     this.displayChangePassword = true;
     this.changePasswordForm.reset();
   }
@@ -1257,7 +1274,22 @@ export class ListAccountsComponent implements OnInit {
   matchPassword(form: AbstractControl) {
     const password = form.get('newPassword')?.value;
     const confirmPassword = form.get('confirmNewPassword')?.value;
-    return password === confirmPassword ? null : { passwordMismatch: true };
+
+    // if (!password || !confirmPassword) {
+    //   // Nếu chưa nhập đủ 2 ô, không validate
+    //   return null;
+    // }
+
+    if (password === confirmPassword) {
+      // Nếu đúng, cần clear lỗi ở confirmNewPassword (nếu có)
+      form.get('confirmNewPassword')?.setErrors(null);
+
+      return null;
+    } else {
+      // Nếu sai, gán lỗi vào confirmNewPassword
+      form.get('confirmNewPassword')?.setErrors({ passwordMismatch: true });
+      return { passwordMismatch: true };
+    }
   }
 
   get passwordErrors_changePassword() {
@@ -1273,5 +1305,79 @@ export class ListAccountsComponent implements OnInit {
     return control?.touched || control?.dirty;
   }
 
-  changePassword() {}
+  handleChangePassword() {
+    this.pop.showYesNoPopup({
+      message: 'Bạn chắc chắn muốn đổi mật khẩu của user này chứ?',
+      onAccept: () => {
+        this.changePassword();
+      },
+    });
+  }
+  changePassword() {
+    let apiChangePassword: Observable<any> = this.isMe()
+      ? this.apiAccount.ChangeMyPassword(
+          this.userNameSeleted,
+          this.changePasswordForm.get('oldPassword')?.value!,
+          this.changePasswordForm.get('newPassword')?.value!
+        )
+      : this.apiAccount.ChangeUserPassword(
+          this.userNameSeleted,
+          this.changePasswordForm.get('newPassword')?.value!
+        );
+
+    apiChangePassword.subscribe({
+      next: (res) => {
+        if (res.result == '1') {
+          this.pop.showOkPopup({ message: res.message });
+          this.closeDialogChangePassword();
+        } else if (res.result == '0') {
+          this.pop.showOkPopup({ message: res.message });
+          this.closeDialogChangePassword();
+        } else {
+          this.pop.showSysErr();
+          console.log(res.message);
+        }
+      },
+      error: (err) => {
+        this.pop.showSysErr();
+        console.log(err);
+      },
+    });
+  }
+
+  LoginAsUser(){
+    this.apiAccount.LoginAsUser(this.userNameSeleted).subscribe({
+      next: (res)=>{
+        if(res.result == '1'){
+          this.authService.saveUserData(res.data, false)
+          this.router.navigate(['/home']);
+          window.location.reload();
+
+        }else{
+          this.pop.showOkPopup({message: res.message})
+        }
+      },
+      error: (err) => {
+        this.pop.showSysErr();
+        console.log(err);
+      }
+    })
+  }
+
+  LogoutUser(){
+    this.apiAccount.LogoutUser(this.userNameSeleted).subscribe({
+      next: (res)=>{
+        if(res.result == '1'){
+          this.pop.showOkPopup({message: res.message})
+        }else{
+          this.pop.showSysErr();
+          console.log(res.message)
+        }
+      },
+      error: (err) => {
+        this.pop.showSysErr();
+        console.log(err);
+      }
+    })
+  }
 }

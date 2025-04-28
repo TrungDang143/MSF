@@ -12,11 +12,11 @@ namespace api.Services
 {
     public class AccountService : IAccount
     {
-        public BaseResponse CreateUser(CreateUserDto inputDto)
+        public BaseResponse CreateUser(CreateUserDto inputDto, int roleID)
         {
             var res = new BaseResponse();
 
-            if (inputDto.roleId == 1)
+            if (inputDto.roleId == 1 && roleID != 1)
             {
                 res.Message = "Không thể set role Admin!";
                 res.Result = AppConstant.RESULT_ERROR;
@@ -55,6 +55,7 @@ namespace api.Services
                     cmd.Parameters.AddWithValue("@FacebookID", (object?)inputDto.facebookId ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@RoleID", inputDto.roleId.HasValue ? inputDto.roleId.Value : "Default");
                     cmd.Parameters.AddWithValue("@IsExternalAvatar", 0);
+                    cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
 
                     var rtnValue = new SqlParameter("@rtnValue", SqlDbType.Int)
                     {
@@ -78,7 +79,7 @@ namespace api.Services
                             cmd_permission.Parameters.AddWithValue("@UserID", (int)rtnValue.Value);
                             if (inputDto.permissionIds != null)
                             {
-                                string permissionIdsString = string.Join(",", inputDto.permissionIds.Select(id => id == 15 ? "admin" : id.ToString()));
+                                string permissionIdsString = string.Join(",", inputDto.permissionIds);
                                 cmd_permission.Parameters.AddWithValue("@PermissionIDs", !string.IsNullOrEmpty(permissionIdsString) ? permissionIdsString : DBNull.Value);
                             }
                             else
@@ -487,7 +488,7 @@ namespace api.Services
             return res;
         }
 
-        public BaseResponse UpdateUserPermission(UpdateUserPermissionDto inputDto)
+        public BaseResponse UpdateUserPermission(UpdateUserPermissionDto inputDto, int roleID)
         {
             var res = new BaseResponse();
 
@@ -524,10 +525,10 @@ namespace api.Services
 
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
+                    cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
                     if (inputDto.PermissionIds != null)
                     {
-                        var permissionIdsString = string.Join(",", inputDto.PermissionIds.Select(id => id == 15 ? "admin" : id.ToString()));
-                        permissionIdsString.Replace("15", "admin");
+                        var permissionIdsString = string.Join(",", inputDto.PermissionIds);
                         cmd.Parameters.AddWithValue("@PermissionIDs", !string.IsNullOrEmpty(permissionIdsString) ? permissionIdsString : DBNull.Value);
                     }
                     else
@@ -678,5 +679,147 @@ namespace api.Services
 
             return res;
         }
+
+        public async Task<BaseResponse> ChangeUserPassword(ChangeUserPasswordDto inputDto)
+        {
+            var res = new BaseResponse();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_ChangePassword", conn))
+                {
+                    await conn.OpenAsync();
+
+                    string password = HashPassword.Encrypt(inputDto.newPassword);
+
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Username", inputDto.username);
+                    cmd.Parameters.AddWithValue("@newpassword", password);
+                    SqlParameter rtnValue = new SqlParameter("@ReturnStatus", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    cmd.Parameters.Add(rtnValue);
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    if((int)rtnValue.Value == 1)
+                    {
+                        res.Message = "Cập nhật mật khẩu thành công!";
+                        res.Result = AppConstant.RESULT_SUCCESS;
+                    }
+                    else
+                    {
+                        res.Message = "Tài khoản không tồn tại!";
+                        res.Result = AppConstant.RESULT_ERROR;
+                    }
+                }
+            }catch(Exception ex)
+            {
+                res.Message = ex.Message;
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
+            }
+
+            return res;
+        }
+
+        public async Task<BaseResponse> ChangeMyPassword(ChangeMyPasswordDto inputDto)
+        {
+            var res = new BaseResponse();
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_ChangeMyPassword", conn))
+                {
+                    await conn.OpenAsync();
+
+                    string newPassword = HashPassword.Encrypt(inputDto.newPassword);
+                    string oldPassword = HashPassword.Encrypt(inputDto.oldPassword);
+
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Username", inputDto.username);
+                    cmd.Parameters.AddWithValue("@newHashPassword", newPassword);
+                    cmd.Parameters.AddWithValue("@oldHashPassword", oldPassword);
+                    SqlParameter rtnValue = new SqlParameter("@ReturnStatus", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+                    cmd.Parameters.Add(rtnValue);
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    if ((int)rtnValue.Value == 1)
+                    {
+                        res.Message = "Cập nhật mật khẩu thành công!";
+                        res.Result = AppConstant.RESULT_SUCCESS;
+                    }
+                    else
+                    {
+                        res.Message = "Tài khoản không tồn tại hoặc sai mật khẩu!";
+                        res.Result = AppConstant.RESULT_ERROR;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                res.Message = ex.Message;
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
+            }
+
+            return res;
+        }
+
+        public BaseResponse LoginUser(LoginUserDto inputDto, string? username)
+        {
+            var res = new BaseResponse();
+            if (username == inputDto.username)
+            {
+                res.Message = "Không thể đăng nhập chính bạn!";
+                res.Result = AppConstant.RESULT_ERROR;
+            }
+            else
+            {
+                res.Message = "Đăng nhập thành công!";
+                res.Result = AppConstant.RESULT_SUCCESS;
+                res.Data = inputDto.token;
+            }
+            return res;
+        }
+
+        public async Task<BaseResponse> LogoutUser(LogoutUserDto inputDto, string? username)
+        {
+            var res = new BaseResponse();
+            if (username == inputDto.username)
+            {
+                res.Message = "Không thể đăng xuất chính bạn!";
+                res.Result = AppConstant.RESULT_ERROR;
+            }
+            else
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_LogoutUser", conn))
+                {
+                    await conn.OpenAsync();
+
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Username", inputDto.username);
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    res.Message = "Logout user thành công!";
+                    res.Result = AppConstant.RESULT_SUCCESS;
+                }
+            }
+            catch (Exception ex)
+            {
+                res.Message = ex.Message;
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
+            }
+
+            return res;
+        }      
     }
 }

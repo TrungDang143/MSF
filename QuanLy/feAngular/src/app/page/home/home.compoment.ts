@@ -99,7 +99,6 @@ export class HomeComponent implements OnInit {
 
   Logout() {
     this.auth.logout();
-    this.router.navigate(['/login']);
   }
 
   goToPage(url: string, permission: string) {

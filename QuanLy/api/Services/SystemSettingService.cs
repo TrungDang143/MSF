@@ -12,9 +12,16 @@ namespace api.Services
 {
     public class SystemSettingService : ISystemSetting
     {
-        public async Task<BaseResponse> CreateRole(CreateRoleDto inputDto)
+        public async Task<BaseResponse> CreateRole(CreateRoleDto inputDto, int roleID)
         {
             var res = new BaseResponse();
+
+            if (roleID != 1)
+            {
+                res.Message = "Bạn không có quyền tạo role!";
+                res.Result = AppConstant.RESULT_ERROR;
+                return res;
+            }
 
             try
             {
@@ -27,6 +34,7 @@ namespace api.Services
 
                     cmd.Parameters.AddWithValue("@RoleName", inputDto.RoleName);
                     cmd.Parameters.AddWithValue("@Description", Utils.DbNullIfNull(inputDto.Description));
+                    cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
                     var rtnStatus = new SqlParameter("@rtnStatus", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output,
@@ -48,10 +56,10 @@ namespace api.Services
                         cmd_perm.Parameters.AddWithValue("@roleID", rtnValue.Value);
                         
                         var listPermissionIds = (inputDto.PermissionIDs != null && inputDto.PermissionIDs.Count > 0) 
-                            ? string.Join(",", inputDto.PermissionIDs.Select(id => id == 15 ? "admin" : id.ToString())) 
-                            : string.Empty;
+                            ? string.Join(",", inputDto.PermissionIDs) : string.Empty;
 
                         cmd_perm.Parameters.AddWithValue("@permissionIDs", Utils.DbNullIfNull(listPermissionIds));
+                        cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
                         await cmd_perm.ExecuteNonQueryAsync();
 
                         res.Message = "Tạo role thành công!";
@@ -267,7 +275,7 @@ namespace api.Services
             return res;
         }
                
-        public async Task<BaseResponse> UpdateRole(UpdateRoleDto inputDto)
+        public async Task<BaseResponse> UpdateRole(UpdateRoleDto inputDto, int roleID)
         {
             var res = new BaseResponse();
             
@@ -291,10 +299,11 @@ namespace api.Services
                     cmd.Parameters.AddWithValue("@description", Utils.DbNullIfNull(inputDto.Description));
 
                     var listPermissionIds = (inputDto.PermissionIDs != null && inputDto.PermissionIDs.Count > 0)
-                            ? string.Join(",", inputDto.PermissionIDs.Select(id => id == 15 ? "admin" : id.ToString()))
+                            ? string.Join(",", inputDto.PermissionIDs)
                             : string.Empty;
 
                     cmd.Parameters.AddWithValue("@permissionIDs", Utils.DbNullIfNull(listPermissionIds));
+                    cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
                     await cmd.ExecuteNonQueryAsync();
 
                     res.Message = "Cập nhật thành công!";

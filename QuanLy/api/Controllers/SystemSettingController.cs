@@ -3,6 +3,7 @@ using api.DTO.SystemSetting;
 using api.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace api.Controllers
 {
@@ -35,7 +36,8 @@ namespace api.Controllers
         [HttpPost("CreateRole")]
         public async Task<BaseResponse> CreateRole([FromBody] CreateRoleDto inputDto)
         {
-            return await _systemSetting.CreateRole(inputDto);
+            int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
+            return await _systemSetting.CreateRole(inputDto, roleID);
         }
 
         [HasPermission("admin.delete_roles")]
@@ -49,7 +51,8 @@ namespace api.Controllers
         [HttpPost("UpdateRole")]
         public async Task<BaseResponse> UpdateRole([FromBody] UpdateRoleDto inputDto)
         {
-            return await _systemSetting.UpdateRole(inputDto);
+            int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
+            return await _systemSetting.UpdateRole(inputDto, roleID);
         }
 
         [HasPermission("view_roles")]

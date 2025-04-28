@@ -9,6 +9,8 @@ import {
   GoogleLoginProvider,
   SocialAuthService,
 } from '@abacritt/angularx-social-login';
+import { Router } from '@angular/router';
+import { PopupService } from './popup/popup.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +18,9 @@ import {
 export class AuthService {
   constructor(
     private http: HttpClient,
-    private authService: SocialAuthService
-  ) { }
+    private authService: SocialAuthService,
+    private router: Router,
+  ) {}
 
   checkToken(): Observable<boolean> {
     const token =
@@ -58,9 +61,10 @@ export class AuthService {
   saveUserData(token: string, rememberMe: boolean): void {
     // Decode payload từ token
     const payload = JSON.parse(atob(token.split('.')[1]));
-    console.log('payload', payload)
-    const role = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-    const username = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+    const role =
+      payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+    const username =
+      payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
     const permissions = payload.permissions
       ? Array.isArray(payload.permissions)
         ? payload.permissions
@@ -97,6 +101,7 @@ export class AuthService {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
     sessionStorage.removeItem('permissions');
+    this.router.navigate(['/login']);
   }
 
   // signInWithGoogle(): any {

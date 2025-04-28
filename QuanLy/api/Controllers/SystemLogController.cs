@@ -17,21 +17,21 @@ namespace api.Controllers
             _systemLogService = systemLogService;
         }
 
-        [HasPermission("view_logs")]
+        [HasPermission("admin.view_logs")]
         [HttpGet("GetLog")]
         public BaseResponse GetLog()
         {
             return _systemLogService.GetLog();
         }
 
-        [HasPermission("view_logs")]
+        [HasPermission("admin.view_logs")]
         [HttpGet("GetSystemLogsByPaging")]
         public BaseResponse GetSystemLogsByPaging([FromQuery]GetSystemLogsByPagingDto inputDto)
         {
             return _systemLogService.GetSystemLogsByPaging(inputDto);
         }
 
-        [HasPermission("view_logs")]
+        [HasPermission("admin.view_logs")]
         [HttpPost("DeleteLogs")]
         public BaseResponse DeleteLogs([FromBody] DeleteLogsDto inputDto)
         {

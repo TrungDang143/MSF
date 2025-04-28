@@ -3,6 +3,7 @@ import { Observable } from 'rxjs/internal/Observable';
 import { environment } from '../shared/environment';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
+import { AuthService } from '../shared/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -65,5 +66,32 @@ export class AccountService {
 
   GetPasswordRule():Observable<any>{
     return this.http.get(environment.baseUrl + "Account/GetActivePasswordRule")
+  }
+
+  ChangeMyPassword(username: string, oldPassword: string, newPassword: string):Observable<any>{
+    const body = {
+      "username": username,
+      "oldPassword": oldPassword,
+      "newPassword": newPassword
+    }
+    return this.http.post(environment.baseUrl + "Account/ChangeMyPassword", body, {headers: environment.headers});
+  }
+
+  ChangeUserPassword(username: string, newPassword: string):Observable<any>{
+    const body = {
+      "username": username,
+      "newPassword": newPassword
+    }
+    return this.http.post(environment.baseUrl + "Account/ChangeUserPassword", body, {headers: environment.headers});
+  }
+
+  LoginAsUser(username: string):Observable<any>{
+    const params = {username: username}
+    return this.http.get(environment.baseUrl + "Account/LoginUser", {params})
+  }
+
+  LogoutUser(username: string):Observable<any>{
+    const params = {username: username}
+    return this.http.get(environment.baseUrl + "Account/LogoutUser", {params})
   }
 }

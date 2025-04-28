@@ -18,7 +18,7 @@ using System.Text;
 
 namespace api.Services
 {
-    public class TokenService: IToken
+    public class TokenService : IToken
     {
         private readonly IConfiguration _config;
 
@@ -64,18 +64,23 @@ namespace api.Services
                 return false;
             }
         }
-        public string GenerateToken(string username, int roleID, List<string> permissionNames)
+        public string GenerateToken(string username, bool isAdminLogin)
         {
             var jwtSettings = _config.GetSection("Jwt");
             var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
+            int roleID = GetUserRoleID(username);
+            int userID = GetUserIDByUsername(username);
+            List<string> permissionNames = GetAllPermissionNameForUser(userID);
+
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, roleID.ToString()),
-            new Claim("permissions", string.Join(",", permissionNames)),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+            {
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role, roleID.ToString()),
+                new Claim("permissions", string.Join(",", permissionNames)),
+                new Claim("isAdminLogin", isAdminLogin.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
@@ -183,46 +188,8 @@ namespace api.Services
         //    return username;
         //}
 
-        public string GetUserRoleName(string username)
-        {
-            string rolename = string.Empty;
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                {
-                    conn.Open();
-
-                    var usernameParam = new SqlParameter("@UsernameOrEmail", username);
-                    var resultParam = new SqlParameter("@rtnvalue", SqlDbType.VarChar, 50)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-
-                    using (SqlCommand cmd = new SqlCommand("sp_GetRoleNameByUsernameOrEmail", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add(usernameParam);
-                        cmd.Parameters.Add(resultParam);
-
-                        cmd.ExecuteNonQuery();
-
-                        //int status = (int)cmd.Parameters["@Result"].Value;
-
-                        if (!string.IsNullOrEmpty(resultParam.Value.ToString()))
-                        {
-                            rolename = resultParam.Value.ToString();
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            return rolename;
-        }
-
-        public int GetUserRoleID(string username)
+        
+        private int GetUserRoleID(string username)
         {
             int roleID = 4;
             try
@@ -289,7 +256,7 @@ namespace api.Services
         //    }
         //}
 
-        public List<string> GetPermissionName(int roleID)
+        private List<string> GetAllPermissionNameForUser(int userID)
         {
             List<string> listPermission = new List<string>();
             try
@@ -298,13 +265,12 @@ namespace api.Services
                 {
                     conn.Open();
 
-                    var roleIDParam = new SqlParameter("@RoleID", roleID);
 
-                    using (SqlCommand cmd = new SqlCommand("sp_GetPermissionByRoleID", conn))
+                    using (SqlCommand cmd = new SqlCommand("sp_GetAllPermissionsForUser", conn))
                     using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add(roleIDParam);
+                        cmd.Parameters.AddWithValue("@UserID", userID);
                         cmd.Parameters.AddWithValue("@isAdmin", true);
 
                         DataTable dt = new DataTable();
@@ -324,10 +290,12 @@ namespace api.Services
             return listPermission;
         }
 
-        public async Task<bool> IsValidUser(string username)
+        public async Task<bool> IsValidUser(string username, bool isAdminLogin = false)
         {
             bool isValid = false;
             if (string.IsNullOrEmpty(username)) return isValid;
+
+            if (isAdminLogin) return true;
 
             try
             {
@@ -349,12 +317,51 @@ namespace api.Services
                     isValid = (bool)rtnValue.Value;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw ex;
             }
 
             return isValid;
+        }
+
+        private int GetUserIDByUsername(string username)
+        {
+            int userID = 0;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                {
+                    conn.Open();
+
+                    var usernameParam = new SqlParameter("@UsernameOrEmail", username);
+                    var resultParam = new SqlParameter("@rtnvalue", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    };
+
+                    using (SqlCommand cmd = new SqlCommand("sp_GetUserIDByUsernameOrEmail", conn))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.Add(usernameParam);
+                        cmd.Parameters.Add(resultParam);
+
+                        cmd.ExecuteNonQuery();
+
+                        //int status = (int)cmd.Parameters["@Result"].Value;
+
+                        if ((int)resultParam.Value != null)
+                        {
+                            userID = (int)resultParam.Value;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return userID;
         }
     }
 }

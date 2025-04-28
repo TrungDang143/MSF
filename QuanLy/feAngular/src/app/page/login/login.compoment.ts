@@ -54,7 +54,7 @@ export class LoginComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void {
     this.auth.logout();
-    //callback
+    
     (window as any).handleCredentialResponse = (response: any) => {
       this.loginWithGoogle(response.credential);
     };

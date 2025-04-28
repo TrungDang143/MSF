@@ -26,14 +26,14 @@
 
   display: grid;
   grid-template-columns: auto;
-  grid-template-rows: 90px auto 220px;
+  grid-template-rows: 90px auto 200px;
 
   padding: 10px;
   background-color: rgba(255, 255, 255, 0.3); /* Màu trắng trong suốt */
   backdrop-filter: blur(10px); /* Hiệu ứng mờ nền phía sau */
   border-radius: 10px; /* Bo góc */
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  height: 600px;
+  height: 610px;
   width: 500px;
 }
 
@@ -55,7 +55,6 @@
   grid-template-columns: auto;
   grid-template-rows: repeat(1, auto);
   gap: 10px;
-
 }
 
 ::ng-deep .body .username-cell input {

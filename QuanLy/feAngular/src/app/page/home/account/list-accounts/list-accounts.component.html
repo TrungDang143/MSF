@@ -370,7 +370,7 @@
               iconPos="right"
               (onClick)="
                 this.displayDetail == true
-                  ? userPermission(detailAccountForm.get('userID')?.value)
+                  ? userPermission()
                   : this.displayPopupCreateUser == true
                   ? createUserPermission()
                   : null
@@ -837,13 +837,13 @@
 </p-dialog>
 
 <p-dialog header="Đổi mật khẩu" [(visible)]="displayChangePassword" [modal]="true" 
-[style]="{'width': '400px', 'height': '400px'}" (onHide)="closeDialogChangePassword()">
+[style]="{'width': '400px', 'height': '420px'}" (onHide)="closeDialogChangePassword()">
 <form action="" method="post" [formGroup]="changePasswordForm">
   <div class="popup-change-password">
-      <div class="user-info-cell" *ngIf="!isMe(userNameSeleted)">
+      <div class="user-info-cell" *ngIf="!isMe()">
         <h3>User: {{userNameSeleted}}</h3>
       </div>
-      <div class="old-password-cell" *ngIf="isMe(userNameSeleted)">
+      <div class="old-password-cell" *ngIf="isMe()">
         <p-floatlabel variant="in">
           <p-password
             formControlName="oldPassword"
@@ -864,13 +864,13 @@
           >
             <small
               *ngIf="changePasswordForm['controls']['oldPassword'].errors['required']"
-              >Nhập mật khẩu.</small
+              >Nhập mật khẩu cũ của bạn.</small
             >
           </div>
         </div>
       </div>
       <div class="new-password-cell">
-        <p-floatlabel variant="on">
+        <p-floatlabel variant="in">
           <p-password
             formControlName="newPassword"
             autocomplete="off"
@@ -887,17 +887,15 @@
                 <li
                   *ngFor="let item of passwordRules"
                   [ngClass]="
-                    !passwordErrors_changePassword.hasOwnProperty(item.settingKey) &&
                     !passwordDirtied_changePassword
                       ? ''
-                      : passwordErrors_changePassword[item.settingKey] == false
-                      ? 'rule-password detail-pass'
-                      : 'rule-password detail-fail'
+                      : passwordErrors_changePassword[item.settingKey]
+                      ? 'rule-password detail-fail'
+                      : 'rule-password detail-pass'
                   "
                 >
                   <i
                     [ngClass]="
-                      !passwordErrors_changePassword.hasOwnProperty(item.settingKey) &&
                       !passwordDirtied_changePassword
                         ? ''
                         : passwordErrors_changePassword[item.settingKey]
@@ -932,7 +930,7 @@
         <div class="errMsg-area">
           <div
             class="errMsg"
-            *ngIf="changePasswordForm.errors?.['passwordMismatch'] || changePasswordForm.get('confirmNewPassword')?.touched"
+            *ngIf="changePasswordForm.errors?.['passwordMismatch'] && changePasswordForm.get('confirmNewPassword')?.touched"
           >
             <small>Mật khẩu nhập lại không khớp.</small>
           </div>
@@ -943,10 +941,10 @@
           label="Save"
           icon="pi pi-check"
           iconPos="right"
-          (onClick)="changePassword()"
+          (onClick)="handleChangePassword()"
           [disabled]="
-            !detailAccountForm.dirty ||
-            detailAccountForm.invalid ||
+            !changePasswordForm.dirty ||
+            !changePasswordForm.valid ||
             !hasPermission('edit_users')
           "
         />

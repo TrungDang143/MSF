@@ -26,9 +26,7 @@ namespace api.Controllers
             var res =  _login.Login(inputDto);
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
-                int roleID = _tokenService.GetUserRoleID(inputDto.UsernameOrEmail);
-                var permissions = _tokenService.GetPermissionName(roleID);
-                string token = _tokenService.GenerateToken(inputDto.UsernameOrEmail, roleID, permissions);
+                string token = _tokenService.GenerateToken(inputDto.UsernameOrEmail, false);
                 res.Data = new
                 {
                     token
@@ -44,9 +42,7 @@ namespace api.Controllers
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
                 string username = res.Data.ToString();
-                int roleID = _tokenService.GetUserRoleID(username);
-                List<string> permissions = _tokenService.GetPermissionName(roleID);
-                string token = _tokenService.GenerateToken(username, roleID, permissions);
+                string token = _tokenService.GenerateToken(username, false);
                 res.Data = new
                 {
                     token
@@ -62,9 +58,7 @@ namespace api.Controllers
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
                 string username = res.Data.ToString();
-                var roleID = _tokenService.GetUserRoleID(username);
-                var permissions = _tokenService.GetPermissionName(roleID);
-                string token = _tokenService.GenerateToken(username, roleID, permissions);
+                string token = _tokenService.GenerateToken(username, false);
                 res.Data = new
                 {
                     token

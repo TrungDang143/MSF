@@ -19,7 +19,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private authService: SocialAuthService,
-    private router: Router,
+    private router: Router
   ) {}
 
   checkToken(): Observable<boolean> {
@@ -59,6 +59,7 @@ export class AuthService {
   }
 
   saveUserData(token: string, rememberMe: boolean): void {
+    this.resetStorageWithoutTokenStack();
     // Decode payload từ token
     const payload = JSON.parse(atob(token.split('.')[1]));
     const role =
@@ -70,12 +71,13 @@ export class AuthService {
         ? payload.permissions
         : payload.permissions.split(',')
       : [];
-
+    const isAdminLogin = payload.isAdminLogin;
     const storage = rememberMe ? localStorage : sessionStorage;
 
     storage.setItem('token', token);
     storage.setItem('user', username);
     storage.setItem('role', role);
+    storage.setItem('isAdminLogin', isAdminLogin);
     storage.setItem('permissions', JSON.stringify(permissions));
   }
 
@@ -87,6 +89,57 @@ export class AuthService {
     return localStorage.getItem('role') || sessionStorage.getItem('role') || '';
   }
 
+  getToken(): string {
+    return (
+      localStorage.getItem('token') || sessionStorage.getItem('token') || ''
+    );
+  }
+
+  goBackAdmin():boolean {
+    let rememberMe: boolean = localStorage.getItem('token') ? true : false;
+    let token: string | null = this.popToken();
+    if (token){
+      this.saveUserData(token, rememberMe);
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
+  loginAsUser():boolean{
+    const token = this.getToken();
+    return this.pushCurrentToken(token);
+  }
+
+  pushCurrentToken(token: string): boolean {
+    const stack = JSON.parse(localStorage.getItem('tokenStack') || '[]');
+    if(stack.length < 5){
+      stack.push(token);
+      localStorage.setItem('tokenStack', JSON.stringify(stack));
+      return true;
+    } else return false;
+  }
+
+  popToken(): string | null {
+    const stack = JSON.parse(localStorage.getItem('tokenStack') || '[]');
+    const lastToken = stack.pop();
+    localStorage.setItem('tokenStack', JSON.stringify(stack));
+    return lastToken || null;
+  }
+
+  canGoBack(): boolean{
+    const stack = JSON.parse(localStorage.getItem('tokenStack') || '[]');
+    return stack.length > 0 && this.isAdminLogin();
+  }
+
+  isAdminLogin(): boolean {
+    const isAdmin =
+      localStorage.getItem('isAdminLogin') ||
+      sessionStorage.getItem('isAdminLogin');
+    return isAdmin === 'True';
+  }
+
   getPermissions(): string[] {
     const data =
       localStorage.getItem('permissions') ||
@@ -95,13 +148,27 @@ export class AuthService {
   }
 
   logout(): void {
+    this.resetAllStorage();
+    this.router.navigate(['/login']);
+  }
+
+  resetStorageWithoutTokenStack() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('permissions');
+    localStorage.removeItem('isAdminLogin');
+    localStorage.removeItem('role');
+
+    sessionStorage.removeItem('role');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
     sessionStorage.removeItem('permissions');
-    this.router.navigate(['/login']);
+    sessionStorage.removeItem('isAdminLogin');
+  }
+
+  resetAllStorage(){
+    this.resetStorageWithoutTokenStack();
+    localStorage.removeItem('tokenStack');
   }
 
   // signInWithGoogle(): any {

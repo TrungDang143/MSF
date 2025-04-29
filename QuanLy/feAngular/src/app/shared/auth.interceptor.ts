@@ -21,9 +21,9 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        auth.logout();
-        router.navigate(['/login']);
-        pop.showOkPopup({message: "Vui lòng đăng nhập lại!"})
+        // auth.logout();
+        // router.navigate(['/login']);
+        pop.showOkPopup({message: "Không thể dùng chức năng này. Vui lòng đăng nhập lại!"})
         return EMPTY;
       }
 

@@ -71,10 +71,15 @@
           Welcome<br /><b>{{ username }}</b>
         </p>
 
-       
-
         <div class="flex items-center gap-2">
-
+          <p-button
+            (click)="goBackAdmin()"
+            icon="pi pi-sign-out"
+            severity="secondary"
+            label="Quay lại Admin"
+            [hidden]="disableBtnGoBackAdmin"
+            [disabled]="disableBtnGoBackAdmin"
+          />
         </div>
     </div>
     <div class="content">

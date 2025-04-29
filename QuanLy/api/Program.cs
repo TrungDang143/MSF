@@ -74,7 +74,7 @@ builder.Services
             {
                 IToken token = context.HttpContext.RequestServices.GetRequiredService<IToken>();
                 string? username = context.Principal?.Identity?.Name;
-                bool isAdminLogin = context.Principal?.Claims.FirstOrDefault(c => c.Type == "LoginAsAdmin")?.Value == "true";
+                bool isAdminLogin = context.Principal?.Claims.FirstOrDefault(c => c.Type == "isAdminLogin")?.Value == "True";
                 if (username == null || !await token.IsValidUser(username, isAdminLogin))
                 {
                     context.Fail("Unauthorized");

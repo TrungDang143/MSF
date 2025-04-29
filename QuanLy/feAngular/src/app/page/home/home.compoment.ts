@@ -81,6 +81,7 @@ export class HomeComponent implements OnInit {
   avatar: string = 'avatar/default-avatar.jpg';
   ngOnInit(): void {
     this.GetUserInfo();
+    this.disableBtnGoBackAdmin = !this.auth.canGoBack()
   }
 
   GetUserInfo() {
@@ -116,6 +117,21 @@ export class HomeComponent implements OnInit {
             this.breadcrumbItems = this.breadcrumbService.getBreadcrumbs();
           });
       });
+    }
+  }
+
+  disableBtnGoBackAdmin = true;
+
+  goBackAdmin() {
+    if(!this.disableBtnGoBackAdmin){
+      if(this.auth.goBackAdmin()){
+        this.router.navigate(['/home/list-accounts']);
+        window.location.reload();
+      }
+      else{
+        this.pop.showOkPopup({message: "Không thể quay lại thêm!"});
+        this.disableBtnGoBackAdmin = true;
+      }
     }
   }
 }

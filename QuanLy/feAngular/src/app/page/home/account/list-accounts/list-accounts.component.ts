@@ -1349,9 +1349,17 @@ export class ListAccountsComponent implements OnInit {
     this.apiAccount.LoginAsUser(this.userNameSeleted).subscribe({
       next: (res)=>{
         if(res.result == '1'){
-          this.authService.saveUserData(res.data, false)
-          this.router.navigate(['/home']);
-          window.location.reload();
+          if(this.authService.loginAsUser()){
+            console.log( "toiday");
+
+            this.authService.saveUserData(res.data, false)
+
+            this.router.navigate(['/home']);
+            window.location.reload();
+          } else{
+            console.log( "Chỉ có thể login as user tối đa 5 lần!");
+            this.pop.showOkPopup({message: "Chỉ có thể login as user tối đa 5 lần!"})
+          }
 
         }else{
           this.pop.showOkPopup({message: res.message})
@@ -1380,4 +1388,5 @@ export class ListAccountsComponent implements OnInit {
       }
     })
   }
+  
 }

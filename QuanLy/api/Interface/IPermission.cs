@@ -6,6 +6,6 @@ namespace api.Interface
     public interface IPermission
     {
         public BaseResponse GetAllPermission(int roleID);
-        public BaseResponse GetPermissionByRoleID(GetPermissionByRoleIDDto inputDto, int roleID);
+        public Task<BaseResponse> GetPermissionByRoleIds(GetPermissionByRoleIDDto inputDto, int roleID);
     }
 }

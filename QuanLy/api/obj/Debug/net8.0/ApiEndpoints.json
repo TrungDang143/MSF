@@ -125,26 +125,6 @@
   },
   {
     "ContainingType": "api.Controllers.AccountController",
-    "Method": "GetAllRole",
-    "RelativePath": "api/Account/GetAllRole",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "api.Interface.BaseResponse",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "api.Controllers.AccountController",
     "Method": "GetAllUserAccounts",
     "RelativePath": "api/Account/GetAllUserAccounts",
     "HttpMethod": "GET",
@@ -200,6 +180,78 @@
       {
         "Name": "UserID",
         "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.AccountController",
+    "Method": "GetRole",
+    "RelativePath": "api/Account/GetRole",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "roleName",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageNumber",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "api.Controllers.AccountController",
+    "Method": "GetRoleByPaging",
+    "RelativePath": "api/Account/GetRoleByPaging",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "roleName",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageNumber",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       }
     ],
@@ -320,15 +372,15 @@
   },
   {
     "ContainingType": "api.Controllers.AccountController",
-    "Method": "UpdateUserPermission",
-    "RelativePath": "api/Account/UpdateUserPermission",
+    "Method": "UpdateUserRoles",
+    "RelativePath": "api/Account/UpdateUserRoles",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "inputDto",
-        "Type": "api.DTO.Account.UpdateUserPermissionDto",
+        "Type": "api.DTO.Account.UpdateUserRolesDto",
         "IsRequired": true
       }
     ],
@@ -600,16 +652,16 @@
   },
   {
     "ContainingType": "api.Controllers.PermissionController",
-    "Method": "GetPermissionByRoleID",
-    "RelativePath": "api/Permission/GetPermissionByRoleID",
-    "HttpMethod": "GET",
+    "Method": "GetPermissionByRoleIds",
+    "RelativePath": "api/Permission/GetPermissionByRoleIds",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "RoleID",
-        "Type": "System.Int32",
-        "IsRequired": false
+        "Name": "inputDto",
+        "Type": "api.DTO.Perrmission.GetPermissionByRoleIDDto",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": [
@@ -721,12 +773,12 @@
       },
       {
         "Name": "pageSize",
-        "Type": "System.Int32",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       },
       {
         "Name": "pageNumber",
-        "Type": "System.Int32",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       }
     ],

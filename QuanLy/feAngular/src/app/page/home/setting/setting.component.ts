@@ -708,8 +708,10 @@ export class SettingComponent implements OnInit {
               permissionIds = this.updateRoleForm.get('permissionIds')?.value;
               this.mockupRolePermission(permissionIds);
             } else {
+              let roleIds: number[] = [];
+              roleIds.push(this.updateRoleForm.get('roleID')?.value);
               this.apiPermission
-                .getPermissionByRoleID(this.updateRoleForm.get('roleID')?.value)
+                .getPermissionByRoleIds(roleIds)
                 .subscribe({
                   next: (res) => {
                     if (res.result == '1') {

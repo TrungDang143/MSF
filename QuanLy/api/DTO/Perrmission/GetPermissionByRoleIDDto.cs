@@ -2,6 +2,6 @@
 {
     public class GetPermissionByRoleIDDto
     {
-        public int RoleID { get; set; }
+        public List<int> RoleIds { get; set; }
     }
 }

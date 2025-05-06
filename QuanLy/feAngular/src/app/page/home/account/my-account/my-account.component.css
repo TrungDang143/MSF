@@ -147,3 +147,14 @@
 .popup-avatar{
   display: block;
 }
+.errMsg-area {
+  min-height: 5px;
+  height: auto;
+}
+.errMsg {
+  color: red;
+  font-weight: 400;
+  width: auto;
+  padding-left: 12px;
+  
+}

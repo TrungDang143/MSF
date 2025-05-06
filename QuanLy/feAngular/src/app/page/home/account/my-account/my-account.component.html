@@ -82,10 +82,13 @@
           <p-floatlabel variant="on">
             <input
               pInputText
-              id="input_phone"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              maxlength="10"
               formControlName="phoneNumber"
-              autocomplete="off"
             />
+
             <label for="input_phone">Phone number</label>
           </p-floatlabel>
         </div>
@@ -99,6 +102,11 @@
           <!-- <p-fileupload #fileUpload mode="basic" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" 
               (onSelect)="selectAvatar($event)" chooseLabel="Chọn ảnh"/> -->
           <p-button label="Thay thế" (onClick)="changeAvatar()"></p-button>
+          <div class="errMsg-area" id="errMsg-avatar">
+            <div class="errMsg" *ngIf="!detailAccountForm.get('avatar')?.value">
+              <small>Chọn avatar.</small>
+            </div>
+          </div>
         </div>
         <div class="popup-cell role-status">
           <p-message severity="success" styleClass="p-message"
@@ -178,7 +186,12 @@
   [style]="{ width: '800px', height: '600px' }"
 >
   <div class="popup-avatar">
-    <input type="file" (change)="fileChangeEvent($event)" />
+    <input
+      #avatarInput
+      type="file"
+      (change)="fileChangeEvent($event)"
+      accept=".jpg,.jpeg,.png"
+    />
 
     <image-cropper
       [imageChangedEvent]="imageChangedEvent"
@@ -194,6 +207,12 @@
       (loadImageFailed)="loadImageFailed()"
       style="height: 400px"
     ></image-cropper>
-    <p-button (click)="submitToServer()">Xác nhận</p-button>
+    <p-button [disabled]="fileSizeError" (click)="submitToServer()"
+      >Xác nhận</p-button>
+    <div class="errMsg-area">
+      <div class="errMsg" *ngIf="fileSizeError">
+        <small>Kích thước ảnh vượt quá giới hạn cho phép (tối đa 3MB).</small>
+      </div>
+    </div>
   </div>
 </p-dialog>

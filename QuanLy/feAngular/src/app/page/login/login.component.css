@@ -132,6 +132,10 @@ padding: 0;
 .body #btn-regen:hover{
   background-color: var(--p-surface-200);
 }
+.body #btn-regen:active{
+  background-color: var(--p-surface-300);
+  transform: scale(0.9);
+}
 
 .body .btn-cell{
   grid-row-start: 4;

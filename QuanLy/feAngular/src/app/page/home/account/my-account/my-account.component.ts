@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -27,6 +27,7 @@ import { HttpClient } from '@angular/common/http';
 import { Page404Service } from '../../../../services/page-404.service';
 import { PopupService } from '../../../../shared/popup/popup.service';
 import { AccountService } from '../../../../services/account.service';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 @Component({
   selector: 'app-my-account',
@@ -44,7 +45,7 @@ import { AccountService } from '../../../../services/account.service';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    ImageCropperComponent,
+    ImageCropperComponent,InputNumberModule
   ],
   templateUrl: './my-account.component.html',
   styleUrl: './my-account.component.css',
@@ -99,7 +100,7 @@ export class MyAccountComponent implements OnInit {
     dateOfBirth: new FormControl(null),
     gender: new FormControl(null),
     address: new FormControl(null, [Validators.maxLength(100)]),
-    statusName: new FormControl(null),
+    status: new FormControl(null),
     googleID: new FormControl(null),
     facebookID: new FormControl(null),
     roleID: new FormControl(null),
@@ -165,20 +166,38 @@ export class MyAccountComponent implements OnInit {
         console.log(err.message);
       },
     });
-    //fileUpload.clear();
   }
 
   displayPopupAvatar = false;
 
-  imageChangedEvent: any = '';
+  imageChangedEvent: Event | null = null;
   croppedImage: string = '';
+  fileSizeError: boolean = false;
+  @ViewChild('avatarInput') avatarInput!: ElementRef;
 
   changeAvatar() {
+    this.imageChangedEvent = null;
+    this.croppedImage = '';
     this.displayPopupAvatar = true;
+    this.fileSizeError = false;
+    this.avatarInput.nativeElement.value = '';
   }
 
-  fileChangeEvent(event: any): void {
-    this.imageChangedEvent = event;
+  fileChangeEvent(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (file) {
+      const maxSize = 3 * 1024 * 1024; 
+      if (file.size > maxSize) {
+        this.fileSizeError = true;
+        input.value = '';
+        this.imageChangedEvent = null;
+      } else {
+        this.fileSizeError = false;
+        this.imageChangedEvent = event;
+      }
+    }
   }
 
   imageCropped(event: ImageCroppedEvent) {

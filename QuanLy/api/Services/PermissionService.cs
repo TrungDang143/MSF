@@ -1,4 +1,5 @@
 ﻿using api.AppUtils;
+using api.DTO.Account;
 using api.DTO.Perrmission;
 using api.Interface;
 using Microsoft.AspNetCore.Components.Forms;
@@ -79,30 +80,45 @@ namespace api.Services
             return res;
         }
 
-        public BaseResponse GetPermissionByRoleID(GetPermissionByRoleIDDto inputDto, int roleID)
+        public async Task<BaseResponse> GetPermissionByRoleIds(GetPermissionByRoleIDDto inputDto, int roleID)
         {
             var res = new BaseResponse();
+            string roleIds = string.Empty;
+            if (inputDto.RoleIds == null || inputDto.RoleIds.Count <= 0)
+            {
+                res.Result = AppConstant.RESULT_ERROR;
+                res.Message = "Không thể lấy permission của role!";
+                return res;
+            }
+            else
+            {
+
+                roleIds = string.Join(",", inputDto.RoleIds.Distinct());
+                if(roleIds.Length < 1)
+                {
+                    res.Result = AppConstant.RESULT_ERROR;
+                    res.Message = "Không thể lấy permission của role!";
+                    return res;
+                }
+            }
 
             try
             {
                 using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                using (SqlCommand cmd = new SqlCommand("sp_GetPermissionByRoleID", conn))
-                using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                using (SqlCommand cmd = new SqlCommand("sp_GetPermissionByRoleIds", conn))
                 {
-                    conn.Open();
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@RoleID", inputDto.RoleID);
+                    await conn.OpenAsync();
+                    cmd.CommandType = CommandType.StoredProcedure;                 
+                    cmd.Parameters.AddWithValue("@roleIds", Utils.DbNullIfNull(roleIds));
                     cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
 
                     DataTable dt = new DataTable();
-                    adapter.Fill(dt);
-
-                    List<int> listPermissionIDs = new List<int>();
-                    foreach (DataRow dr in dt.Rows)
+                    using(SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     {
-                        listPermissionIDs.Add((int)dr[0]);
+                        dt.Load(reader);
                     }
-                    res.Data = listPermissionIDs;
+
+                    res.Data = dt.ConvertToList<RolePermission>();
                 }
 
                 res.Result = AppConstant.RESULT_SUCCESS;

@@ -10,14 +10,12 @@ CREATE TABLE Users (
     DateOfBirth   DATETIME NULL,                     -- Ngày sinh
     Gender        TINYINT NULL CHECK (Gender IN (0,1,2)), -- Giới tính (0: Nữ, 1: Nam, 2: Khác)
     Address       nvarchar(100) NULL,                     -- Địa chỉ
-    --Role          VARCHAR(20) DEFAULT 'User',    -- Vai trò (Mặc định: User)
     Status        TINYINT DEFAULT 1,             -- Trạng thái (0: Inactive, 1: Active)
     CreatedAt     DATETIME DEFAULT GETDATE(),    -- Ngày tạo tài khoản
     UpdatedAt     DATETIME DEFAULT GETDATE(),    -- Ngày cập nhật gần nhất
     GoogleID      VARCHAR(100) NULL,             -- ID Google nếu đăng nhập bằng Google
     FacebookID    VARCHAR(100) NULL,              -- ID Facebook nếu đăng nhập bằng Facebook
 	otp varchar(10) null,
-	roleID int null,
 	LockTime datetime null,
 	RemainTime tinyint null,
 	IsExternalAvatar bit default 0 
@@ -29,8 +27,10 @@ alter table users
 add IsDeleted bit default 0 
 alter table users
 add ReLogin bit default 0 
+alter table users
+add LoginByAdmin bit default 0 
 update users
-set ReLogin = 0
+set LoginByAdmin = 0
 
 --SELECT name
 --FROM sys.check_constraints
@@ -76,6 +76,7 @@ CREATE TABLE RolePermission (
     FOREIGN KEY (RoleID) REFERENCES Role(RoleID) ON DELETE CASCADE,
     FOREIGN KEY (PermissionID) REFERENCES Permission(PermissionID) ON DELETE CASCADE
 );
+
 INSERT INTO Permission (PermissionName, Description) VALUES
 ('view_users', 'Xem danh sách người dùng'),
 ('create_users', 'Tạo người dùng mới'),
@@ -108,6 +109,7 @@ INSERT INTO Permission (PermissionName, Description) VALUES
 --('export_data', 'Xuất dữ liệu');
 
 -- Gán quyền cho Admin (được toàn quyền)
+delete from RolePermission where RoleID = 1
 INSERT INTO RolePermission (RoleID, PermissionID)
 SELECT 1, PermissionID FROM Permission;
 
@@ -784,85 +786,121 @@ begin
 	select * from SystemLog order by CreatedAt desc
 end
 ----------------------------------------------------------------------------------------------------
-create table UserPermission (
-    UserID INT,
-    PermissionID INT,
-    PRIMARY KEY (UserID, PermissionID),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID),
-    FOREIGN KEY (PermissionID) REFERENCES Permission(PermissionID)
-)
+--create table UserPermission (
+--    UserID INT,
+--    PermissionID INT,
+--    PRIMARY KEY (UserID, PermissionID),
+--    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+--    FOREIGN KEY (PermissionID) REFERENCES Permission(PermissionID)
+--)
+--DELETE FROM UserPermission;
+--drop table userpermission
 
-CREATE TABLE UserDeniedPermission (
+--CREATE TABLE UserDeniedPermission (
+--    UserID INT,
+--    PermissionID INT,
+--    PRIMARY KEY (UserID, PermissionID)
+--);
+--DELETE FROM UserDeniedPermission;
+--drop table UserDeniedPermission
+CREATE TABLE UserRole (
+    RoleID INT,
     UserID INT,
-    PermissionID INT,
-    PRIMARY KEY (UserID, PermissionID)
+    PRIMARY KEY (RoleID, UserID),
+    FOREIGN KEY (RoleID) REFERENCES Role(RoleID) ON DELETE CASCADE,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
+
+--insert into UserRole (RoleID, UserID)
+--select roleID, UserID from Users
+
+create table DenyUserRolePermission (
+    UserID INT,
+    RoleID INT,         
+    PermissionID INT,
+    PRIMARY KEY (UserID, RoleID, PermissionID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (RoleID, PermissionID) REFERENCES RolePermission(RoleID, PermissionID)
+)
+--INSERT INTO UserRolePermission (UserID, RoleID, PermissionID)
+--SELECT 1042 AS UserID, 1 AS RoleID, p.PermissionID
+--FROM Permission p
+--WHERE EXISTS (
+--    SELECT 1
+--    FROM RolePermission rp
+--    WHERE rp.RoleID = 1 AND rp.PermissionID = p.PermissionID
+--)
+--AND NOT EXISTS (
+--    SELECT 1
+--    FROM UserRolePermission urp
+--    WHERE urp.UserID = 1 AND urp.RoleID = 1 AND urp.PermissionID = p.PermissionID
+--);
 ----------------------------------------------------------------------------------------------------
-CREATE PROCEDURE sp_UpdateUserPermissions
+CREATE PROCEDURE sp_UpdateUserRoles
     @UserID INT,
-    @PermissionIDs NVARCHAR(MAX) -- Danh sách quyền mong muốn cuối cùng (VD: '1,3,5,6')
+    @RolePermissionsJson NVARCHAR(MAX),
+	@isAdmin bit
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Xoá quyền riêng cũ
-    DELETE FROM UserPermission WHERE UserID = @UserID;
-    DELETE FROM UserDeniedPermission WHERE UserID = @UserID;
+    BEGIN TRY
+        BEGIN TRANSACTION;
 
-    -- Lấy RoleID của user
-    DECLARE @RoleID INT;
-    SELECT @RoleID = RoleID FROM Users WHERE UserID = @UserID;
+        SELECT *
+        INTO #TempPermissions
+        FROM OPENJSON(@RolePermissionsJson)
+        WITH (
+            RoleID INT,
+            PermissionID INT,
+			IsDenied bit
+        );
 
-    -- Quyền theo role
-    DECLARE @RolePermissions TABLE (PermissionID INT);
-    INSERT INTO @RolePermissions (PermissionID)
-    SELECT PermissionID FROM RolePermission WHERE RoleID = @RoleID;
+		if (@isAdmin = 0)
+			delete from #TempPermissions where roleid = 1
 
-    -- Quyền mong muốn cuối cùng
-    DECLARE @DesiredPermissions TABLE (PermissionID INT);
-    INSERT INTO @DesiredPermissions (PermissionID)
-    SELECT TRY_CAST(value AS INT) 
-    FROM STRING_SPLIT(@PermissionIDs, ',') 
-    WHERE TRY_CAST(value AS INT) IS NOT NULL;
+		delete from DenyUserRolePermission where userid = @UserID;
+		delete from UserRole where userid = @UserID;
 
-    -- Thêm quyền cấp thêm: trong desired nhưng không có trong role
-    INSERT INTO UserPermission (UserID, PermissionID)
-    SELECT @UserID, dp.PermissionID
-    FROM @DesiredPermissions dp
-    LEFT JOIN @RolePermissions rp ON dp.PermissionID = rp.PermissionID
-    WHERE rp.PermissionID IS NULL;
+		insert into UserRole (UserID, RoleID)
+		select @UserID, roleid from #TempPermissions
 
-    -- Thêm quyền deny: có trong role nhưng không nằm trong desired
-    INSERT INTO UserDeniedPermission (UserID, PermissionID)
-    SELECT @UserID, rp.PermissionID
-    FROM @RolePermissions rp
-    LEFT JOIN @DesiredPermissions dp ON rp.PermissionID = dp.PermissionID
-    WHERE dp.PermissionID IS NULL;
+        INSERT INTO DenyUserRolePermission (UserID, RoleID, PermissionID)
+        SELECT @UserID, RoleID, PermissionID
+        FROM #TempPermissions
+        WHERE IsDenied = 1;
+
+        DROP TABLE #TempPermissions;
+
+        COMMIT;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK;
+        THROW;
+    END CATCH
 END
 
 ----------------------------------------------------------------------------------------------------
 CREATE PROCEDURE sp_GetAllPermissionsForUser
-    @UserID INT
+    @UserID INT,
+	@isAdmin bit
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT DISTINCT p.PermissionID, p.PermissionName
-    FROM Permission p
-    WHERE p.PermissionID IN (
-        -- Quyền theo Role
-        SELECT rp.PermissionID
-        FROM Users u
-        JOIN RolePermission rp ON u.RoleID = rp.RoleID
-        WHERE u.UserID = @UserID
+    SELECT 
+		ur.RoleID,
+        p.PermissionID,
+        p.PermissionName,
+        p.Description
+	from UserRole ur with (nolock)
+	inner join RolePermission rp with (nolock) on ur.roleID = rp.RoleID
+	inner join Permission p with (nolock) on p.PermissionID = rp.permissionID
+	left join DenyUserRolePermission dp with (nolock) on dp.PermissionID = rp.PermissionID
+	WHERE ur.UserID = @UserID
+	and dp.PermissionID is null
+	AND (@isAdmin = 1 OR p.PermissionName NOT LIKE 'admin.%')  
 
-        UNION
-
-        -- Quyền riêng
-        SELECT up.PermissionID
-        FROM UserPermission up
-        WHERE up.UserID = @UserID
-    )
 END
 
 ----------------------------------------------------------------------------------------------------
@@ -1226,6 +1264,113 @@ declare @rtnValue bit;
 exec sp_IsValidUser 'ddtrung143@gmail.com', @rtnValue output
 select @rtnValue
 ----------------------------------------------------------------------------------------------------
+create proc sp_ChangeMyPassword
+@Username VARCHAR(50),
+@oldHashPassword VARCHAR(255),
+@newHashPassword VARCHAR(255),
+@ReturnStatus int output
+as
+begin
+	IF EXISTS (SELECT 1 FROM Users WHERE Username = @Username and @oldHashPassword = PasswordHash)
+    BEGIN
+		UPDATE Users
+		SET PasswordHash = @newHashPassword, otp = NULL
+		WHERE Username = @Username;
+
+		SET @ReturnStatus = 1;
+	END
+    ELSE
+    BEGIN
+        SET @ReturnStatus = 0;
+    END
+end
+----------------------------------------------------------------------------------------------------
+create proc sp_LoginByAdmin
+@Username varchar(50)
+as
+begin
+	IF EXISTS (SELECT 1 FROM Users WHERE Username = @Username)
+    BEGIN
+		UPDATE Users
+		SET LoginByAdmin = 1
+		WHERE Username = @Username;
+	END
+end
+----------------------------------------------------------------------------------------------------
+create proc sp_Logout
+@Username varchar(50)
+as
+begin
+	IF EXISTS (SELECT 1 FROM Users WHERE Username = @Username)
+    BEGIN
+		UPDATE Users
+		SET LoginByAdmin = 0
+		WHERE Username = @Username;
+	END
+end
+----------------------------------------------------------------------------------------------------
+create proc sp_LogoutUser
+@Username varchar(50)
+as
+begin
+	IF EXISTS (SELECT 1 FROM Users WHERE Username = @Username)
+    BEGIN
+		UPDATE Users
+		SET ReLogin = 1
+		WHERE Username = @Username;
+	END
+end
+
+----------------------------------------------------------------------------------------------------
+create procedure sp_GetUserIDByUsernameOrEmail
+    @UsernameOrEmail VARCHAR(100),
+	@rtnvalue int output
+AS
+BEGIN
+
+   set @rtnValue = (SELECT UserID FROM Users WHERE (Username = @UsernameOrEmail OR Email = @UsernameOrEmail))
+
+END;
+----------------------------------------------------------------------------------------------------
+CREATE PROCEDURE sp_GetPermissionByRoleIds
+    @roleIds VARCHAR(MAX),
+    @isAdmin BIT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        ;WITH RoleIDList AS (
+			SELECT TRY_CAST(value AS INT) AS RoleID
+			FROM STRING_SPLIT(@roleIds, ',')
+			WHERE TRIM(value) <> ''
+			  AND TRY_CAST(value AS INT) IS NOT NULL)
+
+        SELECT
+            r.RoleID,
+            r.RoleName,
+            p.PermissionID,
+            p.PermissionName,
+            p.Description
+        FROM 
+            RolePermission rp
+        INNER JOIN 
+            Permission p ON rp.PermissionID = p.PermissionID
+        INNER JOIN 
+            Role r ON rp.RoleID = r.RoleID
+        INNER JOIN 
+            RoleIDList rl ON rp.RoleID = rl.RoleID
+        WHERE 
+            @isAdmin = 1 OR p.PermissionName NOT LIKE 'admin.%';
+    END TRY
+    BEGIN CATCH
+        ROLLBACK;
+        THROW;
+    END CATCH
+END;
+
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -1246,5 +1391,7 @@ exec sp_GetPermissionByRoleID 17
 
 insert into Users (username, email, PasswordHash, roleid, status) values ('admin','admin@gmail.com','bcb15f821479b4d5772bd0ca866c00ad5f926e3580720659cc80d39c9d09802a', 1, 1)
 
-
+declare @rtnValue int
+exec sp_IsValidUser 'trungtest9', @rtnvalue output
+select @rtnvalue
 

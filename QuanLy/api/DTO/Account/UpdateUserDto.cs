@@ -15,5 +15,6 @@
         public int? status { get; set; }
         public int? roleID { get; set; }
         public bool isExternalAvatar { get; set; }
+        public List<int>? PermissionIds { get; set; }
     }
 }

@@ -27,11 +27,11 @@ namespace api.Controllers
         }
 
         [HasPermission("view_permissions")]
-        [HttpGet("GetPermissionByRoleID")]
-        public BaseResponse GetPermissionByRoleID([FromQuery]GetPermissionByRoleIDDto inputDto)
+        [HttpPost("GetPermissionByRoleIds")]
+        public async Task<BaseResponse> GetPermissionByRoleIds([FromBody]GetPermissionByRoleIDDto inputDto)
         {
             int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
-            return _permission.GetPermissionByRoleID(inputDto, roleID);
+            return await _permission.GetPermissionByRoleIds(inputDto, roleID);
         }
     }
 }

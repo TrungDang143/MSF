@@ -51,10 +51,10 @@ export class AccountService {
     return this.http.get(environment.baseUrl + "Account/GetAllUserPermission", {params})
   }
 
-  UpdateUserPermission(userID: number, permissionIDs: number[]): Observable<any>{
-    const body = {userID: userID, permissionIds: permissionIDs};
-    return this.http.post(environment.baseUrl + "Account/UpdateUserPermission", body, {headers: environment.headers})
-  }
+  // UpdateUserPermission(userID: number, permissionIDs: number[]): Observable<any>{
+  //   const body = {userID: userID, permissionIds: permissionIDs};
+  //   return this.http.post(environment.baseUrl + "Account/UpdateUserPermission", body, {headers: environment.headers})
+  // }
 
   GetRoleGenderStatus(): Observable<any>{
     return this.http.get(environment.baseUrl + "Account/GetRoleGenderStatus");
@@ -93,5 +93,10 @@ export class AccountService {
   LogoutUser(username: string):Observable<any>{
     const params = {username: username}
     return this.http.get(environment.baseUrl + "Account/LogoutUser", {params})
+  }
+
+  UpdateUserRoles(userID: number, rolePermissions: any):Observable<any>{
+    const body = {userID, rolePermissions}
+    return this.http.post(environment.baseUrl + "Account/UpdateUserRoles", body)
   }
 }

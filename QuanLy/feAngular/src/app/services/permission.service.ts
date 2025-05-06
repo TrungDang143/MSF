@@ -14,8 +14,7 @@ export class PermissionService {
     return this.http.get(environment.baseUrl + 'Permission/GetAllPermission')
   }
 
-  getPermissionByRoleID(roleID: number): Observable<any>{
-    const params = new HttpParams().set("RoleID",roleID)
-    return this.http.get(environment.baseUrl + "Permission/GetPermissionByRoleID", {params});
+  getPermissionByRoleIds(roleIds: number[]): Observable<any>{
+    return this.http.post(environment.baseUrl + "Permission/GetPermissionByRoleIds", {roleIds});
   }
 }

@@ -1,11 +1,11 @@
 import { NgFor, NgIf, NgClass } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Account } from '../../../../model/account/account.model';
 import { AccountService } from '../../../../services/account.service';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-
+import { InputNumberModule } from 'primeng/inputnumber';
 import {
   AbstractControl,
   FormControl,
@@ -34,7 +34,7 @@ import { Table, TableModule } from 'primeng/table';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { TreeModule } from 'primeng/tree';
-import { TreeNode } from 'primeng/api';
+import { ScrollerOptions, TreeNode } from 'primeng/api';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PermissionService } from '../../../../services/permission.service';
 import { PasswordModule } from 'primeng/password';
@@ -43,6 +43,14 @@ import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { TabsModule } from 'primeng/tabs';
+import { PickListModule } from 'primeng/picklist';
+import { PanelModule } from 'primeng/panel';
+import {
+  AutoCompleteCompleteEvent,
+  AutoCompleteLazyLoadEvent,
+  AutoCompleteModule,
+} from 'primeng/autocomplete';
 
 @Component({
   selector: 'app-list-accounts',
@@ -71,6 +79,11 @@ import { Router } from '@angular/router';
     PasswordModule,
     DividerModule,
     Menu,
+    InputNumberModule,
+    TabsModule,
+    PickListModule,
+    PanelModule,
+    AutoCompleteModule,
   ],
   templateUrl: './list-accounts.component.html',
   styleUrl: './list-accounts.component.css',
@@ -109,12 +122,16 @@ export class ListAccountsComponent implements OnInit {
           {
             label: 'Đăng nhập',
             icon: 'pi pi-sign-in',
-            command: () => {this.LoginAsUser()},
+            command: () => {
+              this.LoginAsUser();
+            },
           },
           {
             label: 'Đăng xuất user',
             icon: 'pi pi-sign-out',
-            command: () => {this.LogoutUser()},
+            command: () => {
+              this.LogoutUser();
+            },
           },
         ],
       },
@@ -132,7 +149,44 @@ export class ListAccountsComponent implements OnInit {
     return this.authService.hasPermission(permission);
   }
 
-  globalFilterValue: string = '';
+  ngOnInit(): void {
+    this.loadData();
+    this.getPasswordRule();
+  }
+  filterAccountForm: FormGroup = new FormGroup({
+    username: new FormControl<string>(''),
+    roleID: new FormControl<number>(0),
+    permissionID: new FormControl<number>(0),
+    statusID: new FormControl<number>(0),
+  });
+
+  pageSz_listRoles = 10;
+  pageNo_listRoles = 1;
+  search_listRoles = '';
+
+  options: ScrollerOptions = {
+    delay: 250,
+    showLoader: true,
+    lazy: true,
+    onLazyLoad: this.onLazyLoad.bind(this),
+  };
+  filteredRoles: { roleID: number; roleName: string }[] = [];
+
+  getFilteredFieldValue(event: AutoCompleteCompleteEvent, fieldName: string) {
+    switch (fieldName) {
+      case 'role': {
+        break;
+      }
+    }
+
+  }
+  onLazyLoad(event: AutoCompleteLazyLoadEvent) {
+    const { first, last } = event;
+    this.pageSz_listRoles = last - first; 
+    this.pageNo_listRoles = Math.floor(first / this.pageSz_listRoles); 
+
+  }
+
   listUser: Account[] = [];
   listRole: { roleID: string; roleName: string }[] = [];
 
@@ -140,30 +194,29 @@ export class ListAccountsComponent implements OnInit {
   roles = [];
   status = [];
 
-  ngOnInit(): void {
-    this.loadData();
-    this.getPasswordRule();
-  }
-
   isMe(username?: string): boolean {
     if (username) return this.authService.getUser() == username;
     return this.authService.getUser() == this.userNameSeleted;
   }
 
+  getRole() {
+    this.apiAccount.GetAllRole().subscribe({
+      next: (res) => {
+        if (res.result == '1') this.listRole = res.data;
+      },
+      error: (err) => {
+        this.pop.showOkPopup({ message: 'Lỗi lấy danh sách role' });
+        console.log(err);
+      },
+    });
+  }
+  ///Load data vao trang
   loadData() {
     this.apiAccount.GetAllUserAccount().subscribe({
       next: (res) => {
         if (res.result == '1') {
           this.listUser = res.data.users;
-          this.apiAccount.GetAllRole().subscribe({
-            next: (res) => {
-              if (res.result == '1') this.listRole = res.data;
-            },
-            error: (err) => {
-              this.pop.showOkPopup({ message: 'Lỗi lấy danh sách role' });
-              console.log(err);
-            },
-          });
+          this.getRole();
         } else {
           this.pop.showOkPopup({ message: 'Không tìm thấy tài khoản!' });
         }
@@ -193,25 +246,39 @@ export class ListAccountsComponent implements OnInit {
     userID: new FormControl({ value: 0, disabled: true }),
     username: new FormControl({ value: '', disabled: true }),
     email: new FormControl({ value: '', disabled: true }),
-    fullName: new FormControl(null, [Validators.maxLength(100)]),
-    phoneNumber: new FormControl(null, [Validators.maxLength(15)]),
-    avatar: new FormControl(null),
-    dateOfBirth: new FormControl(null),
-    gender: new FormControl(null),
-    address: new FormControl(null, [Validators.maxLength(100)]),
-    status: new FormControl(null),
+    fullName: new FormControl(null, [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(100),
+    ]),
+    phoneNumber: new FormControl(null, [
+      Validators.required,
+      Validators.minLength(10),
+      Validators.maxLength(15),
+    ]),
+    avatar: new FormControl(null, [Validators.required]),
+    dateOfBirth: new FormControl(null, [Validators.required]),
+    gender: new FormControl(null, [Validators.required]),
+    address: new FormControl(null, [
+      Validators.required,
+      Validators.minLength(10),
+      Validators.maxLength(100),
+    ]),
+    status: new FormControl(null, [Validators.required]),
     createdAt: new FormControl(null),
     updatedAt: new FormControl(null),
     googleID: new FormControl(null),
     facebookID: new FormControl(null),
     otp: new FormControl(null),
-    roleID: new FormControl(null),
+    roleID: new FormControl(null, [Validators.required]),
     lockTime: new FormControl(null),
     remainTime: new FormControl(null),
     isExternalAvatar: new FormControl(false),
     permissionIds: new FormControl<number[]>([]),
   });
+  ///end load data vao trang
 
+  ///show detail
   viewDetail(id: any) {
     this.apiAccount.GetDetailUserInfo(id).subscribe({
       next: (res) => {
@@ -225,8 +292,10 @@ export class ListAccountsComponent implements OnInit {
         this.detailAccountForm.patchValue(data);
         if (this.isMe(this.detailAccountForm.get('username')?.value)) {
           this.detailAccountForm.get('roleID')?.disable();
+          this.detailAccountForm.get('permissionIds')?.disable();
         } else {
           this.detailAccountForm.get('roleID')?.enable();
+          this.detailAccountForm.get('permissionIds')?.enable();
         }
 
         var dateOfBirth: Date | null;
@@ -236,6 +305,7 @@ export class ListAccountsComponent implements OnInit {
         }
 
         this.detailAccountForm.markAsPristine();
+        console.log(this.detailAccountForm.value);
       },
       error: (err) => {
         console.log(err);
@@ -292,62 +362,45 @@ export class ListAccountsComponent implements OnInit {
   acceptUpdate() {
     if (this.disabledBtnSave) return;
     this.disabledBtnSave = true;
+
     console.log(this.detailAccountForm.value);
+
     const birht = this.detailAccountForm.get('dateOfBirth');
     if (birht && birht.value) {
       let convertDate = this.formatDateToString(birht.value);
       this.detailAccountForm.patchValue({ dateOfBirth: convertDate });
     }
-    this.apiAccount.UpdateUser(this.detailAccountForm.getRawValue()).subscribe({
-      next: (res) => {
-        if (res.result == '1') {
-          this.loadData();
-          this.apiAccount
-            .UpdateUserPermission(
-              this.detailAccountForm.get('userID')?.value,
-              this.detailAccountForm.get('permissionIds')?.value
-            )
-            .subscribe({
-              next: (res) => {
-                if (res.result == '1') {
-                  // this.pop.showOkPopup({ message: res.message });
 
-                  this.pop.showOkPopup({ message: 'Cập nhật thành công!' });
-                  this.disabledBtnSave = false;
-                  this.closeDialogDetail();
+    if (!this.isMe()) {
+      this.apiAccount
+        .UpdateUser(this.detailAccountForm.getRawValue())
+        .subscribe({
+          next: (res) => {
+            if (res.result == '1') {
+              this.pop.showOkPopup({ message: 'Cập nhật thành công!' });
 
-                  this.displayPopupPermission = false;
-                } else if (res.result == '1'){
-                  this.pop.showOkPopup({ message: res.message });
-                }
-                else{
-                  this.pop.showSysErr();
-                  console.log(res.message);
-                }
-              },
-              error: (err) => {
-                this.pop.showOkPopup({
-                  header: 'Lỗi',
-                  message: 'Lỗi kết nối server, không thể update permission!',
-                });
-                console.log(err);
-              },
+              this.displayPopupPermission = false;
+
+              this.closeDialogDetail();
+              this.loadData();
+            } else if (res.result == '2') {
+              this.pop.showOkPopup({ message: res.message });
+            } else {
+              this.pop.showSysErr();
+              console.log(res.message);
+            }
+            this.disabledBtnSave = false;
+          },
+          error: (err) => {
+            this.pop.showOkPopup({
+              header: 'Lỗi',
+              message: 'Không thể kết nối với server!',
             });
-        } else {
-          this.pop.showOkPopup({ message: 'Lỗi cập nhật thông tin!' });
-          this.disabledBtnSave = false;
-        }
-      },
-      error: (err) => {
-        this.pop.showOkPopup({
-          header: 'Lỗi',
-          message: 'Không thể kết nối với server!',
+            this.disabledBtnSave = false;
+            console.log(err.message);
+          },
         });
-        this.disabledBtnSave = false;
-        console.log(err.message);
-      },
-    });
-    //fileUpload.clear();
+    }
   }
 
   closeDialogDetail() {
@@ -360,7 +413,9 @@ export class ListAccountsComponent implements OnInit {
     this.closeDialogCreateUser();
     this.detailAccountForm.reset();
   }
+  ///end show detail
 
+  ///delete
   deleteUser(userID: number) {
     this.pop.showYesNoPopup({
       message: 'Xác nhận xoá user này?',
@@ -389,18 +444,39 @@ export class ListAccountsComponent implements OnInit {
       },
     });
   }
+  ///end delete
 
+  ///change avatar
   displayPopupAvatar = false;
 
-  imageChangedEvent: any = '';
+  imageChangedEvent: Event | null = null;
   croppedImage: string = '';
+  fileSizeError: boolean = false;
+  @ViewChild('avatarInput') avatarInput!: ElementRef;
 
   changeAvatar() {
+    this.imageChangedEvent = null;
+    this.croppedImage = '';
     this.displayPopupAvatar = true;
+    this.fileSizeError = false;
+    this.avatarInput.nativeElement.value = '';
   }
 
-  fileChangeEvent(event: any): void {
-    this.imageChangedEvent = event;
+  fileChangeEvent(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (file) {
+      const maxSize = 3 * 1024 * 1024;
+      if (file.size > maxSize) {
+        this.fileSizeError = true;
+        input.value = '';
+        this.imageChangedEvent = null;
+      } else {
+        this.fileSizeError = false;
+        this.imageChangedEvent = event;
+      }
+    }
   }
 
   imageCropped(event: ImageCroppedEvent) {
@@ -416,7 +492,7 @@ export class ListAccountsComponent implements OnInit {
   }
 
   loadImageFailed() {
-    console.error('Không thể load ảnh');
+    this.pop.showOkPopup({ message: 'Không thể load ảnh!' });
   }
   submitToServer() {
     if (this.croppedImage) {
@@ -431,124 +507,161 @@ export class ListAccountsComponent implements OnInit {
 
     this.displayPopupAvatar = false;
   }
+  ///end chảnge avatar
 
+  ///show userrole
   displayPopupPermission = false;
-  cateloryPermission: string[] = [
-    'Quản lý người dùng',
-    'Quản lý vai trò',
-    'Quản lý phân quyền',
-    'Quản lý nội dung',
-    'Phân quyền Admin',
-  ];
 
-  permission_User: TreeNode[] = [];
-  permission_Role: TreeNode[] = [];
-  permission_Content: TreeNode[] = [];
-  permission_Permission: TreeNode[] = [];
-  permission_System: TreeNode[] = [];
+  selectedRoles: { roleID: number; roleName: string }[] = [];
 
-  permission_User_Selected: TreeNode[] = [];
-  permission_Role_Selected: TreeNode[] = [];
-  permission_Content_Selected: TreeNode[] = [];
-  permission_Permission_Selected: TreeNode[] = [];
-  permission_System_Selected: TreeNode[] = [];
+  rolePermissionsByRoleID: { [roleID: number]: TreeNode[] } = {};
+  selectedRolePermissionsByRoleID: { [roleID: number]: TreeNode[] } = {};
+  userRoles: { roleID: number; roleName: string }[] = [];
+  selectedRoleID: number = 0;
 
-  showDetailPermission: number = 0;
-  isAllUserSelected: boolean = false;
-  isAllRoleSelected: boolean = false;
-  isAllPermissionSelected: boolean = false;
-  isAllContentSelected: boolean = false;
-  isAllSystemSelected: boolean = false;
+  isAllRolePermissionsSelected: boolean = false;
   isAllCatelorySelected: boolean = false;
 
   permissionSelected: TreeNode[] = [];
 
-  getPermission(permissionNameGroup: string) {
-    if (permissionNameGroup == this.cateloryPermission[0]) {
-      this.showDetailPermission = 1;
-    } else if (permissionNameGroup == this.cateloryPermission[1]) {
-      this.showDetailPermission = 2;
-    } else if (permissionNameGroup == this.cateloryPermission[2]) {
-      this.showDetailPermission = 3;
-    } else if (permissionNameGroup == this.cateloryPermission[3]) {
-      this.showDetailPermission = 4;
-    } else this.showDetailPermission = 5;
+  addRoleForUser() {
+    this.pop.showYesNoPopup({
+      message: 'Bạn có chắc chắn muốn chỉnh sửa role của user?',
+      onAccept: () => {
+        let roleIds: number[] = [];
+        this.selectedRoles.forEach((role) => roleIds.push(role.roleID));
+        this.getPermissionByRoleIds(roleIds);
+      },
+    });
+  }
+  refreshUserRole() {
+    this.selectedRoles = [];
+    this.getRole();
+  }
+
+  getPermissionByRoleIds(roleIds: number[]) {
+    this.apiPermission.getPermissionByRoleIds(roleIds).subscribe({
+      next: (res) => {
+        if (res.result == '1') {
+          const grouped = new Map<
+            number,
+            { roleName: string; permissions: TreeNode[] }
+          >();
+
+          res.data.forEach((item: any) => {
+            if (!grouped.has(item.roleID)) {
+              grouped.set(item.roleID, {
+                roleName: item.roleName,
+                permissions: [],
+              });
+            }
+
+            grouped.get(item.roleID)?.permissions.push({
+              label: item.description,
+              data: {
+                permissionID: item.permissionID,
+                description: item.description,
+              },
+              leaf: true,
+            });
+          });
+
+          grouped.forEach((value, roleID) => {
+            this.rolePermissionsByRoleID[roleID] = [
+              {
+                label: value.roleName,
+                data: { roleID },
+                expanded: true,
+                children: value.permissions,
+              },
+            ];
+
+            this.userRoles.push({ roleID, roleName: value.roleName });
+            this.selectedRoleID = Number(
+              Object.keys(this.rolePermissionsByRoleID)[0]
+            );
+          });
+        }
+      },
+      error: (err: any) => {
+        this.pop.showSysErr();
+        console.log(err);
+      },
+    });
   }
   toggleAllCatelory() {
-    if (this.isAllCatelorySelected) {
-      this.isAllUserSelected = true;
-      this.isAllRoleSelected = true;
-      this.isAllPermissionSelected = true;
-      this.isAllContentSelected = true;
-      this.isAllSystemSelected = true;
-      this.isAllCatelorySelected = true;
-
-      this.toggleAllDetail(
-        this.permission_User,
-        this.permission_User_Selected,
-        true
-      );
-      this.toggleAllDetail(
-        this.permission_Role,
-        this.permission_Role_Selected,
-        true
-      );
-      this.toggleAllDetail(
-        this.permission_Permission,
-        this.permission_Permission_Selected,
-        true
-      );
-      this.toggleAllDetail(
-        this.permission_Content,
-        this.permission_Content_Selected,
-        true
-      );
-      this.toggleAllDetail(
-        this.permission_System,
-        this.permission_System_Selected,
-        true
-      );
-
-      this.permissionSelected = [
-        ...this.permission_User_Selected,
-        ...this.permission_Role_Selected,
-        ...this.permission_Permission_Selected,
-        ...this.permission_Content_Selected,
-        ...this.permission_System_Selected,
-      ];
-    } else {
-      this.isAllUserSelected = false;
-      this.isAllRoleSelected = false;
-      this.isAllPermissionSelected = false;
-      this.isAllContentSelected = false;
-      this.isAllSystemSelected = false;
-      this.toggleAllDetail(
-        this.permission_User,
-        this.permission_User_Selected,
-        false
-      );
-      this.toggleAllDetail(
-        this.permission_Role,
-        this.permission_Role_Selected,
-        false
-      );
-      this.toggleAllDetail(
-        this.permission_Permission,
-        this.permission_Permission_Selected,
-        false
-      );
-      this.toggleAllDetail(
-        this.permission_Content,
-        this.permission_Content_Selected,
-        false
-      );
-      this.toggleAllDetail(
-        this.permission_System,
-        this.permission_System_Selected,
-        false
-      );
-      this.permissionSelected.length = 0;
-    }
+    // if (this.isAllCatelorySelected) {
+    //   this.isAllUserSelected = true;
+    //   this.isAllRoleSelected = true;
+    //   this.isAllPermissionSelected = true;
+    //   this.isAllContentSelected = true;
+    //   this.isAllSystemSelected = true;
+    //   this.isAllCatelorySelected = true;
+    //   this.toggleAllDetail(
+    //     this.permission_User,
+    //     this.permission_User_Selected,
+    //     true
+    //   );
+    //   this.toggleAllDetail(
+    //     this.permission_Role,
+    //     this.permission_Role_Selected,
+    //     true
+    //   );
+    //   this.toggleAllDetail(
+    //     this.permission_Permission,
+    //     this.permission_Permission_Selected,
+    //     true
+    //   );
+    //   this.toggleAllDetail(
+    //     this.permission_Content,
+    //     this.permission_Content_Selected,
+    //     true
+    //   );
+    //   this.toggleAllDetail(
+    //     this.permission_System,
+    //     this.permission_System_Selected,
+    //     true
+    //   );
+    //   this.permissionSelected = [
+    //     ...this.permission_User_Selected,
+    //     ...this.permission_Role_Selected,
+    //     ...this.permission_Permission_Selected,
+    //     ...this.permission_Content_Selected,
+    //     ...this.permission_System_Selected,
+    //   ];
+    // } else {
+    //   this.isAllUserSelected = false;
+    //   this.isAllRoleSelected = false;
+    //   this.isAllPermissionSelected = false;
+    //   this.isAllContentSelected = false;
+    //   this.isAllSystemSelected = false;
+    //   this.toggleAllDetail(
+    //     this.permission_User,
+    //     this.permission_User_Selected,
+    //     false
+    //   );
+    //   this.toggleAllDetail(
+    //     this.permission_Role,
+    //     this.permission_Role_Selected,
+    //     false
+    //   );
+    //   this.toggleAllDetail(
+    //     this.permission_Permission,
+    //     this.permission_Permission_Selected,
+    //     false
+    //   );
+    //   this.toggleAllDetail(
+    //     this.permission_Content,
+    //     this.permission_Content_Selected,
+    //     false
+    //   );
+    //   this.toggleAllDetail(
+    //     this.permission_System,
+    //     this.permission_System_Selected,
+    //     false
+    //   );
+    //   this.permissionSelected.length = 0;
+    // }
   }
   toggleAllDetail(
     nodes: TreeNode[],
@@ -594,185 +707,179 @@ export class ListAccountsComponent implements OnInit {
   }
 
   onCatelorySelectionChange() {
-    this.isAllCatelorySelected =
-      this.isAllContentSelected &&
-      this.isAllPermissionSelected &&
-      this.isAllRoleSelected &&
-      this.isAllSystemSelected &&
-      this.isAllUserSelected;
+    // this.isAllCatelorySelected =
+    //   this.isAllContentSelected &&
+    //   this.isAllPermissionSelected &&
+    //   this.isAllRoleSelected &&
+    //   this.isAllSystemSelected &&
+    //   this.isAllUserSelected;
   }
 
-  onDetailSelectionChange(showDetailPermission: number) {
-    switch (showDetailPermission) {
-      case 1: {
-        const allNodeCount = this.getAllDetailNodes(
-          this.permission_User
-        ).length;
-        const selectedCount = this.permission_User_Selected.length;
-        this.isAllUserSelected = selectedCount === allNodeCount;
-        break;
-      }
-      case 2: {
-        const allNodeCount = this.getAllDetailNodes(
-          this.permission_Role
-        ).length;
-        const selectedCount = this.permission_Role_Selected.length;
-        this.isAllRoleSelected = selectedCount === allNodeCount;
-        break;
-      }
-      case 3: {
-        const allNodeCount = this.getAllDetailNodes(
-          this.permission_Permission
-        ).length;
-        const selectedCount = this.permission_Permission_Selected.length;
-        this.isAllPermissionSelected = selectedCount === allNodeCount;
-        break;
-      }
-      case 4: {
-        const allNodeCount = this.getAllDetailNodes(
-          this.permission_Content
-        ).length;
-        const selectedCount = this.permission_Content_Selected.length;
-        this.isAllContentSelected = selectedCount === allNodeCount;
-        break;
-      }
-      case 5: {
-        const allNodeCount = this.getAllDetailNodes(
-          this.permission_System
-        ).length;
-        const selectedCount = this.permission_System_Selected.length;
-        this.isAllSystemSelected = selectedCount === allNodeCount;
-        break;
-      }
-      default: {
-        break;
-      }
-    }
-    this.onCatelorySelectionChange();
+  onDetailSelectionChange() {
+    // switch (showDetailPermission) {
+    //   case 1: {
+    //     const allNodeCount = this.getAllDetailNodes(
+    //       this.permission_User
+    //     ).length;
+    //     const selectedCount = this.permission_User_Selected.length;
+    //     this.isAllUserSelected = selectedCount === allNodeCount;
+    //     break;
+    //   }
+    //   case 2: {
+    //     const allNodeCount = this.getAllDetailNodes(
+    //       this.permission_Role
+    //     ).length;
+    //     const selectedCount = this.permission_Role_Selected.length;
+    //     this.isAllRoleSelected = selectedCount === allNodeCount;
+    //     break;
+    //   }
+    //   case 3: {
+    //     const allNodeCount = this.getAllDetailNodes(
+    //       this.permission_Permission
+    //     ).length;
+    //     const selectedCount = this.permission_Permission_Selected.length;
+    //     this.isAllPermissionSelected = selectedCount === allNodeCount;
+    //     break;
+    //   }
+    //   case 4: {
+    //     const allNodeCount = this.getAllDetailNodes(
+    //       this.permission_Content
+    //     ).length;
+    //     const selectedCount = this.permission_Content_Selected.length;
+    //     this.isAllContentSelected = selectedCount === allNodeCount;
+    //     break;
+    //   }
+    //   case 5: {
+    //     const allNodeCount = this.getAllDetailNodes(
+    //       this.permission_System
+    //     ).length;
+    //     const selectedCount = this.permission_System_Selected.length;
+    //     this.isAllSystemSelected = selectedCount === allNodeCount;
+    //     break;
+    //   }
+    //   default: {
+    //     break;
+    //   }
+    // }
+    // this.onCatelorySelectionChange();
   }
 
   showPermission() {
     this.displayPopupPermission = true;
 
-    this.permission_User.length = 0;
-    this.permission_Role.length = 0;
-    this.permission_Content.length = 0;
-    this.permission_Permission.length = 0;
-    this.permission_System.length = 0;
+    // this.permission_User.length = 0;
+    // this.permission_Role.length = 0;
+    // this.permission_Content.length = 0;
+    // this.permission_Permission.length = 0;
+    // this.permission_System.length = 0;
 
-    this.permission_User_Selected.length = 0;
-    this.permission_Role_Selected.length = 0;
-    this.permission_Content_Selected.length = 0;
-    this.permission_Permission_Selected.length = 0;
-    this.permission_System_Selected.length = 0;
+    // this.permission_User_Selected.length = 0;
+    // this.permission_Role_Selected.length = 0;
+    // this.permission_Content_Selected.length = 0;
+    // this.permission_Permission_Selected.length = 0;
+    // this.permission_System_Selected.length = 0;
 
-    this.showDetailPermission = 0;
-    this.isAllUserSelected = false;
-    this.isAllRoleSelected = false;
-    this.isAllPermissionSelected = false;
-    this.isAllContentSelected = false;
-    this.isAllSystemSelected = false;
-    this.isAllCatelorySelected = false;
+    // this.showDetailPermission = 0;
+    // this.isAllUserSelected = false;
+    // this.isAllRoleSelected = false;
+    // this.isAllPermissionSelected = false;
+    // this.isAllContentSelected = false;
+    // this.isAllSystemSelected = false;
+    // this.isAllCatelorySelected = false;
 
     this.permissionSelected.length = 0;
   }
 
   mockupUserPermission(permissionIds: number[]) {
-    const permissionGroups = [
-      {
-        nodes: this.permission_User,
-        selected: this.permission_User_Selected,
-      },
-      {
-        nodes: this.permission_Role,
-        selected: this.permission_Role_Selected,
-      },
-      {
-        nodes: this.permission_Permission,
-        selected: this.permission_Permission_Selected,
-      },
-      {
-        nodes: this.permission_Content,
-        selected: this.permission_Content_Selected,
-      },
-      {
-        nodes: this.permission_System,
-        selected: this.permission_System_Selected,
-      },
-    ];
-
-    this.toggleAllPermissionByIds(permissionGroups, permissionIds);
-
-    this.updateParentSelection(
-      this.permission_User,
-      this.permission_User_Selected
-    );
-    this.updateParentSelection(
-      this.permission_Role,
-      this.permission_Role_Selected
-    );
-    this.updateParentSelection(
-      this.permission_Permission,
-      this.permission_Permission_Selected
-    );
-    this.updateParentSelection(
-      this.permission_Content,
-      this.permission_Content_Selected
-    );
-    this.updateParentSelection(
-      this.permission_System,
-      this.permission_System_Selected
-    );
-
-    for (let i = 1; i <= 5; i++) {
-      this.onDetailSelectionChange(i);
-    }
+    //   const permissionGroups = [
+    //     {
+    //       nodes: this.permission_User,
+    //       selected: this.permission_User_Selected,
+    //     },
+    //     {
+    //       nodes: this.permission_Role,
+    //       selected: this.permission_Role_Selected,
+    //     },
+    //     {
+    //       nodes: this.permission_Permission,
+    //       selected: this.permission_Permission_Selected,
+    //     },
+    //     {
+    //       nodes: this.permission_Content,
+    //       selected: this.permission_Content_Selected,
+    //     },
+    //     {
+    //       nodes: this.permission_System,
+    //       selected: this.permission_System_Selected,
+    //     },
+    //   ];
+    //   this.toggleAllPermissionByIds(permissionGroups, permissionIds);
+    //   this.updateParentSelection(
+    //     this.permission_User,
+    //     this.permission_User_Selected
+    //   );
+    //   this.updateParentSelection(
+    //     this.permission_Role,
+    //     this.permission_Role_Selected
+    //   );
+    //   this.updateParentSelection(
+    //     this.permission_Permission,
+    //     this.permission_Permission_Selected
+    //   );
+    //   this.updateParentSelection(
+    //     this.permission_Content,
+    //     this.permission_Content_Selected
+    //   );
+    //   this.updateParentSelection(
+    //     this.permission_System,
+    //     this.permission_System_Selected
+    //   );
+    //   for (let i = 1; i <= 5; i++) {
+    //     this.onDetailSelectionChange(i);
+    //   }
   }
 
   mockupPermission(data: any) {
-    this.permission_User = [
-      {
-        label: 'User',
-        data: 'permission_User',
-        expanded: true,
-        children: this.convertToTreeNodes(data.permission_User),
-      },
-    ];
-    this.permission_Role = [
-      {
-        label: 'Role',
-        data: 'permission_Role',
-        expanded: true,
-        children: this.convertToTreeNodes(data.permission_Role),
-      },
-    ];
-
-    this.permission_Content = [
-      {
-        label: 'Content',
-        data: 'permission_Content',
-        expanded: true,
-        children: this.convertToTreeNodes(data.permission_Content),
-      },
-    ];
-
-    this.permission_Permission = [
-      {
-        label: 'Permission',
-        data: 'permission_Permission',
-        expanded: true,
-        children: this.convertToTreeNodes(data.permission_Permission),
-      },
-    ];
-
-    this.permission_System = [
-      {
-        label: 'Admin',
-        data: 'permission_System',
-        expanded: true,
-        children: this.convertToTreeNodes(data.permission_System),
-      },
-    ];
+    // this.permission_User = [
+    //   {
+    //     label: 'User',
+    //     data: 'permission_User',
+    //     expanded: true,
+    //     children: this.convertToTreeNodes(data.permission_User),
+    //   },
+    // ];
+    // this.permission_Role = [
+    //   {
+    //     label: 'Role',
+    //     data: 'permission_Role',
+    //     expanded: true,
+    //     children: this.convertToTreeNodes(data.permission_Role),
+    //   },
+    // ];
+    // this.permission_Content = [
+    //   {
+    //     label: 'Content',
+    //     data: 'permission_Content',
+    //     expanded: true,
+    //     children: this.convertToTreeNodes(data.permission_Content),
+    //   },
+    // ];
+    // this.permission_Permission = [
+    //   {
+    //     label: 'Permission',
+    //     data: 'permission_Permission',
+    //     expanded: true,
+    //     children: this.convertToTreeNodes(data.permission_Permission),
+    //   },
+    // ];
+    // this.permission_System = [
+    //   {
+    //     label: 'Admin',
+    //     data: 'permission_System',
+    //     expanded: true,
+    //     children: this.convertToTreeNodes(data.permission_System),
+    //   },
+    // ];
   }
 
   isChangedRole = false;
@@ -780,70 +887,72 @@ export class ListAccountsComponent implements OnInit {
   //detail user
   //show permission cua user
   userPermission() {
-    this.apiPermission.getAllPermission().subscribe({
-      next: (res) => {
-        if (res.result == '1') {
-          this.showPermission();
-          this.mockupPermission(res.data);
+    this.showPermission();
 
-          if (!this.isChangedRole) {
-            if (this.detailAccountForm.get('permissionIds')?.value) {
-              let permissionIds: [] =
-                this.detailAccountForm.get('permissionIds')?.value;
-              this.mockupUserPermission(permissionIds);
-            } else {
-              //lay tat ca quyen (role + extend)
-              this.apiAccount
-                .GetAllUserPermission(this.userIdSeleted)
-                .subscribe({
-                  next: (res) => {
-                    if (res.result == '1') {
-                      let permissionIds: [] = res.data;
+    // this.apiPermission.getAllPermission().subscribe({
+    //   next: (res) => {
+    //     if (res.result == '1') {
+    //       this.showPermission();
+    //       this.mockupPermission(res.data);
 
-                      this.mockupUserPermission(permissionIds);
-                    } else {
-                      this.pop.showOkPopup({ message: res.message });
-                    }
-                  },
-                  error: (err) => {
-                    this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
-                    console.log(err);
-                  },
-                });
-            }
-          } else {
-            this.apiPermission
-              .getPermissionByRoleID(this.userIdSeleted)
-              .subscribe({
-                next: (res) => {
-                  if (res.result == '1') {
-                    let permissionIds: [] = res.data;
-                    this.mockupUserPermission(permissionIds);
-                  } else {
-                    this.pop.showOkPopup({ message: res.message });
-                  }
-                },
-                error: (err) => {
-                  this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
-                  console.log(err);
-                },
-              });
-          }
+    //       if (!this.isChangedRole) {
+    //         if (this.detailAccountForm.get('permissionIds')?.value) {
+    //           let permissionIds: [] =
+    //             this.detailAccountForm.get('permissionIds')?.value;
+    //           this.mockupUserPermission(permissionIds);
+    //         } else {
+    //           //lay tat ca quyen (role + extend)
+    //           this.apiAccount
+    //             .GetAllUserPermission(this.userIdSeleted)
+    //             .subscribe({
+    //               next: (res) => {
+    //                 if (res.result == '1') {
+    //                   let permissionIds: [] = res.data;
 
-          this.getPermission(this.cateloryPermission[0]);
-        } else {
-          this.pop.showOkPopup({ message: res.message });
-        }
-      },
-      error: (err) => {
-        this.pop.showOkPopup({
-          header: 'Lỗi',
-          message: 'Không thể kết nối với server!',
-        });
-        this.displayPopupPermission = false;
-        console.log(err);
-      },
-    });
+    //                   this.mockupUserPermission(permissionIds);
+    //                 } else {
+    //                   this.pop.showOkPopup({ message: res.message });
+    //                 }
+    //               },
+    //               error: (err) => {
+    //                 this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
+    //                 console.log(err);
+    //               },
+    //             });
+    //         }
+    //       } else {
+    //         this.apiPermission
+    //           .getPermissionByRoleID(this.userIdSeleted)
+    //           .subscribe({
+    //             next: (res) => {
+    //               if (res.result == '1') {
+    //                 let permissionIds: [] = res.data;
+    //                 this.mockupUserPermission(permissionIds);
+    //               } else {
+    //                 this.pop.showOkPopup({ message: res.message });
+    //               }
+    //             },
+    //             error: (err) => {
+    //               this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
+    //               console.log(err);
+    //             },
+    //           });
+    //       }
+
+    //       this.getPermission(this.cateloryPermission[0]);
+    //     } else {
+    //       this.pop.showOkPopup({ message: res.message });
+    //     }
+    //   },
+    //   error: (err) => {
+    //     this.pop.showOkPopup({
+    //       header: 'Lỗi',
+    //       message: 'Không thể kết nối với server!',
+    //     });
+    //     this.displayPopupPermission = false;
+    //     console.log(err);
+    //   },
+    // });
   }
 
   convertToTreeNodes(data: any[]): TreeNode[] {
@@ -922,31 +1031,64 @@ export class ListAccountsComponent implements OnInit {
   }
 
   updateUserPermission() {
-    this.permissionSelected = [
-      ...this.permission_User_Selected,
-      ...this.permission_Role_Selected,
-      ...this.permission_Permission_Selected,
-      ...this.permission_Content_Selected,
-      ...this.permission_System_Selected,
-    ];
-    const ids: number[] = [];
+    console.log(this.selectedRolePermissionsByRoleID);
 
-    this.permissionSelected.forEach((node) => {
-      if (node.leaf && node.data?.permissionID) {
-        ids.push(node.data.permissionID);
+    const payload: { RoleID: number; PermissionID: number }[] = [];
+
+    Object.entries(this.selectedRolePermissionsByRoleID).forEach(
+      ([roleID, treeNodes]) => {
+        treeNodes.forEach((node) => {
+          if (node.data?.PermissionID) {
+            payload.push({
+              RoleID: Number(roleID),
+              PermissionID: node.data.PermissionID,
+            });
+          }
+        });
       }
-    });
-    if (this.detailAccountForm.get('roleID')?.value == 1) {
-      this.pop.showOkPopup({
-        message: 'Không thể chỉnh sửa quyền của role Admin!!',
-      });
-      return;
-    }
-    this.detailAccountForm.patchValue({ permissionIds: ids });
-    this.displayPopupPermission = false;
-    this.detailAccountForm.markAsDirty();
-  }
+    );
 
+    const jsonPayload = JSON.stringify(payload);
+    console.log(jsonPayload);
+    this.apiAccount.UpdateUserRoles(this.userIdSeleted, jsonPayload).subscribe({
+      next: (res) => {
+        if (res.result == '1') {
+          this.pop.showOkPopup({ message: res.message });
+        } else {
+          this.pop.showOkPopup({ message: res.message });
+        }
+      },
+      error: (err) => {
+        this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
+        console.log(err);
+      },
+    });
+    // this.permissionSelected = [
+    //   ...this.permission_User_Selected,
+    //   ...this.permission_Role_Selected,
+    //   ...this.permission_Permission_Selected,
+    //   ...this.permission_Content_Selected,
+    //   ...this.permission_System_Selected,
+    // ];
+    // const ids: number[] = [];
+    // this.permissionSelected.forEach((node) => {
+    //   if (node.leaf && node.data?.permissionID) {
+    //     ids.push(node.data.permissionID);
+    //   }
+    // });
+    // if (this.detailAccountForm.get('roleID')?.value == 1) {
+    //   this.pop.showOkPopup({
+    //     message: 'Không thể chỉnh sửa quyền của role Admin!!',
+    //   });
+    //   return;
+    // }
+    // this.detailAccountForm.patchValue({ permissionIds: ids });
+    // this.displayPopupPermission = false;
+    // this.detailAccountForm.markAsDirty();
+  }
+  ///end show userrole
+
+  ///show create user
   displayPopupCreateUser: boolean = false;
   disableBtnCreateUser: boolean = false;
   listRole_Create: [] = [];
@@ -1023,84 +1165,81 @@ export class ListAccountsComponent implements OnInit {
   }
 
   createUserPermission() {
-    this.apiPermission.getAllPermission().subscribe({
-      next: (res) => {
-        if (res.result == '1') {
-          this.showPermission();
-          this.mockupPermission(res.data);
-
-          if (this.createAccountForm.get('roleID')?.value) {
-            this.apiPermission
-              .getPermissionByRoleID(
-                this.createAccountForm.get('roleID')?.value
-              )
-              .subscribe({
-                next: (res) => {
-                  if (res.result == '1') {
-                    let rolePermissionIds: [] = res.data;
-                    let lastSetPermissionIds = this.createAccountForm.get(
-                      'permissionIds'
-                    )?.value as number[];
-                    console.log(this.createAccountForm.get('permissionIds'));
-                    let permissionIds: number[];
-                    if (lastSetPermissionIds) {
-                      permissionIds = [
-                        ...new Set([
-                          ...rolePermissionIds,
-                          ...lastSetPermissionIds,
-                        ]),
-                      ];
-                    } else {
-                      permissionIds = [...rolePermissionIds];
-                    }
-                    this.mockupUserPermission(permissionIds);
-                  } else {
-                    this.pop.showOkPopup({ message: res.message });
-                  }
-                },
-                error: (err) => {
-                  this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
-                  console.log(err);
-                },
-              });
-          } else {
-            this.displayPopupPermission = false;
-            this.pop.showOkPopup({ message: 'Vui lòng chọn Role trước!' });
-          }
-
-          this.getPermission(this.cateloryPermission[0]);
-        } else {
-          this.pop.showOkPopup({ message: res.message });
-        }
-      },
-      error: (err) => {
-        this.pop.showOkPopup({
-          header: 'Lỗi',
-          message: 'Không thể kết nối với server!',
-        });
-        this.displayPopupPermission = false;
-        console.log(err);
-      },
-    });
+    // this.apiPermission.getAllPermission().subscribe({
+    //   next: (res) => {
+    //     if (res.result == '1') {
+    //       this.showPermission();
+    //       this.mockupPermission(res.data);
+    //       if (this.createAccountForm.get('roleID')?.value) {
+    //         this.apiPermission
+    //           .getPermissionByRoleID(
+    //             this.createAccountForm.get('roleID')?.value
+    //           )
+    //           .subscribe({
+    //             next: (res) => {
+    //               if (res.result == '1') {
+    //                 let rolePermissionIds: [] = res.data;
+    //                 let lastSetPermissionIds = this.createAccountForm.get(
+    //                   'permissionIds'
+    //                 )?.value as number[];
+    //                 console.log(this.createAccountForm.get('permissionIds'));
+    //                 let permissionIds: number[];
+    //                 if (lastSetPermissionIds) {
+    //                   permissionIds = [
+    //                     ...new Set([
+    //                       ...rolePermissionIds,
+    //                       ...lastSetPermissionIds,
+    //                     ]),
+    //                   ];
+    //                 } else {
+    //                   permissionIds = [...rolePermissionIds];
+    //                 }
+    //                 this.mockupUserPermission(permissionIds);
+    //               } else {
+    //                 this.pop.showOkPopup({ message: res.message });
+    //               }
+    //             },
+    //             error: (err) => {
+    //               this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
+    //               console.log(err);
+    //             },
+    //           });
+    //       } else {
+    //         this.displayPopupPermission = false;
+    //         this.pop.showOkPopup({ message: 'Vui lòng chọn Role trước!' });
+    //       }
+    //       this.getPermission(this.cateloryPermission[0]);
+    //     } else {
+    //       this.pop.showOkPopup({ message: res.message });
+    //     }
+    //   },
+    //   error: (err) => {
+    //     this.pop.showOkPopup({
+    //       header: 'Lỗi',
+    //       message: 'Không thể kết nối với server!',
+    //     });
+    //     this.displayPopupPermission = false;
+    //     console.log(err);
+    //   },
+    // });
   }
 
   addUserPermission() {
-    this.permissionSelected = [
-      ...this.permission_User_Selected,
-      ...this.permission_Role_Selected,
-      ...this.permission_Permission_Selected,
-      ...this.permission_Content_Selected,
-      ...this.permission_System_Selected,
-    ];
-    const ids: number[] = [];
-
-    this.permissionSelected.forEach((node) => {
-      if (node.leaf && node.data?.permissionID) {
-        ids.push(node.data.permissionID);
-      }
-    });
-    this.createAccountForm.patchValue({ permissionIds: ids });
-    this.displayPopupPermission = false;
+    // this.permissionSelected = [
+    //   ...this.permission_User_Selected,
+    //   ...this.permission_Role_Selected,
+    //   ...this.permission_Permission_Selected,
+    //   ...this.permission_Content_Selected,
+    //   ...this.permission_System_Selected,
+    // ];
+    // const ids: number[] = [];
+    // this.permissionSelected.forEach((node) => {
+    //   if (node.leaf && node.data?.permissionID) {
+    //     ids.push(node.data.permissionID);
+    //   }
+    // });
+    // this.createAccountForm.patchValue({ permissionIds: ids });
+    // this.displayPopupPermission = false;
   }
 
   createUser() {
@@ -1159,7 +1298,9 @@ export class ListAccountsComponent implements OnInit {
     const control = this.createAccountForm.get('password');
     return control?.dirty;
   }
+  ///end show create user
 
+  ///show change password
   getPasswordRule() {
     this.apiAccount.GetPasswordRule().subscribe({
       next: (res) => {
@@ -1344,49 +1485,53 @@ export class ListAccountsComponent implements OnInit {
       },
     });
   }
+  ///end show change password
 
-  LoginAsUser(){
+  ///menu account
+  LoginAsUser() {
     this.apiAccount.LoginAsUser(this.userNameSeleted).subscribe({
-      next: (res)=>{
-        if(res.result == '1'){
-          if(this.authService.loginAsUser()){
-            console.log( "toiday");
+      next: (res) => {
+        if (res.result == '1') {
+          if (this.authService.loginAsUser()) {
+            console.log('toiday');
 
-            this.authService.saveUserData(res.data, false)
+            this.authService.saveUserData(res.data, false);
 
-            this.router.navigate(['/home']);
-            window.location.reload();
-          } else{
-            console.log( "Chỉ có thể login as user tối đa 5 lần!");
-            this.pop.showOkPopup({message: "Chỉ có thể login as user tối đa 5 lần!"})
+            this.router.navigate(['/home']).then(() => {
+              window.location.reload();
+            });
+          } else {
+            console.log('Chỉ có thể login as user tối đa 5 lần!');
+            this.pop.showOkPopup({
+              message: 'Chỉ có thể login as user tối đa 5 lần!',
+            });
           }
-
-        }else{
-          this.pop.showOkPopup({message: res.message})
+        } else {
+          this.pop.showOkPopup({ message: res.message });
         }
       },
       error: (err) => {
         this.pop.showSysErr();
         console.log(err);
-      }
-    })
+      },
+    });
   }
 
-  LogoutUser(){
+  LogoutUser() {
     this.apiAccount.LogoutUser(this.userNameSeleted).subscribe({
-      next: (res)=>{
-        if(res.result == '1'){
-          this.pop.showOkPopup({message: res.message})
-        }else{
+      next: (res) => {
+        if (res.result == '1') {
+          this.pop.showOkPopup({ message: res.message });
+        } else {
           this.pop.showSysErr();
-          console.log(res.message)
+          console.log(res.message);
         }
       },
       error: (err) => {
         this.pop.showSysErr();
         console.log(err);
-      }
-    })
+      },
+    });
   }
-  
+  ///end menu account
 }

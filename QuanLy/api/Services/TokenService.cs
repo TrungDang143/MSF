@@ -69,9 +69,9 @@ namespace api.Services
             var jwtSettings = _config.GetSection("Jwt");
             var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
-            int roleID = GetUserRoleID(username);
             int userID = GetUserIDByUsername(username);
-            List<string> permissionNames = GetAllPermissionNameForUser(userID);
+             
+            GetUserInfoForToken(userID, out List<string> permissionNames, out int roleID);
 
             var claims = new List<Claim>
             {
@@ -95,29 +95,6 @@ namespace api.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
-        //public string Decode(string token)
-        //{
-        //    string[] parts = token.Split('.');
-        //    if (parts.Length < 2)
-        //    {
-        //        throw new ArgumentException("Token không hợp lệ!");
-        //    }
-
-        //    string payload = parts[1];
-
-        //    payload = payload.Replace('_', '/').Replace('-', '+');
-        //    switch (payload.Length % 4)
-        //    {
-        //        case 2: payload += "=="; break;
-        //        case 3: payload += "="; break;
-        //    }
-
-        //    // Decode Base64
-        //    byte[] decodedBytes = Convert.FromBase64String(payload);
-        //    var result = System.Text.Encoding.UTF8.GetString(decodedBytes);
-        //    return result;
-        //}
 
         //public static async Task<PayloadFBDto> DecodeFBToken(string token)
         //{
@@ -176,89 +153,15 @@ namespace api.Services
 
         }
 
-        //public string GetUsernameFormLoginToken(string token)
-        //{
-        //    var claimsPrincipal = DecodeToken(token);
-        //    string username = string.Empty;
-        //    if (claimsPrincipal != null)
-        //    {
-        //        username = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
-        //    }
-
-        //    return username;
-        //}
-
-        
-        private int GetUserRoleID(string username)
+        /// <summary>
+        /// get all permission name and roleID
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns></returns>
+        private void GetUserInfoForToken(int userID, out List<string> listPermission, out int roleID)
         {
-            int roleID = 4;
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                {
-                    conn.Open();
-
-                    var usernameParam = new SqlParameter("@UsernameOrEmail", username);
-                    var resultParam = new SqlParameter("@rtnvalue", SqlDbType.Int)
-                    {
-                        Direction = ParameterDirection.Output
-                    };
-
-                    using (SqlCommand cmd = new SqlCommand("sp_GetRoleIDByUsernameOrEmail", conn))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add(usernameParam);
-                        cmd.Parameters.Add(resultParam);
-
-                        cmd.ExecuteNonQuery();
-
-                        //int status = (int)cmd.Parameters["@Result"].Value;
-
-                        if ((int)resultParam.Value != null)
-                        {
-                            roleID = (int)resultParam.Value;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            return roleID;
-        }
-
-        //public ClaimsPrincipal? DecodeToken(string token)
-        //{
-        //    var jwtSettings = _config.GetSection("Jwt");
-        //    var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
-
-        //    var tokenHandler = new JwtSecurityTokenHandler();
-        //    var validationParameters = new TokenValidationParameters
-        //    {
-        //        ValidateIssuer = true,
-        //        ValidateAudience = true,
-        //        ValidateLifetime = true,
-        //        ValidateIssuerSigningKey = true,
-        //        ValidIssuer = jwtSettings["Issuer"],
-        //        ValidAudience = jwtSettings["Audience"],
-        //        IssuerSigningKey = new SymmetricSecurityKey(key)
-        //    };
-
-        //    try
-        //    {
-        //        var principal = tokenHandler.ValidateToken(token, validationParameters, out _);
-        //        return principal;
-        //    }
-        //    catch
-        //    {
-        //        return null; // Token không hợp lệ
-        //    }
-        //}
-
-        private List<string> GetAllPermissionNameForUser(int userID)
-        {
-            List<string> listPermission = new List<string>();
+            listPermission = new List<string>();
+            roleID = 0;
             try
             {
                 using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
@@ -278,8 +181,10 @@ namespace api.Services
 
                         foreach (DataRow dr in dt.Rows)
                         {
-                            listPermission.Add(dr[1].ToString());
+                            listPermission.Add(dr[2].ToString());
                         }
+
+                        roleID = int.Parse(dt.Rows[0][0].ToString());
                     }
                 }
             }
@@ -287,7 +192,6 @@ namespace api.Services
             {
                 throw ex;
             }
-            return listPermission;
         }
 
         public async Task<bool> IsValidUser(string username, bool isAdminLogin = false)

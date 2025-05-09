@@ -28,10 +28,10 @@ namespace api.Controllers
         }
 
         [HasPermission("view_users")]
-        [HttpGet("GetAllUserAccounts")]
-        public async Task<BaseResponse> GetAllUserAccounts()
+        [HttpGet("GetAccounts")]
+        public async Task<BaseResponse> GetAccounts([FromQuery]GetAccountsDto inputDto)
         {
-            return await _account.GetAllUserAccounts();
+            return await _account.GetAccounts(inputDto);
         }
 
         [HasPermission("view_users")]
@@ -41,12 +41,12 @@ namespace api.Controllers
             return await _account.GetRole(inputDto);
         }
 
-        [HasPermission("view_users")]
-        [HttpGet("GetRoleByPaging")]
-        public async Task<BaseResponse> GetRoleByPaging([FromQuery] GetRoleDto inputDto)
-        {
-            return await _account.GetRoleByPaging(inputDto);
-        }
+        //[HasPermission("view_users")]
+        //[HttpGet("GetRoleByPaging")]
+        //public async Task<BaseResponse> GetRoleByPaging([FromQuery] GetRoleDto inputDto)
+        //{
+        //    return await _account.GetRoleByPaging(inputDto);
+        //}
 
         [HasPermission("edit_users")]
         [HttpGet("GetDetailUserInfo")]
@@ -59,6 +59,11 @@ namespace api.Controllers
         [HttpPost("UpdateUser")]
         public async Task<BaseResponse> UpdateUser([FromBody] UpdateUserDto inputDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return AppConstant.INVALID_MODEL();
+            }
+
             string? username = User.Identity?.Name;
             int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
             return await _account.UpdateUser(inputDto, username, roleID);

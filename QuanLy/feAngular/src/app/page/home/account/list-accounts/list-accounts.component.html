@@ -1,97 +1,136 @@
 <div class="card">
+    <div class="filter" style="padding: 0; margin: 5px 0">
+      <p-panel
+        [toggleable]="true"
+        [expandIcon]="'pi pi-angle-up'"
+        [collapseIcon]="'pi pi-angle-down'"
+        [(collapsed)] = "collapsedChange"
+      >
+      <ng-template #header>
+        <div (click)="toggleFilterPanel()" style="width: 100%;">
+          <h3 style="margin: 5px;">Lọc nâng cao</h3>
+        </div>
+      </ng-template>
+      <ng-template #icons>
+        <div (click)="toggleFilterPanel()" style="display: flex; width: 60px; align-items: center;">
+          {{collapsedChange ? 'Hiện lọc' : 'Ẩn lọc'}} 
+        </div>
+      </ng-template>
+        <form action="" method="get" [formGroup]="filterAccountForm">
+          <div class="filter-form">
+            <div class="filter-form-1">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  id="search_username"
+                  formControlName="username"
+                  autocomplete="off"
+                />
+                <label for="search_username">Username hoặc email</label>
+              </p-floatlabel>
+            </div>
+            <div class="filter-form-2">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  id="search_fullname"
+                  formControlName="fullname"
+                  autocomplete="off"
+                />
+                <label for="search_fullname">Họ tên</label>
+              </p-floatlabel>
+            </div>
+            <div class="filter-form-3">
+              <p-floatlabel variant="on">
+                <p-select 
+                id="search_role"
+                appendTo="body"
+                formControlName="roleID" 
+                [options]="listRole" 
+                optionLabel="roleName" 
+                optionValue="roleID"
+                [showClear]="true"
+                (onChange)="getPermission_filter()"
+                />
+                <label for="search_role" style="margin-left: 10px;">Chọn vai trò</label>
+              </p-floatlabel>
+            </div>
+            <div class="filter-form-4">
+              <p-floatlabel variant="on">
+                <p-select 
+                id="search_permission"
+                appendTo="body"
+                formControlName="permissionID" 
+                [options]="listPermission" 
+                optionLabel="description" 
+                optionValue="permissionID"
+                [emptyMessage]="'Không có kết quả'"
+                [showClear]="true"/>
+                <label for="search_permission" style="margin-left: 10px;">Chọn quyền</label>
+              </p-floatlabel>
+            </div>
+            <div class="filter-form-action">
+              <button
+                pButton
+                type="button"
+                icon="pi pi-filter"
+                label="Lọc"
+                (click)="filter()"
+              ></button>
+              <button
+                pButton
+                type="button"
+                icon="pi pi-undo"
+                label="Làm mới"
+                severity="secondary"
+                (click)="refresh()"
+              ></button>
+            </div>
+          </div>
+        </form>
+      </p-panel>
+
+      <div class="action">
+        <p-button
+          severity="success"
+          label="Tạo user"
+          icon="pi pi-plus"
+          (click)="createUserPopup()"
+        ></p-button>
+        <p-button
+          severity="secondary"
+          label="Làm mới"
+          icon="pi pi-undo"
+          (click)="refresh()"
+        ></p-button>
+      </div>
+    </div>
+
   <p-table
-    #dt2
     [value]="listUser"
-    [paginator]="true"
-    dataKey="id"
-    [rows]="5"
-    [rowsPerPageOptions]="[5, 10, 20]"
-    [globalFilterFields]="['username', 'email', 'fullName']"
+    [lazy]="true"
+    [paginator]="false"
+    [loading]="loading"
+    (onLazyLoad)="loadUserLazy()"
     [resizableColumns]="true"
     styleClass="p-datatable-gridlines custom-list-user-table"
     [tableStyle]="{ 'min-width': '50rem' }"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-    [showCurrentPageReport]="true"
-    [filters]="filters"
     [scrollable]="true"
     scrollHeight="420px"
   >
     <ng-template #header>
-      <div class="filter" style="padding: 0; margin: 5px 0;">
-        <p-panel header="Lọc nâng cao" [toggleable]="true" 
-        [expandIcon]="'pi pi-angle-up'"
-        [collapseIcon]="'pi pi-angle-down'">
-          <form action="" method="get" [formGroup]="filterAccountForm">
-            <div class="filter-form">
-              <div class="filter-form-1">
-                <p-floatlabel variant="on">
-                  <input
-                    pInputText
-                    id="search_username"
-                    formControlName="username"
-                    autocomplete="off"
-                  />
-                  <label for="search_username">Username hoặc email</label>
-                </p-floatlabel>
-              </div>
-              <div class="filter-form-2">
-                <p-floatlabel variant="on">
-                  <p-autocomplete
-                    id="search_role"
-                    appendTo="body"
-                    dropdown="true"
-                    formControlName="roleID"
-                    [suggestions]="filteredRoles"
-                    [optionLabel]="'roleName'"
-                    [optionValue]="'roleID'"
-                    (completeMethod)="getFilteredFieldValue($event, 'role')"
-                    [virtualScroll]="true"
-                    [virtualScrollItemSize]="38" [virtualScrollOptions]="options"
-                    [emptyMessage]="'Không có kết quả'"
-                  />
-                  <label for="search_role">Vai trò</label>
-                </p-floatlabel>
-              </div>
-              <div class="filter-form-3"></div>
-              <div class="filter-form-4"></div>
-              <div class="filter-form-action"></div>
-
-              <!-- <p-select
-                [options]="listRole"
-                optionLabel="roleName"
-                optionValue="roleName"
-                [(ngModel)]="selectedRole"
-                placeholder="Lọc theo role"
-                (onChange)="dt2.filter($event.value, 'roleName', 'equals')"
-                [showClear]="true"
-              ></p-select> -->
-            </div>
-          </form>
-        </p-panel>
-
-        <div class="action">
-          <p-button
-            severity="success"
-            label="Tạo user"
-            (click)="createUserPopup()"
-          ></p-button>
-        </div>
-      </div>
-    </ng-template>
-    <ng-template #header>
       <tr>
-        <th pResizableColumn style="width: 80px">Action</th>
-        <th pResizableColumn style="width: 100px">Avatar</th>
+        <th pFrozenColumn style="width: 80px">Action</th>
         <th pResizableColumn>Username</th>
-        <th pResizableColumn>Fullname</th>
+        <th pResizableColumn>Họ tên</th>
         <th pResizableColumn>Email</th>
-        <th pResizableColumn>Role</th>
-        <th pResizableColumn style="width: 100px">Status</th>
+        <th pResizableColumn>Vai trò</th>
+        <th style="width: 100px">Trạng thái</th>
       </tr>
     </ng-template>
     <ng-template #body let-user>
       <tr>
-        <td style="text-align: center">
+        <td pFrozenColumn style="text-align: center">
           <p-menu
             #menu
             [model]="menuAccountActions"
@@ -101,32 +140,31 @@
           <p-button
             (click)="openMenuAction($event, menu, user.userID, user.username)"
             icon="pi pi-list"
-            severity="primary"
+            variant="outlined"
             label="Action"
           />
         </td>
 
-        <td>
-          <img
-            src="{{ user.avatar }}"
-            alt="avatar"
-            height="50px"
-            width="50px"
-          />
+        <td >
+          <div style="display: flex; justify-items: start; align-items: center;">
+            <img [alt]="'avatar'" src="{{ user.avatar }}" height="40px"width="40px" style="border-radius: 50%;"/>
+            <span style="margin-left: 5px;">{{ user.username }}</span>
+          </div>
         </td>
-        <td>{{ user.username }}</td>
         <td>{{ user.fullName }}</td>
         <td>{{ user.email }}</td>
-        <td>{{ user.roleName }}</td>
+        <td>{{ user.roles }}</td>
         <td>
-          <p-message
+          <div style="width: fit-content; justify-self: center">
+            <p-message
             severity="{{
               user.statusName === 'Kích hoạt' ? 'success' : 'error'
             }}"
-            styleClass="custom-pmessage"
           >
             <span>{{ user.statusName }}</span>
           </p-message>
+          </div>
+          
         </td>
       </tr>
     </ng-template>
@@ -136,6 +174,18 @@
           Không có kết quả
         </td>
       </tr>
+    </ng-template>
+    <ng-template #summary>
+      <p-paginator
+        (onPageChange)="onPageChange($event)"
+        [first]="first"
+        [totalRecords]="totalRows"
+        [rows]="rows"
+        [rowsPerPageOptions]="rowsPerPageOptions"
+        [appendTo]="body"
+        currentPageReportTemplate="Dòng {first} - {last} trên tổng số {totalRecords} records"
+        [showCurrentPageReport]="true"
+      />
     </ng-template>
   </p-table>
 </div>
@@ -153,18 +203,7 @@
         <p style="color: red">Vui lòng thử lại</p>
       </div>
       <div *ngIf="detailAccountForm">
-        <div class="popup-detail">
-          <div class="popup-cell userID">
-            <p-floatlabel variant="on">
-              <input
-                pInputText
-                id="input_userID"
-                formControlName="userID"
-                autocomplete="off"
-              />
-              <label for="input_userID">UserID</label>
-            </p-floatlabel>
-          </div>
+        <div class="popup-detail">    
           <div class="popup-cell fullname">
             <p-floatlabel variant="on">
               <input
@@ -403,12 +442,12 @@
           <div class="popup-cell detail-info">
             <div class="create">
               <p-message severity="success" styleClass="custom-detail-pmessage">
-                Create time: {{ detailAccountForm.get("createdAt")?.value }}
+                Thời gian tạo: {{ detailAccountForm.get("createdAt")?.value }}
               </p-message>
             </div>
             <div class="update">
               <p-message severity="success" styleClass="custom-detail-pmessage"
-                >Last update: {{ detailAccountForm.value.updatedAt }}</p-message
+                >Cập nhật gần nhất: {{ detailAccountForm.value.updatedAt }}</p-message
               >
             </div>
             <div class="otp">
@@ -423,7 +462,7 @@
                 severity="warn"
                 variant="outlined"
                 styleClass="custom-detail-pmessage"
-                >Last lock time:
+                >Bị khoá gần nhất:
                 {{ detailAccountForm.value.lockTime || "-" }}</p-message
               >
             </div>
@@ -432,88 +471,40 @@
                 severity="warn"
                 variant="outlined"
                 styleClass="custom-detail-pmessage"
-                >Remaining Login Attempts:
+                >Số lần thử còn lại:
                 {{ detailAccountForm.value.remainTime || "###" }}</p-message
               >
             </div>
           </div>
           <div class="popup-cell gg">
             Liên kết với Google:
-            <p-inplace *ngIf="detailAccountForm.value.googleID; else btnGG">
-              <ng-template #display>
-                <span>Đã liên kết</span>
-              </ng-template>
-              <ng-template #content>
-                <p class="m-0">
-                  Google ID: {{ detailAccountForm.value.googleID }}
-                </p>
-              </ng-template>
-            </p-inplace>
-            <ng-template #btnGG>
               <div class="social-login">
                 <p-button
-                  label="Liên kết với Google"
+                  label="{{detailAccountForm.get('isGoogle')?.value && detailAccountForm.get('isGoogle')?.value == true ? 'Đã liên kết' : 'Liên kết với Google'}}"
                   icon="pi pi-google"
                   styleClass="p-button-rounded p-button-secondary google-btn"
+                  (click)="linkGG()"
                 >
                 </p-button>
               </div>
-            </ng-template>
           </div>
           <div class="popup-cell fb">
             Liên kết với Facebook:
-            <p-inplace *ngIf="detailAccountForm.value.facebookID; else btnFF">
-              <ng-template #display>
-                <span>Đã liên kết</span>
-              </ng-template>
-              <ng-template #content>
-                <p class="m-0">
-                  Facebook ID: {{ detailAccountForm.value.facebookID }}
-                </p>
-              </ng-template>
-            </p-inplace>
-            <ng-template #btnFF>
               <div class="social-login">
                 <p-button
-                  label="Liên kết với Facebook"
+                  label="{{detailAccountForm.get('isFacebook')?.value && detailAccountForm.get('isFacebook')?.value == true ? 'Đã liên kết' : 'Liên kết với Facebook'}}"
                   icon="pi pi-facebook"
                   styleClass="p-button-rounded p-button-secondary facebook-btn"
+                  (click)="linkFB()"
                 >
                 </p-button>
               </div>
-            </ng-template>
           </div>
 
           <div class="popup-cell role">
-            <p-floatlabel variant="on">
-              <p-select
-                inputId="input_role"
-                [options]="roles"
-                styleClass="w-full"
-                formControlName="roleID"
-                optionLabel="roleName"
-                optionValue="roleID"
-                appendTo="body"
-                (onChange)="changeRole()"
-              />
-              <label for="input_role">Role</label>
-            </p-floatlabel>
-            <div class="errMsg-area">
-              <div
-                class="errMsg"
-                *ngIf="
-                  detailAccountForm['controls']['roleID'].touched &&
-                  detailAccountForm['controls']['roleID'].errors
-                "
+            <p-message severity="success" styleClass="custom-detail-pmessage"
+                >Vai trò: {{ detailAccountForm.value.roles }}</p-message
               >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['roleID'].errors['required']
-                  "
-                  >Chọn role của bạn.</small
-                >
-              </div>
-            </div>
           </div>
           <div class="popup-cell status">
             <p-floatlabel variant="on">

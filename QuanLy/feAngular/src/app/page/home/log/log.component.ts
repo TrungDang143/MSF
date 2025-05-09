@@ -36,7 +36,6 @@ import { PaginatorModule } from 'primeng/paginator';
   styleUrl: './log.component.css',
 })
 export class LogComponent implements OnInit {
-  @ViewChild('dt2') dt2: Table | undefined;
 
   dateFrom: Date | null = null;
   dateTo: Date | null = null;
@@ -45,13 +44,6 @@ export class LogComponent implements OnInit {
   selectedLogs: any[] = [];
 
   constructor(private apiLog: LogService, private pop: PopupService) {}
-
-  // applyFilterGlobal($event: any, stringVal: any) {
-  //   this.dt2!.filterGlobal(
-  //     ($event.target as HTMLInputElement).value,
-  //     stringVal
-  //   );
-  // }
 
   ngOnInit(): void {
     // this.getlog();
@@ -67,7 +59,6 @@ export class LogComponent implements OnInit {
   onPageChange(event: PaginatorState) {
     this.first = event.first ?? 0;
     this.rows = event.rows ?? 10;
-    console.log(this.first, this.rows);
     this.loadSysLogsLazy();
   }
   loadSysLogsLazy() {

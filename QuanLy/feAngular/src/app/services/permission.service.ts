@@ -10,11 +10,11 @@ export class PermissionService {
 
   constructor(private http: HttpClient) { }
 
-  getAllPermission(): Observable<any>{
+  GetAllPermission(): Observable<any>{
     return this.http.get(environment.baseUrl + 'Permission/GetAllPermission')
   }
 
-  getPermissionByRoleIds(roleIds: number[]): Observable<any>{
+  GetPermissionByRoleIds(roleIds: number[]): Observable<any>{
     return this.http.post(environment.baseUrl + "Permission/GetPermissionByRoleIds", {roleIds});
   }
 }

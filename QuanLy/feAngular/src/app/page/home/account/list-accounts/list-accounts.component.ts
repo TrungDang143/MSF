@@ -51,6 +51,8 @@ import {
   AutoCompleteLazyLoadEvent,
   AutoCompleteModule,
 } from 'primeng/autocomplete';
+import { PaginatorState } from 'primeng/paginator';
+import { PaginatorModule } from 'primeng/paginator';
 
 @Component({
   selector: 'app-list-accounts',
@@ -83,13 +85,12 @@ import {
     TabsModule,
     PickListModule,
     PanelModule,
-    AutoCompleteModule,
+    AutoCompleteModule,PaginatorModule
   ],
   templateUrl: './list-accounts.component.html',
   styleUrl: './list-accounts.component.css',
 })
 export class ListAccountsComponent implements OnInit {
-  @ViewChild('dt2') dt2: Table | undefined;
   constructor(
     private apiAccount: AccountService,
     private pop: PopupService,
@@ -150,59 +151,47 @@ export class ListAccountsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadData();
+    this.filterAccountForm.reset();
+    this.rowsPerPageOptions = [5, 10, 20];
+    this.loadUserLazy();
     this.getPasswordRule();
   }
-  filterAccountForm: FormGroup = new FormGroup({
-    username: new FormControl<string>(''),
-    roleID: new FormControl<number>(0),
-    permissionID: new FormControl<number>(0),
-    statusID: new FormControl<number>(0),
-  });
-
-  pageSz_listRoles = 10;
-  pageNo_listRoles = 1;
-  search_listRoles = '';
-
-  options: ScrollerOptions = {
-    delay: 250,
-    showLoader: true,
-    lazy: true,
-    onLazyLoad: this.onLazyLoad.bind(this),
-  };
-  filteredRoles: { roleID: number; roleName: string }[] = [];
-
-  getFilteredFieldValue(event: AutoCompleteCompleteEvent, fieldName: string) {
-    switch (fieldName) {
-      case 'role': {
-        break;
-      }
-    }
-
-  }
-  onLazyLoad(event: AutoCompleteLazyLoadEvent) {
-    const { first, last } = event;
-    this.pageSz_listRoles = last - first; 
-    this.pageNo_listRoles = Math.floor(first / this.pageSz_listRoles); 
-
-  }
-
-  listUser: Account[] = [];
-  listRole: { roleID: string; roleName: string }[] = [];
-
-  genders = [];
-  roles = [];
-  status = [];
-
   isMe(username?: string): boolean {
     if (username) return this.authService.getUser() == username;
     return this.authService.getUser() == this.userNameSeleted;
   }
+  
+  ///Load data vao trang
+  rowsPerPageOptions = [5, 10, 20];
+  filterAccountForm: FormGroup = new FormGroup({
+    username: new FormControl<string>(''),
+    fullname: new FormControl<string>(''),
+    roleID: new FormControl<number>(-1),
+    permissionID: new FormControl<number>(-1),
+    pageSize: new FormControl<number>(this.rowsPerPageOptions[0]),
+    pageNumber: new FormControl<number>(1)
+  });
 
-  getRole() {
-    this.apiAccount.GetAllRole().subscribe({
+  collapsedChange: boolean = true;
+  toggleFilterPanel(){
+    this.collapsedChange = !this.collapsedChange
+  }
+
+  listUser: Account[] = [];
+  listRole: { roleID: number; roleName: string }[] = [];
+  listPermission: { permissionID: number; permissionName: string }[] = [];
+
+  loading = false;
+  totalRows = 0;
+  first: number = 0;
+  rows: number = 10;
+  
+  getRole_filter() {
+    this.apiAccount.GetRole().subscribe({
       next: (res) => {
-        if (res.result == '1') this.listRole = res.data;
+        if (res.result == '1') {
+          this.listRole = res.data;
+        }
       },
       error: (err) => {
         this.pop.showOkPopup({ message: 'Lỗi lấy danh sách role' });
@@ -210,36 +199,81 @@ export class ListAccountsComponent implements OnInit {
       },
     });
   }
-  ///Load data vao trang
-  loadData() {
-    this.apiAccount.GetAllUserAccount().subscribe({
-      next: (res) => {
-        if (res.result == '1') {
-          this.listUser = res.data.users;
-          this.getRole();
-        } else {
-          this.pop.showOkPopup({ message: 'Không tìm thấy tài khoản!' });
-        }
-      },
-      error: (err) => {
-        this.pop.showOkPopup({ message: 'Lỗi lấy danh sách users' });
-        console.log(err);
-      },
-    });
+  getPermission_filter(){
+    this.filterAccountForm.get("permissionID")?.reset();
+    let roleID: number | null = this.filterAccountForm.get("roleID")?.value;
+    if(roleID){
+      this.apiPermission.GetPermissionByRoleIds([roleID]).subscribe({
+        next: res =>{
+          if(res.result == '1'){
+            this.listPermission = res.data;
+          }
+        },
+        error: (err) => {
+          this.pop.showOkPopup({ message: 'Lỗi lấy danh sách permission' });
+          console.log(err);
+        },
+      })
+    }else{
+      //this.pop.showOkPopup({message: "Vui lòng chọn role trước!"})
+      this.filterAccountForm.get("permissionID")?.reset();
+    }
+  }
+  onPageChange(event: PaginatorState) {
+    this.first = event.first ?? 0;
+    this.rows = event.rows ?? this.rowsPerPageOptions[0];
+
+    this.loadUserLazy();
+  }
+  loadUserLazy() {
+    this.loading = true;
+
+    if (this.first !== undefined && this.rows !== undefined) {
+      const page = this.first / this.rows! + 1;
+      const pageSize = this.rows!;
+      this.filterAccountForm.patchValue({
+        pageNumber: page,
+        pageSize: pageSize
+      })
+      this.apiAccount.GetAccounts(this.filterAccountForm?.value).subscribe({
+        next: (res) => {
+          if (res.result == '1') {
+            this.listUser = res.data.users;
+            this.totalRows = res.totalRows;
+            this.getRole_filter();
+          } else if(res.result == '0') {
+            this.pop.showOkPopup({ message: res.message });
+          }else{
+            this.pop.showOkPopup({ message: 'Lỗi lấy danh sách users' });
+            console.log(res.message);
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          this.pop.showSysErr();
+          console.log(err);
+          this.loading = false;
+        },
+      });
+      
+    }
+  }
+  
+  filter(){
+    this.first = 0;
+    this.rows = this.rowsPerPageOptions[0];
+    this.loadUserLazy()
+  }
+  refresh(){
+    this.filterAccountForm.reset();
+    this.first = 0;
+    this.rows = 10;
+    this.loadUserLazy();
   }
 
-  applyFilterGlobal($event: any, stringVal: any) {
-    this.dt2!.filterGlobal(
-      ($event.target as HTMLInputElement).value,
-      stringVal
-    );
-  }
-
-  selectedRole: any;
-  filters: any = {
-    roleName: { value: null, matchMode: 'equals' },
-  };
-
+  ///end load data vao trang
+  
+  ///show detail
   displayDetail: boolean = false;
 
   detailAccountForm: FormGroup = new FormGroup({
@@ -247,38 +281,35 @@ export class ListAccountsComponent implements OnInit {
     username: new FormControl({ value: '', disabled: true }),
     email: new FormControl({ value: '', disabled: true }),
     fullName: new FormControl(null, [
-      Validators.required,
       Validators.minLength(5),
       Validators.maxLength(100),
     ]),
     phoneNumber: new FormControl(null, [
-      Validators.required,
       Validators.minLength(10),
       Validators.maxLength(15),
     ]),
-    avatar: new FormControl(null, [Validators.required]),
-    dateOfBirth: new FormControl(null, [Validators.required]),
-    gender: new FormControl(null, [Validators.required]),
+    avatar: new FormControl(null),
+    dateOfBirth: new FormControl(null),
+    gender: new FormControl(null),
     address: new FormControl(null, [
-      Validators.required,
       Validators.minLength(10),
       Validators.maxLength(100),
     ]),
     status: new FormControl(null, [Validators.required]),
     createdAt: new FormControl(null),
     updatedAt: new FormControl(null),
-    googleID: new FormControl(null),
-    facebookID: new FormControl(null),
+    isGoogle: new FormControl(null),
+    isFacebook: new FormControl(null),
     otp: new FormControl(null),
-    roleID: new FormControl(null, [Validators.required]),
+    roles: new FormControl(null),
     lockTime: new FormControl(null),
     remainTime: new FormControl(null),
     isExternalAvatar: new FormControl(false),
     permissionIds: new FormControl<number[]>([]),
   });
-  ///end load data vao trang
 
-  ///show detail
+  genders = [];
+  status = [];
   viewDetail(id: any) {
     this.apiAccount.GetDetailUserInfo(id).subscribe({
       next: (res) => {
@@ -286,17 +317,16 @@ export class ListAccountsComponent implements OnInit {
 
         const data = res.data;
         this.genders = data.listGender;
-        this.roles = data.listRole;
         this.status = data.listStatus;
 
         this.detailAccountForm.patchValue(data);
-        if (this.isMe(this.detailAccountForm.get('username')?.value)) {
-          this.detailAccountForm.get('roleID')?.disable();
-          this.detailAccountForm.get('permissionIds')?.disable();
-        } else {
-          this.detailAccountForm.get('roleID')?.enable();
-          this.detailAccountForm.get('permissionIds')?.enable();
-        }
+        // if (this.isMe(this.detailAccountForm.get('username')?.value)) {
+        //   this.detailAccountForm.get('roleID')?.disable();
+        //   this.detailAccountForm.get('permissionIds')?.disable();
+        // } else {
+        //   this.detailAccountForm.get('roleID')?.enable();
+        //   this.detailAccountForm.get('permissionIds')?.enable();
+        // }
 
         var dateOfBirth: Date | null;
         if (data.dateOfBirth) {
@@ -382,7 +412,7 @@ export class ListAccountsComponent implements OnInit {
               this.displayPopupPermission = false;
 
               this.closeDialogDetail();
-              this.loadData();
+              this.loadUserLazy();
             } else if (res.result == '2') {
               this.pop.showOkPopup({ message: res.message });
             } else {
@@ -403,6 +433,40 @@ export class ListAccountsComponent implements OnInit {
     }
   }
 
+  linkGG(){
+    if(this.detailAccountForm.get('isGoogle')?.value && this.detailAccountForm.get('isGoogle')?.value == true){
+      this.pop.showYesNoPopup({
+        message: "Bạn chắc chắn muốn bỏ liên kết Google?",
+        onAccept: ()=>{
+          //todo: unlink gg
+        }
+      })
+    }else{
+      this.pop.showYesNoPopup({
+        message: "Bạn chắc chắn muốn liên kết với Google?",
+        onAccept: ()=>{
+
+        }
+      })
+    }
+  }
+  linkFB(){
+    if(this.detailAccountForm.get('isFacebook')?.value && this.detailAccountForm.get('isFacebook')?.value == true){
+      this.pop.showYesNoPopup({
+        message: "Bạn chắc chắn muốn bỏ liên kết Facebook?",
+        onAccept: ()=>{
+          //todo: unlink fb
+        }
+      })
+    }else{
+      this.pop.showYesNoPopup({
+        message: "Bạn chắc chắn muốn liên kết với Facebook?",
+        onAccept: ()=>{
+          
+        }
+      })
+    }
+  }
   closeDialogDetail() {
     this.displayDetail = false;
     this.detailAccountForm.reset();
@@ -430,7 +494,7 @@ export class ListAccountsComponent implements OnInit {
         if (res.result == '1') {
           this.pop.showOkPopup({ message: 'Xoá thành công!' });
           this.closeDialogDetail();
-          this.loadData();
+          this.loadUserLazy();
         } else {
           this.pop.showOkPopup({ message: 'Lỗi khi xoá user!' });
         }
@@ -536,11 +600,11 @@ export class ListAccountsComponent implements OnInit {
   }
   refreshUserRole() {
     this.selectedRoles = [];
-    this.getRole();
+    this.getRole_filter();
   }
 
   getPermissionByRoleIds(roleIds: number[]) {
-    this.apiPermission.getPermissionByRoleIds(roleIds).subscribe({
+    this.apiPermission.GetPermissionByRoleIds(roleIds).subscribe({
       next: (res) => {
         if (res.result == '1') {
           const grouped = new Map<
@@ -1263,7 +1327,7 @@ export class ListAccountsComponent implements OnInit {
 
           this.closeDialogCreateUser();
 
-          this.loadData();
+          this.loadUserLazy();
         } else {
           this.pop.showOkPopup({ message: res.message });
         }

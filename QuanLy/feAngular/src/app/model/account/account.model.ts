@@ -5,7 +5,7 @@ export interface Account {
   username: string;
   email: string;
   statusName: string;
-  roleName: string;
+  roles: string;
 }
 
 export interface AccountDetail {

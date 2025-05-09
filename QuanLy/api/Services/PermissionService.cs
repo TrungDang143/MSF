@@ -10,20 +10,26 @@ namespace api.Services
 {
     public class PermissionService : IPermission
     {
-        public BaseResponse GetAllPermission(int roleID)
+        public async Task<BaseResponse> GetAllPermission(int roleID)
         {
             var res = new BaseResponse();
             GetAllPermissionOutDto model = new GetAllPermissionOutDto();
             try
             {
                 using( SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                using( SqlCommand cmd = new SqlCommand("sp_GetAllPermissions",conn))
+                using( SqlCommand cmd = new SqlCommand("sp_GetPermissionByRoleIds", conn))
                 using( SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                 {
+                    await conn.OpenAsync();
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@roleIds", Utils.DbNullIfNull(null));
+                    cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
 
                     DataTable dt = new DataTable();
-                    adapter.Fill(dt);
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        dt.Load(reader);
+                    }
 
                     DataTable dt_user = dt.Clone();
                     DataTable dt_role = dt.Clone();
@@ -74,7 +80,7 @@ namespace api.Services
             }catch(Exception ex)
             {
                 res.Message = ex.Message;
-                res.Result = AppConstant.RESULT_ERROR;
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
             }
 
             return res;
@@ -126,7 +132,7 @@ namespace api.Services
             }
             catch (Exception ex)
             {
-                res.Result = AppConstant.RESULT_ERROR;
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
                 res.Message = ex.Message;
             }
 

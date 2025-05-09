@@ -628,10 +628,15 @@ exec sp_GetStatus 'dtrung', @rtnValue output
 select @rtnValue
 ----------------------------------------------------------------------------------------------------
 create procedure sp_GetRole
+@rolename varchar(50) null
 AS
 BEGIN
-
-  SELECT * FROM Role
+	begin try
+		SELECT * FROM Role with (nolock) where (@roleName is null or RoleName like '%' + @rolename + '%')
+	end try
+	begin catch
+		throw;
+	end catch
 
 END;
 declare @rtnValue int;
@@ -1370,6 +1375,63 @@ BEGIN
 END;
 
 ----------------------------------------------------------------------------------------------------
+CREATE PROCEDURE sp_GetAccount
+    @UsernameOrEmail VARCHAR(100) = NULL,
+    @roleID INT = NULL,
+    @permissionID INT = NULL,
+    @pageNumber INT = 1,
+    @pageSize INT = 10,
+    @totalRows INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        ;WITH UserList AS (
+            SELECT DISTINCT u.UserID, u.Username, u.Email
+            FROM Users u
+            JOIN UserRole ur ON u.UserID = ur.UserID
+            JOIN RolePermission rp ON ur.RoleID = rp.RoleID
+            LEFT JOIN DenyUserRolePermission dn 
+                ON dn.UserID = u.UserID 
+                AND dn.RoleID = ur.RoleID 
+                AND dn.PermissionID = rp.PermissionID
+            WHERE
+                (@UsernameOrEmail IS NULL OR u.Username LIKE '%' + @UsernameOrEmail + '%' OR u.Email LIKE '%' + @UsernameOrEmail + '%')
+                AND (@roleID IS NULL OR ur.RoleID = @roleID)
+                AND (
+                    @permissionID IS NULL 
+                    OR (
+                        rp.PermissionID = @permissionID 
+                        AND dn.PermissionID IS NULL  -- Không bị deny
+                    )
+                )
+        )
+        SELECT @totalRows = COUNT(*) FROM UserList;
+
+        SELECT *
+        FROM UserList
+        ORDER BY Username
+        OFFSET (@pageNumber - 1) * @pageSize ROWS
+        FETCH NEXT @pageSize ROWS ONLY;
+
+    END TRY
+    BEGIN CATCH
+        THROW;
+    END CATCH
+END;
+
+DECLARE @total INT;
+
+EXEC sp_GetAccount
+    @UsernameOrEmail = 'trung',     -- hoặc NULL nếu không lọc theo tên/email
+    @roleID = 1,                   -- hoặc NULL nếu không lọc theo role
+    @permissionID = 5,             -- hoặc NULL nếu không lọc theo permission
+    @pageNumber = 1,
+    @pageSize = 10,
+    @totalRows = @total OUTPUT;
+
+SELECT @total AS TotalRows;
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -1379,7 +1441,7 @@ DECLARE @ReturnStatus int;
 EXEC sp_FindUserByUsernameOrEmail 'ddtrung143@gmail.com', @ReturnValue output
 SELECT @ReturnValue ,@ReturnStatus;
 
-select * from Users
+select Users.Username, Genders.GenderName from Users left join Genders on Genders.GenderID = Users.Gender
 
 SELECT FORMAT(ABS(CHECKSUM(NEWID())) % 10000, 'D4') AS RandomCode;
 
@@ -1394,4 +1456,7 @@ insert into Users (username, email, PasswordHash, roleid, status) values ('admin
 declare @rtnValue int
 exec sp_IsValidUser 'trungtest9', @rtnvalue output
 select @rtnvalue
+
+select * from Users
+
 

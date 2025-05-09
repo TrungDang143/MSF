@@ -4,25 +4,36 @@
   border-right: 1px solid rgb(226, 232, 240) !important;
 }
 :host ::ng-deep .custom-list-user-table th {
-  background-color: var(--p-surface-300);
+  background-color: var(--p-surface-300) !important;
+  padding: 8px;
   text-align: center;
 }
 :host::ng-deep .custom-pmessage span {
   justify-items: center !important;
   text-align: center !important;
 }
-
+::ng-deep .p-panel-content{
+  padding-bottom: 0;
+}
+::ng-deep .p-panel-icons{
+  display: flex;
+}
 .filter {
   display: block;
   margin: 0;
   padding: 0;
 }
 
+:host::ng-deep .filter input{
+  width: 270px;
+}
+:host::ng-deep .filter p-select{
+  width: 270px;
+}
 .filter .filter-form{
   display: grid;
   grid-template-columns: repeat(4, auto);
   grid-template-rows: 50px 50px;
-  gap: 5px
 }
 .filter-form-1{
   grid-row-start: 1;
@@ -58,13 +69,22 @@
   grid-column-start: 1;
   grid-column-end: 5;
 }
+.filter-form-action button{
+  margin-right: 10px;
+}
 ::ng-deep .filter p-select {
   margin-left: 10px;
 }
 
 .filter .action{
   justify-self: flex-end;
+  padding-top: 5px;
+  padding-bottom: 10px;
 }
+.filter .action p-button{
+  margin-left: 10px;
+}
+
 
 .active {
   color: green;
@@ -85,7 +105,7 @@
 .popup-detail {
   overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(7, 1fr);
   gap: 5px;
   width: 1200px;
@@ -104,14 +124,19 @@
 }
 
 .popup-detail .username {
-  grid-column: span 3 / span 3;
+  /* grid-column: span 3 / span 3;
   grid-column-start: 1;
-  grid-row-start: 2;
+  grid-row-start: 2; */
+  grid-column: span 3 / span 3;
+  grid-row-start: 1;
 }
 
 .popup-detail .email {
-  grid-column: span 3 / span 3;
+  /* grid-column: span 3 / span 3;
   grid-column-start: 4;
+  grid-row-start: 2; */
+  grid-column: span 3 / span 3;
+  grid-column-start: 1;
   grid-row-start: 2;
 }
 
@@ -122,9 +147,12 @@
 }
 
 .popup-detail .gender {
+  /* grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 3; */
   grid-column: span 3 / span 3;
   grid-column-start: 4;
-  grid-row-start: 3;
+  grid-row-start: 2;
 }
 
 .popup-detail .address {
@@ -134,13 +162,16 @@
 }
 
 .popup-detail .phone {
+  /* grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 4; */
   grid-column: span 3 / span 3;
   grid-column-start: 4;
-  grid-row-start: 4;
+  grid-row-start: 3;
 }
 
 .popup-detail .avatar {
-  grid-column: span 2 / span 2;
+  grid-column: span 3 / span 3;
   grid-row: span 2 / span 2;
   grid-column-start: 7;
   grid-row-start: 1;
@@ -158,13 +189,14 @@
 }
 
 .popup-detail .detail-info {
-  grid-column: span 2 / span 2;
+  grid-column: span 3 / span 3;
   grid-column-start: 7;
   grid-row-start: 4;
   grid-row-end: 7;
 }
 ::ng-deep .custom-detail-pmessage {
   margin-bottom: 10px;
+  max-width: 350px;
 }
 
 .popup-detail .gg {
@@ -185,10 +217,13 @@
 }
 
 .popup-detail .status {
-  grid-column: span 3 / span 3;
+  /* grid-column: span 3 / span 3;
   grid-column-start: 4;
   grid-row-start: 6;
-  grid-row-end: 7;
+  grid-row-end: 7; */
+  grid-column: span 3 / span 3;
+  grid-column-start: 4;
+  grid-row-start: 4;
 }
 
 .popup-detail .setting-btn {
@@ -199,8 +234,8 @@
 }
 
 .popup-detail .action-btn {
-  grid-column: 1 / span 4;
-  grid-column-start: 5;
+  grid-column: span 3 / span 3;
+  grid-column-start: 7;
   grid-row-start: 7;
   grid-row-end: 8;
   display: flex;

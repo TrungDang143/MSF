@@ -1,17 +1,22 @@
-
 @import "primeicons/primeicons.css";
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; font-size: medium;}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-size: 15px !important;
+}
 
 .errMsg-area {
-    min-height: 5px;
-    height: auto;
-  }
-  .errMsg {
-    color: red;
-    font-weight: 400;
-    width: auto;
-    padding-left: 12px;
-    
-  }
+  min-height: 5px;
+  height: auto;
+}
+.errMsg {
+  color: red;
+  font-weight: 400;
+  width: auto;
+  padding-left: 12px;
+}

@@ -15,14 +15,13 @@
         public byte? Status { get; set; }
         public string? CreatedAt { get; set; }
         public string? UpdatedAt { get; set; }
-        public string? GoogleID { get; set; }
-        public string? FacebookID { get; set; }
+        public bool isGoogle { get; set; }
+        public bool isFacebook { get; set; }
         public string? Otp { get; set; }
-        public int? RoleID { get; set; }
+        public string? Roles { get; set; }
         public string? LockTime { get; set; }
-        public byte? RemainTime { get; set; }
+        public string? RemainTime { get; set; }
         public bool IsExternalAvatar { get; set; }
-        public List<Role> ListRole { get; set; }
         public List<Status> ListStatus { get; set; }
         public List<Gender> ListGender { get; set; }
     }

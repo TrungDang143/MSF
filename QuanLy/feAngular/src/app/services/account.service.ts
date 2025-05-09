@@ -12,14 +12,38 @@ export class AccountService {
 
   constructor(private http: HttpClient) { }
 
-  GetAllUserAccount(): Observable<any>{
-    const url = environment.baseUrl + "Account/GetAllUserAccounts"
+  GetAccounts(filter?: any): Observable<any>{
+    const url = environment.baseUrl + "Account/GetAccounts"
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.get(url, { headers });
+    let params = new HttpParams();
+
+  if (filter) {
+    if (filter.username) {
+      params = params.set('UsernameOrEmail', filter.username);
+    }
+    if (filter.fullname) {
+      params = params.set('Fullname', filter.fullname);
+    }
+    if (filter.roleID !== null && filter.roleID !== undefined) {
+      params = params.set('RoleID', filter.roleID);
+    }
+    if (filter.permissionID !== null && filter.permissionID !== undefined) {
+      params = params.set('PermissionID', filter.permissionID);
+    }
+    if (filter.pageSize) {
+      params = params.set('pageSize', filter.pageSize);
+    }
+    if (filter.pageNumber) {
+      params = params.set('pageNumber', filter.pageNumber);
+    }
   }
 
-  GetAllRole(): Observable<any>{
-    return this.http.get(environment.baseUrl + "Account/GetAllRole")
+  return this.http.get(url, { params, headers });
+}
+
+  GetRole(rolename?: string): Observable<any>{
+    const params = new HttpParams().set("roleName", rolename??'')
+    return this.http.get(environment.baseUrl + "Account/GetRole", {params})
   }
 
   GetDetailUserInfo(userid: number): Observable<any>{

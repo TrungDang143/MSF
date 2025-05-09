@@ -2,8 +2,8 @@
 
 namespace api.DTO.Account
 {
-    public class GetRoleDto:BasePaging
+    public class GetRoleDto
     {
-        public string roleName { get; set; }
+        public string? roleName { get; set; }
     }
 }

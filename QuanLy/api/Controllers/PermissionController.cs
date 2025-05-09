@@ -20,10 +20,10 @@ namespace api.Controllers
 
         [HasPermission("view_permissions")]
         [HttpGet("GetAllPermission")]
-        public BaseResponse GetAllPermission()
+        public async Task<BaseResponse> GetAllPermission()
         {
             int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
-            return _permission.GetAllPermission(roleID);
+            return await _permission.GetAllPermission(roleID);
         }
 
         [HasPermission("view_permissions")]

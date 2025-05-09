@@ -5,6 +5,7 @@ using api.Interface;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using System.Linq.Expressions;
 using System.Net;
@@ -139,7 +140,7 @@ namespace api.Services
             return res;
         }
 
-        public async Task<BaseResponse> GetAllUserAccounts()
+        public async Task<BaseResponse> GetAccounts(GetAccountsDto inputDto)
         {
             var res = new BaseResponse();
             GetAllAccountsOutDto model = new GetAllAccountsOutDto();
@@ -150,62 +151,55 @@ namespace api.Services
                 {
                     await conn.OpenAsync();
 
-                    using (SqlCommand cmd = new SqlCommand("sp_GetAllAccount", conn))
-                    using (SqlCommand cmd_role = new SqlCommand("sp_GetRole", conn))
-                    using (SqlCommand cmd_status = new SqlCommand("sp_GetStatus", conn))
+                    using (SqlCommand cmd = new SqlCommand("sp_GetAccount", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd_role.CommandType = CommandType.StoredProcedure;
-                        cmd_role.Parameters.AddWithValue("@rolename", DBNull.Value);
-                        cmd_status.CommandType = CommandType.StoredProcedure;
-
+                        cmd.Parameters.AddWithValue("@UsernameOrEmail", Utils.DbNullIfNull(inputDto.UsernameOrEmail));
+                        cmd.Parameters.AddWithValue("@fullName", Utils.DbNullIfNull(inputDto.Fullname));
+                        cmd.Parameters.AddWithValue("@roleID", Utils.DbNullIfNull(inputDto.RoleID, Utils.IsGreaterThanZero(inputDto.RoleID)));
+                        cmd.Parameters.AddWithValue("@permissionID", Utils.DbNullIfNull(inputDto.PermissionID, Utils.IsGreaterThanZero(inputDto.PermissionID)));
+                        cmd.Parameters.AddWithValue("@pageNumber", Utils.DbNullIfNull(inputDto.pageNumber, Utils.IsGreaterThanZero(inputDto.pageNumber)));
+                        cmd.Parameters.AddWithValue("@pageSize", Utils.DbNullIfNull(inputDto.pageSize, Utils.IsGreaterThanZero(inputDto.pageSize)));
+                        cmd.Parameters.AddWithValue("@isDeleted", false);
+                        SqlParameter totalRows = new SqlParameter("@totalRows", SqlDbType.Int)
+                        {
+                            Direction = ParameterDirection.Output
+                        };
+                        cmd.Parameters.Add(totalRows);
                         DataTable dt = new DataTable();
-                        DataTable dt_role = new DataTable();
-                        DataTable dt_status = new DataTable();
+
                         using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                        using (SqlDataReader reader_role = await cmd_role.ExecuteReaderAsync())
-                        using (SqlDataReader reader_status = await cmd_status.ExecuteReaderAsync())
                         {
                             dt.Load(reader);
-                            dt_role.Load(reader_role);
-                            dt_status.Load(reader_status);
-
-                            dt.Columns.Add("RoleName", typeof(String));
-                            dt.Columns.Add("StatusName", typeof(String));
 
                             if (dt.Rows.Count > 0)
                             {
-                                for (int i = 0; i < dt.Rows.Count; i++)
+                                dt.Columns.Add("StatusName", typeof(String));
+
+                                if (dt.Rows.Count > 0)
                                 {
-                                    if (!string.IsNullOrEmpty(dt.Rows[i]["Avatar"]?.ToString()))
+                                    for (int i = 0; i < dt.Rows.Count; i++)
                                     {
-                                        dt.Rows[i]["Avatar"] = ImageBase64Helper.GetAvatar(dt.Rows[i]["IsExternalAvatar"].ToString(), dt.Rows[i]["Avatar"].ToString());
+                                        if (!string.IsNullOrEmpty(dt.Rows[i]["Avatar"]?.ToString()))
+                                        {
+                                            dt.Rows[i]["Avatar"] = ImageBase64Helper.GetAvatar(dt.Rows[i]["IsExternalAvatar"].ToString(), dt.Rows[i]["Avatar"].ToString());
+                                        }
+                                        if (!string.IsNullOrEmpty(dt.Rows[i]["Status"]?.ToString()))
+                                        {
+                                            dt.Rows[i]["StatusName"] = int.Parse(dt.Rows[i]["Status"].ToString()) == 1 ? "Kích hoạt" : "Vô hiệu hoá";
+                                        }
                                     }
-                                    if (!string.IsNullOrEmpty(dt.Rows[i]["roleID"]?.ToString()))
-                                    {
-
-                                        dt.Rows[i]["RoleName"] = getRoleName(dt_role, dt.Rows[i]["roleID"].ToString());
-                                    }
-                                    if (!string.IsNullOrEmpty(dt.Rows[i]["Status"]?.ToString()))
-                                    {
-
-                                        dt.Rows[i]["StatusName"] = getStatusName(dt_status, dt.Rows[i]["Status"].ToString());
-                                    }
-                                    //dt.Rows[i]["GoogleID"] = !string.IsNullOrEmpty(dt.Rows[i]["GoogleID"]?.ToString()) ? true : false;
-                                    //dt.Rows[i]["FacebookID"] = !string.IsNullOrEmpty(dt.Rows[i]["FacebookID"]?.ToString()) ? true : false;
-
-                                    //var date = dt.Rows[0]["DateOfBirth"] != DBNull.Value ? (DateTime)dt.Rows[0]["DateOfBirth"] : new DateTime();
-                                    //dt.Rows[0]["DateOfBirth"] = date > new DateTime() ? date.ToString("dd-MM-yyyy") : string.Empty;
                                 }
 
                                 model.Users = dt.ConvertToList<Account>();
                                 res.Message = "Success!";
                                 res.Data = model;
                                 res.Result = AppConstant.RESULT_SUCCESS;
+                                res.TotalRows = (int)totalRows.Value;
                             }
                             else
                             {
-                                res.Message = "Không tìm thấy tài khoản";
+                                res.Message = "Không tìm thấy tài khoản thoả mãn!";
                                 res.Result = AppConstant.RESULT_ERROR;
                             }
                         }
@@ -215,36 +209,10 @@ namespace api.Services
             catch (Exception ex)
             {
                 res.Message = ex.Message;
-                res.Result = AppConstant.RESULT_ERROR;
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
             }
 
             return res;
-        }
-        private string getRoleName(DataTable dt, string roleID)
-        {
-            string result = string.Empty;
-            foreach (DataRow dr in dt.Rows)
-            {
-                if (dr[0].ToString() == roleID)
-                {
-                    result = dr[1].ToString();
-                    break;
-                }
-            }
-            return result;
-        }
-        private string getStatusName(DataTable dt, string statusID)
-        {
-            string result = string.Empty;
-            foreach (DataRow dr in dt.Rows)
-            {
-                if (dr[0].ToString() == statusID)
-                {
-                    result = dr[1].ToString();
-                    break;
-                }
-            }
-            return result;
         }
         public async Task<BaseResponse> GetDetailUserInfo(GetDetailUserInfoInDto inputDto)
         {
@@ -253,8 +221,7 @@ namespace api.Services
             try
             {
                 using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                using (SqlCommand cmd = new SqlCommand("sp_GetUserByUserID", conn))
-                using (SqlCommand cmd_role = new SqlCommand("sp_GetRole", conn))
+                using (SqlCommand cmd = new SqlCommand("sp_GetDetailUserByUserID", conn))
                 using (SqlCommand cmd_status = new SqlCommand("sp_GetStatus", conn))
                 using (SqlCommand cmd_gender = new SqlCommand("sp_GetGenders", conn))
                 {
@@ -266,12 +233,12 @@ namespace api.Services
                     cmd.Parameters.Add(userIDPrm);
 
                     DataTable dt = new DataTable();
-                    DataTable dt_role = new DataTable();
                     DataTable dt_status = new DataTable();
                     DataTable dt_gender = new DataTable();
 
                     using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                     {
+                        dt.Load(reader);
                         if (dt.Rows.Count != 1)
                         {
                             res.Message = "User không tồn tại!";
@@ -285,47 +252,48 @@ namespace api.Services
                         model.FullName          = dt.Rows[0]["FullName"]?.ToString();
                         model.PhoneNumber       = dt.Rows[0]["PhoneNumber"]?.ToString();
                         model.Avatar            = ImageBase64Helper.GetAvatar(dt.Rows[0]["IsExternalAvatar"].ToString(), dt.Rows[0]["Avatar"].ToString());
+
                         var date                = dt.Rows[0]["DateOfBirth"] != DBNull.Value ? (DateTime)dt.Rows[0]["DateOfBirth"] : new DateTime();
                         model.DateOfBirth       = date > new DateTime() ? date.ToString("dd-MM-yyyy") : string.Empty;
+
                         model.Gender            = dt.Rows[0]["Gender"] != DBNull.Value ? (byte?)dt.Rows[0]["Gender"] : null;
                         model.Address           = dt.Rows[0]["Address"]?.ToString();
                         model.Status            = dt.Rows[0]["Status"] != DBNull.Value ? (byte?)dt.Rows[0]["Status"] : null;
+
                         var createAt            = dt.Rows[0]["CreatedAt"] != DBNull.Value ? (DateTime)dt.Rows[0]["CreatedAt"] : new DateTime();
-                        model.CreatedAt         = createAt > new DateTime() ? createAt.ToString("hh:mm:ss dd-MM-yyyy") : "###";
+                        model.CreatedAt         = createAt > new DateTime() ? createAt.ToString("hh:mm:ss dd-MM-yyyy") : AppConstant.NO_INFO;
+
                         var updateAt            = dt.Rows[0]["UpdatedAt"] != DBNull.Value ? (DateTime)dt.Rows[0]["UpdatedAt"] : new DateTime();
-                        model.UpdatedAt         = updateAt > new DateTime() ? updateAt.ToString("hh:mm:ss dd-MM-yyyy") : "###";
-                        model.GoogleID          = dt.Rows[0]["GoogleID"]?.ToString();
-                        model.FacebookID        = dt.Rows[0]["FacebookID"]?.ToString();
-                        model.Otp               = dt.Rows[0]["otp"]?.ToString();
-                        model.RoleID            = dt.Rows[0]["roleID"] != DBNull.Value ? (int?)dt.Rows[0]["roleID"] : null;
+                        model.UpdatedAt         = updateAt > new DateTime() ? updateAt.ToString("hh:mm:ss dd-MM-yyyy") : AppConstant.NO_INFO;
+
+                        model.isGoogle          = !string.IsNullOrEmpty(dt.Rows[0]["GoogleID"].ToString());
+                        model.isFacebook        = !string.IsNullOrEmpty(dt.Rows[0]["FacebookID"].ToString());
+                        model.Otp               = dt.Rows[0]["otp"] != DBNull.Value ? dt.Rows[0]["otp"].ToString() : AppConstant.NO_INFO;
+                        model.Roles             = dt.Rows[0]["Roles"] != DBNull.Value ? dt.Rows[0]["Roles"].ToString() : AppConstant.NO_INFO;
+
                         var locktime            = dt.Rows[0]["LockTime"] != DBNull.Value ? (DateTime)dt.Rows[0]["LockTime"] : new DateTime();
-                        model.LockTime          = locktime > new DateTime() ? locktime.ToString("hh:mm:ss dd-MM-yyyy") : "###";
-                        model.RemainTime        = dt.Rows[0]["RemainTime"] != DBNull.Value ? (byte?)dt.Rows[0]["RemainTime"] : null;
+                        model.LockTime          = locktime > new DateTime() ? locktime.ToString("hh:mm:ss dd-MM-yyyy") : AppConstant.NO_INFO;
+
+                        model.RemainTime        = dt.Rows[0]["RemainTime"] != DBNull.Value ? dt.Rows[0]["RemainTime"].ToString() : AppConstant.NO_INFO;
                         model.IsExternalAvatar  = dt.Rows[0]["IsExternalAvatar"] != DBNull.Value ? (bool)dt.Rows[0]["IsExternalAvatar"] : false;
-
-                        cmd_role.CommandType = CommandType.StoredProcedure;
-                        cmd_role.Parameters.AddWithValue("@rolename", DBNull.Value);
-                        cmd_gender.CommandType = CommandType.StoredProcedure;
-                        cmd_status.CommandType = CommandType.StoredProcedure;
-
-                        using (SqlDataReader reader_role = await cmd_role.ExecuteReaderAsync())
-                        using (SqlDataReader reader_status = await cmd_status.ExecuteReaderAsync())
-                        using (SqlDataReader reader_gender = await cmd_gender.ExecuteReaderAsync())
-                        {
-                            dt_role.Load(reader_role);
-                            dt_status.Load(reader_status);
-                            dt_gender.Load(reader_gender);
-                        }       
-
-                        model.ListRole = dt_role.ConvertToList<Role>();
-                        model.ListStatus = dt_status.ConvertToList<Status>();
-                        model.ListGender = dt_gender.ConvertToList<Gender>();
-
-
-                        res.Data = model;
-                        res.Result = AppConstant.RESULT_SUCCESS;
-                        res.Message = "Get detail user info thanh cong";
                     }
+
+                    cmd_gender.CommandType = CommandType.StoredProcedure;
+                    cmd_status.CommandType = CommandType.StoredProcedure;
+                    using (SqlDataReader reader_status = await cmd_status.ExecuteReaderAsync())
+                    {
+                        dt_status.Load(reader_status);
+                        model.ListStatus = dt_status.ConvertToList<Status>();
+                    }
+                    using (SqlDataReader reader_gender = await cmd_gender.ExecuteReaderAsync())
+                    {
+                        dt_gender.Load(reader_gender);
+                        model.ListGender = dt_gender.ConvertToList<Gender>();
+                    }
+
+                    res.Data = model;
+                    res.Result = AppConstant.RESULT_SUCCESS;
+                    res.Message = "Get detail user info thanh cong";
                 }
             }
             catch (Exception ex)
@@ -603,46 +571,46 @@ namespace api.Services
             }
             return res;
         }
-        public async Task<BaseResponse> GetRoleByPaging(GetRoleDto inputDto)
-        {
-            var res = new BaseResponse();
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                using (SqlCommand cmd_role = new SqlCommand("sp_GetRoleByPaging", conn))
-                using (SqlDataAdapter adapter_role = new SqlDataAdapter(cmd_role))
-                {
-                    await conn.OpenAsync();
+        //public async Task<BaseResponse> GetRoleByPaging(GetRoleDto inputDto)
+        //{
+        //    var res = new BaseResponse();
+        //    try
+        //    {
+        //        using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+        //        using (SqlCommand cmd_role = new SqlCommand("sp_GetRoleByPaging", conn))
+        //        using (SqlDataAdapter adapter_role = new SqlDataAdapter(cmd_role))
+        //        {
+        //            await conn.OpenAsync();
 
-                    DataTable dt = new DataTable();
+        //            DataTable dt = new DataTable();
 
-                    cmd_role.CommandType = CommandType.StoredProcedure;
-                    cmd_role.Parameters.AddWithValue("@roleName", Utils.DbNullIfNull(inputDto.roleName));
-                    cmd_role.Parameters.AddWithValue("@PageSize", Utils.DbNullIfNull(inputDto.pageSize));
-                    cmd_role.Parameters.AddWithValue("@PageNumber", Utils.DbNullIfNull(inputDto.pageNumber));
-                    SqlParameter rowCount = new SqlParameter("@TotalRows", SqlDbType.Int)
-                    {
-                        Direction = ParameterDirection.Output,
-                    };
-                    using (SqlDataReader reader = await cmd_role.ExecuteReaderAsync())
-                    {
-                        dt.Load(reader);
-                    }
-                    List<Role> listRole = dt.ConvertToList<Role>();
+        //            cmd_role.CommandType = CommandType.StoredProcedure;
+        //            cmd_role.Parameters.AddWithValue("@roleName", Utils.DbNullIfNull(inputDto.roleName));
+        //            cmd_role.Parameters.AddWithValue("@PageSize", Utils.DbNullIfNull(inputDto.pageSize));
+        //            cmd_role.Parameters.AddWithValue("@PageNumber", Utils.DbNullIfNull(inputDto.pageNumber));
+        //            SqlParameter rowCount = new SqlParameter("@TotalRows", SqlDbType.Int)
+        //            {
+        //                Direction = ParameterDirection.Output,
+        //            };
+        //            using (SqlDataReader reader = await cmd_role.ExecuteReaderAsync())
+        //            {
+        //                dt.Load(reader);
+        //            }
+        //            List<Role> listRole = dt.ConvertToList<Role>();
 
 
-                    res.Data = listRole;
-                    res.Result = AppConstant.RESULT_SUCCESS;
-                    res.Message = "Get role thanh cong";
-                }
-            }
-            catch (Exception ex)
-            {
-                res.Message = ex.Message;
-                res.Result = AppConstant.RESULT_ERROR;
-            }
-            return res;
-        }
+        //            res.Data = listRole;
+        //            res.Result = AppConstant.RESULT_SUCCESS;
+        //            res.Message = "Get role thanh cong";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        res.Message = ex.Message;
+        //        res.Result = AppConstant.RESULT_ERROR;
+        //    }
+        //    return res;
+        //}
 
         public async Task<BaseResponse> GetRoleGenderStatus()
         {

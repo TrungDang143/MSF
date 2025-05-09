@@ -696,7 +696,7 @@ export class SettingComponent implements OnInit {
   }
 
   showDialogRolePermission() {
-    this.apiPermission.getAllPermission().subscribe({
+    this.apiPermission.GetAllPermission().subscribe({
       next: (res) => {
         if (res.result == '1') {
           this.showPermission();
@@ -711,7 +711,7 @@ export class SettingComponent implements OnInit {
               let roleIds: number[] = [];
               roleIds.push(this.updateRoleForm.get('roleID')?.value);
               this.apiPermission
-                .getPermissionByRoleIds(roleIds)
+                .GetPermissionByRoleIds(roleIds)
                 .subscribe({
                   next: (res) => {
                     if (res.result == '1') {

@@ -276,6 +276,12 @@ namespace api.Services
 
                         model.RemainTime        = dt.Rows[0]["RemainTime"] != DBNull.Value ? dt.Rows[0]["RemainTime"].ToString() : AppConstant.NO_INFO;
                         model.IsExternalAvatar  = dt.Rows[0]["IsExternalAvatar"] != DBNull.Value ? (bool)dt.Rows[0]["IsExternalAvatar"] : false;
+
+                        model.UserRoleIds = dt.Rows[0]["RoleIds"] != DBNull.Value ? dt.Rows[0]["RoleIds"].ToString()
+                                                                                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                                                        .Select(s => int.Parse(s.Trim()))
+                                                                                        .ToList()
+                                                                                    : null;
                     }
 
                     cmd_gender.CommandType = CommandType.StoredProcedure;
@@ -436,36 +442,36 @@ namespace api.Services
         {
             var res = new BaseResponse();
 
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                using (SqlCommand cmd = new SqlCommand("sp_GetAllPermissionsForUser", conn))
-                using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
-                {
-                    conn.Open();
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
-                    cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
+            //try
+            //{
+            //    using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+            //    using (SqlCommand cmd = new SqlCommand("sp_GetAllPermissionsForUser", conn))
+            //    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+            //    {
+            //        conn.Open();
+            //        cmd.CommandType = CommandType.StoredProcedure;
+            //        cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
+            //        cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
 
-                    DataTable dt = new DataTable();
-                    adapter.Fill(dt);
+            //        DataTable dt = new DataTable();
+            //        adapter.Fill(dt);
 
-                    List<int> listPermissionIDs = new List<int>();
-                    foreach (DataRow dr in dt.Rows)
-                    {
-                        listPermissionIDs.Add((int)dr[0]);
-                    }
-                    res.Data = listPermissionIDs;
-                }
+            //        List<int> listPermissionIDs = new List<int>();
+            //        foreach (DataRow dr in dt.Rows)
+            //        {
+            //            listPermissionIDs.Add((int)dr[0]);
+            //        }
+            //        res.Data = listPermissionIDs;
+            //    }
 
-                res.Result = AppConstant.RESULT_SUCCESS;
-                res.Message = "Get user permission thanh cong";
-            }
-            catch (Exception ex)
-            {
-                res.Result = AppConstant.RESULT_ERROR;
-                res.Message = ex.Message;
-            }
+            //    res.Result = AppConstant.RESULT_SUCCESS;
+            //    res.Message = "Get user permission thanh cong";
+            //}
+            //catch (Exception ex)
+            //{
+            //    res.Result = AppConstant.RESULT_ERROR;
+            //    res.Message = ex.Message;
+            //}
 
             return res;
         }
@@ -479,63 +485,63 @@ namespace api.Services
         /// <param name="res"></param>
         private async void UpdateUserPermission(int UserID, List<int>? PermissionIds, int? roleID, BaseResponse res)
         {
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                using (SqlCommand cmd = new SqlCommand("sp_UpdateUserPermissions", conn))
-                using (SqlCommand cmd_role = new SqlCommand("sp_GetRoleIDByUserID", conn))
-                {
-                    await conn.OpenAsync();
+            //try
+            //{
+            //    using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+            //    using (SqlCommand cmd = new SqlCommand("sp_UpdateUserPermissions", conn))
+            //    using (SqlCommand cmd_role = new SqlCommand("sp_GetRoleIDByUserID", conn))
+            //    {
+            //        await conn.OpenAsync();
 
-                    cmd_role.CommandType = CommandType.StoredProcedure;
-                    cmd_role.Parameters.AddWithValue("@UserID", UserID);
+            //        cmd_role.CommandType = CommandType.StoredProcedure;
+            //        cmd_role.Parameters.AddWithValue("@UserID", UserID);
 
-                    DataTable dt = new DataTable();
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                    {
-                        dt.Load(reader);
-                    }
-                    int isAdmin = 0;
-                    foreach (DataRow dr in dt.Rows)
-                    {
-                        if (dr[0].ToString() == "1")
-                        {
-                            isAdmin = 1;
-                            break;
-                        }
-                    }
+            //        DataTable dt = new DataTable();
+            //        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+            //        {
+            //            dt.Load(reader);
+            //        }
+            //        int isAdmin = 0;
+            //        foreach (DataRow dr in dt.Rows)
+            //        {
+            //            if (dr[0].ToString() == "1")
+            //            {
+            //                isAdmin = 1;
+            //                break;
+            //            }
+            //        }
 
-                    if (isAdmin == 1)
-                    {
-                        res.Message = "Không thể thay đổi quyền của role Admin!";
-                        res.Result = AppConstant.RESULT_ERROR;
-                        return;
-                    }
+            //        if (isAdmin == 1)
+            //        {
+            //            res.Message = "Không thể thay đổi quyền của role Admin!";
+            //            res.Result = AppConstant.RESULT_ERROR;
+            //            return;
+            //        }
 
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@UserID", UserID);
-                    cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
-                    if (PermissionIds != null)
-                    {
-                        var permissionIdsString = string.Join(",", PermissionIds);
-                        cmd.Parameters.AddWithValue("@PermissionIDs", !string.IsNullOrEmpty(permissionIdsString) ? permissionIdsString : DBNull.Value);
-                    }
-                    else
-                    {
-                        cmd.Parameters.AddWithValue("@PermissionIDs", DBNull.Value);
-                    }
+            //        cmd.CommandType = CommandType.StoredProcedure;
+            //        cmd.Parameters.AddWithValue("@UserID", UserID);
+            //        cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
+            //        if (PermissionIds != null)
+            //        {
+            //            var permissionIdsString = string.Join(",", PermissionIds);
+            //            cmd.Parameters.AddWithValue("@PermissionIDs", !string.IsNullOrEmpty(permissionIdsString) ? permissionIdsString : DBNull.Value);
+            //        }
+            //        else
+            //        {
+            //            cmd.Parameters.AddWithValue("@PermissionIDs", DBNull.Value);
+            //        }
 
-                    cmd.ExecuteNonQuery();
+            //        cmd.ExecuteNonQuery();
 
-                    res.Message = "Cập nhật user thành công!";
-                    res.Result = AppConstant.RESULT_SUCCESS;
-                }
-            }
-            catch (Exception ex)
-            {
-                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
-                res.Message = ex.Message;
-            }
+            //        res.Message = "Cập nhật user thành công!";
+            //        res.Result = AppConstant.RESULT_SUCCESS;
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    res.Result = AppConstant.RESULT_SYSTEM_ERROR;
+            //    res.Message = ex.Message;
+            //}
 
             return;
         }
@@ -571,47 +577,6 @@ namespace api.Services
             }
             return res;
         }
-        //public async Task<BaseResponse> GetRoleByPaging(GetRoleDto inputDto)
-        //{
-        //    var res = new BaseResponse();
-        //    try
-        //    {
-        //        using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-        //        using (SqlCommand cmd_role = new SqlCommand("sp_GetRoleByPaging", conn))
-        //        using (SqlDataAdapter adapter_role = new SqlDataAdapter(cmd_role))
-        //        {
-        //            await conn.OpenAsync();
-
-        //            DataTable dt = new DataTable();
-
-        //            cmd_role.CommandType = CommandType.StoredProcedure;
-        //            cmd_role.Parameters.AddWithValue("@roleName", Utils.DbNullIfNull(inputDto.roleName));
-        //            cmd_role.Parameters.AddWithValue("@PageSize", Utils.DbNullIfNull(inputDto.pageSize));
-        //            cmd_role.Parameters.AddWithValue("@PageNumber", Utils.DbNullIfNull(inputDto.pageNumber));
-        //            SqlParameter rowCount = new SqlParameter("@TotalRows", SqlDbType.Int)
-        //            {
-        //                Direction = ParameterDirection.Output,
-        //            };
-        //            using (SqlDataReader reader = await cmd_role.ExecuteReaderAsync())
-        //            {
-        //                dt.Load(reader);
-        //            }
-        //            List<Role> listRole = dt.ConvertToList<Role>();
-
-
-        //            res.Data = listRole;
-        //            res.Result = AppConstant.RESULT_SUCCESS;
-        //            res.Message = "Get role thanh cong";
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        res.Message = ex.Message;
-        //        res.Result = AppConstant.RESULT_ERROR;
-        //    }
-        //    return res;
-        //}
-
         public async Task<BaseResponse> GetRoleGenderStatus()
         {
             var res = new BaseResponse();

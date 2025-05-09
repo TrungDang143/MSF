@@ -24,6 +24,7 @@
         public bool IsExternalAvatar { get; set; }
         public List<Status> ListStatus { get; set; }
         public List<Gender> ListGender { get; set; }
+        public List<int>? UserRoleIds{ get; set; }
     }
 
     public class Role

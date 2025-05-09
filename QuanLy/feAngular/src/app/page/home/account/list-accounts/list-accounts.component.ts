@@ -85,7 +85,8 @@ import { PaginatorModule } from 'primeng/paginator';
     TabsModule,
     PickListModule,
     PanelModule,
-    AutoCompleteModule,PaginatorModule
+    AutoCompleteModule,
+    PaginatorModule,
   ],
   templateUrl: './list-accounts.component.html',
   styleUrl: './list-accounts.component.css',
@@ -160,7 +161,7 @@ export class ListAccountsComponent implements OnInit {
     if (username) return this.authService.getUser() == username;
     return this.authService.getUser() == this.userNameSeleted;
   }
-  
+
   ///Load data vao trang
   rowsPerPageOptions = [5, 10, 20];
   filterAccountForm: FormGroup = new FormGroup({
@@ -169,12 +170,12 @@ export class ListAccountsComponent implements OnInit {
     roleID: new FormControl<number>(-1),
     permissionID: new FormControl<number>(-1),
     pageSize: new FormControl<number>(this.rowsPerPageOptions[0]),
-    pageNumber: new FormControl<number>(1)
+    pageNumber: new FormControl<number>(1),
   });
 
   collapsedChange: boolean = true;
-  toggleFilterPanel(){
-    this.collapsedChange = !this.collapsedChange
+  toggleFilterPanel() {
+    this.collapsedChange = !this.collapsedChange;
   }
 
   listUser: Account[] = [];
@@ -185,12 +186,18 @@ export class ListAccountsComponent implements OnInit {
   totalRows = 0;
   first: number = 0;
   rows: number = 10;
-  
+
   getRole_filter() {
     this.apiAccount.GetRole().subscribe({
       next: (res) => {
         if (res.result == '1') {
           this.listRole = res.data;
+
+          let userRoleIds: [] = this.detailAccountForm.get('userRoleIds')?.value;
+          this.listRoles = this.listRole.filter((role) => {
+            return !userRoleIds.some((ur) => ur == role.roleID);
+          });
+          this.selectedRoles = this.listRole.filter(role => {return userRoleIds.some(ur => ur == role.roleID)})
         }
       },
       error: (err) => {
@@ -199,13 +206,13 @@ export class ListAccountsComponent implements OnInit {
       },
     });
   }
-  getPermission_filter(){
-    this.filterAccountForm.get("permissionID")?.reset();
-    let roleID: number | null = this.filterAccountForm.get("roleID")?.value;
-    if(roleID){
+  getPermission_filter() {
+    this.filterAccountForm.get('permissionID')?.reset();
+    let roleID: number | null = this.filterAccountForm.get('roleID')?.value;
+    if (roleID) {
       this.apiPermission.GetPermissionByRoleIds([roleID]).subscribe({
-        next: res =>{
-          if(res.result == '1'){
+        next: (res) => {
+          if (res.result == '1') {
             this.listPermission = res.data;
           }
         },
@@ -213,10 +220,10 @@ export class ListAccountsComponent implements OnInit {
           this.pop.showOkPopup({ message: 'Lỗi lấy danh sách permission' });
           console.log(err);
         },
-      })
-    }else{
+      });
+    } else {
       //this.pop.showOkPopup({message: "Vui lòng chọn role trước!"})
-      this.filterAccountForm.get("permissionID")?.reset();
+      this.filterAccountForm.get('permissionID')?.reset();
     }
   }
   onPageChange(event: PaginatorState) {
@@ -233,17 +240,17 @@ export class ListAccountsComponent implements OnInit {
       const pageSize = this.rows!;
       this.filterAccountForm.patchValue({
         pageNumber: page,
-        pageSize: pageSize
-      })
+        pageSize: pageSize,
+      });
       this.apiAccount.GetAccounts(this.filterAccountForm?.value).subscribe({
         next: (res) => {
           if (res.result == '1') {
             this.listUser = res.data.users;
             this.totalRows = res.totalRows;
             this.getRole_filter();
-          } else if(res.result == '0') {
+          } else if (res.result == '0') {
             this.pop.showOkPopup({ message: res.message });
-          }else{
+          } else {
             this.pop.showOkPopup({ message: 'Lỗi lấy danh sách users' });
             console.log(res.message);
           }
@@ -255,16 +262,15 @@ export class ListAccountsComponent implements OnInit {
           this.loading = false;
         },
       });
-      
     }
   }
-  
-  filter(){
+
+  filter() {
     this.first = 0;
     this.rows = this.rowsPerPageOptions[0];
-    this.loadUserLazy()
+    this.loadUserLazy();
   }
-  refresh(){
+  refresh() {
     this.filterAccountForm.reset();
     this.first = 0;
     this.rows = 10;
@@ -272,7 +278,7 @@ export class ListAccountsComponent implements OnInit {
   }
 
   ///end load data vao trang
-  
+
   ///show detail
   displayDetail: boolean = false;
 
@@ -305,7 +311,7 @@ export class ListAccountsComponent implements OnInit {
     lockTime: new FormControl(null),
     remainTime: new FormControl(null),
     isExternalAvatar: new FormControl(false),
-    permissionIds: new FormControl<number[]>([]),
+    userRoleIds: new FormControl<number[]>([]),
   });
 
   genders = [];
@@ -335,7 +341,6 @@ export class ListAccountsComponent implements OnInit {
         }
 
         this.detailAccountForm.markAsPristine();
-        console.log(this.detailAccountForm.value);
       },
       error: (err) => {
         console.log(err);
@@ -373,6 +378,13 @@ export class ListAccountsComponent implements OnInit {
     if (!this.detailAccountForm.valid) {
       this.pop.showOkPopup({
         message: 'Vui lòng kiểm tra lại thông tin user!',
+      });
+      this.detailAccountForm.markAllAsTouched();
+      Object.keys(this.detailAccountForm.controls).forEach((key) => {
+        const controlErrors = this.detailAccountForm.get(key)?.errors;
+        if (controlErrors) {
+          console.log(`Lỗi ở '${key}':`, controlErrors);
+        }
       });
       return;
     } else {
@@ -433,38 +445,40 @@ export class ListAccountsComponent implements OnInit {
     }
   }
 
-  linkGG(){
-    if(this.detailAccountForm.get('isGoogle')?.value && this.detailAccountForm.get('isGoogle')?.value == true){
+  linkGG() {
+    if (
+      this.detailAccountForm.get('isGoogle')?.value &&
+      this.detailAccountForm.get('isGoogle')?.value == true
+    ) {
       this.pop.showYesNoPopup({
-        message: "Bạn chắc chắn muốn bỏ liên kết Google?",
-        onAccept: ()=>{
+        message: 'Bạn chắc chắn muốn bỏ liên kết Google?',
+        onAccept: () => {
           //todo: unlink gg
-        }
-      })
-    }else{
+        },
+      });
+    } else {
       this.pop.showYesNoPopup({
-        message: "Bạn chắc chắn muốn liên kết với Google?",
-        onAccept: ()=>{
-
-        }
-      })
+        message: 'Bạn chắc chắn muốn liên kết với Google?',
+        onAccept: () => {},
+      });
     }
   }
-  linkFB(){
-    if(this.detailAccountForm.get('isFacebook')?.value && this.detailAccountForm.get('isFacebook')?.value == true){
+  linkFB() {
+    if (
+      this.detailAccountForm.get('isFacebook')?.value &&
+      this.detailAccountForm.get('isFacebook')?.value == true
+    ) {
       this.pop.showYesNoPopup({
-        message: "Bạn chắc chắn muốn bỏ liên kết Facebook?",
-        onAccept: ()=>{
+        message: 'Bạn chắc chắn muốn bỏ liên kết Facebook?',
+        onAccept: () => {
           //todo: unlink fb
-        }
-      })
-    }else{
+        },
+      });
+    } else {
       this.pop.showYesNoPopup({
-        message: "Bạn chắc chắn muốn liên kết với Facebook?",
-        onAccept: ()=>{
-          
-        }
-      })
+        message: 'Bạn chắc chắn muốn liên kết với Facebook?',
+        onAccept: () => {},
+      });
     }
   }
   closeDialogDetail() {
@@ -562,9 +576,11 @@ export class ListAccountsComponent implements OnInit {
     if (this.croppedImage) {
       if (this.displayPopupCreateUser) {
         this.createAccountForm.patchValue({ avatar: this.croppedImage });
+        this.detailAccountForm.markAsTouched();
         this.createAccountForm.markAsDirty();
       } else if (this.displayDetail) {
         this.detailAccountForm.patchValue({ avatar: this.croppedImage });
+        this.detailAccountForm.markAsTouched();
         this.detailAccountForm.markAsDirty();
       }
     }
@@ -576,10 +592,12 @@ export class ListAccountsComponent implements OnInit {
   ///show userrole
   displayPopupPermission = false;
 
+  listRoles: { roleID: number; roleName: string }[] = [];
   selectedRoles: { roleID: number; roleName: string }[] = [];
 
   rolePermissionsByRoleID: { [roleID: number]: TreeNode[] } = {};
   selectedRolePermissionsByRoleID: { [roleID: number]: TreeNode[] } = {};
+
   userRoles: { roleID: number; roleName: string }[] = [];
   selectedRoleID: number = 0;
 
@@ -599,8 +617,8 @@ export class ListAccountsComponent implements OnInit {
     });
   }
   refreshUserRole() {
-    this.selectedRoles = [];
     this.getRole_filter();
+    this.getPermissionByRoleIds(this.detailAccountForm.get('userRoleIds')?.value)
   }
 
   getPermissionByRoleIds(roleIds: number[]) {
@@ -830,7 +848,7 @@ export class ListAccountsComponent implements OnInit {
 
   showPermission() {
     this.displayPopupPermission = true;
-
+    this.refreshUserRole();
     // this.permission_User.length = 0;
     // this.permission_Role.length = 0;
     // this.permission_Content.length = 0;

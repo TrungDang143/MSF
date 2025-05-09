@@ -92,21 +92,27 @@ namespace api.Services
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     await conn.OpenAsync();
+                    if (inputDto.RoleIds != null)
+                    {
+                        var listId = string.Join(",", inputDto.RoleIds.Select(id => id != 1 ? id.ToString(): ""));
+                        cmd.Parameters.AddWithValue("@roleIds", listId);
 
-                    var listId = string.Join(",", inputDto.RoleIds.Select(id => id == 1 ? "admin" : id.ToString()));
-                    cmd.Parameters.AddWithValue("@roleIds", listId);
+                        await cmd.ExecuteNonQueryAsync();
 
-                    await cmd.ExecuteNonQueryAsync();
-
-                    res.Message = "Xoá role thành công!";
-                    res.Result = AppConstant.RESULT_SUCCESS;
-
+                        res.Message = "Xoá role thành công!";
+                        res.Result = AppConstant.RESULT_SUCCESS;
+                    }
+                    else
+                    {
+                        res.Message = "Xoá role thất bại!";
+                        res.Result = AppConstant.RESULT_ERROR;
+                    }
                 }
             }
             catch (Exception ex)
             {
                 res.Message = ex.Message;
-                res.Result = AppConstant.RESULT_ERROR;
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
             }
 
             return res;
@@ -123,6 +129,7 @@ namespace api.Services
                 {
                     await conn.OpenAsync();
                     cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@rolename", DBNull.Value);
                     DataTable dt = new DataTable();
                     using (var reader = await cmd.ExecuteReaderAsync())
                     {

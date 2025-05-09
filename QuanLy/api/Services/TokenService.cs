@@ -182,9 +182,12 @@ namespace api.Services
                         foreach (DataRow dr in dt.Rows)
                         {
                             listPermission.Add(dr[2].ToString());
+                            string role = dr[0].ToString();
+                            if (int.Parse(role) == 1)
+                            {
+                                roleID = 1;
+                            }
                         }
-
-                        roleID = int.Parse(dt.Rows[0][0].ToString());
                     }
                 }
             }

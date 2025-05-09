@@ -62,7 +62,7 @@ namespace api.Services
                         }
                         else
                         {
-                            if (roleID != null && roleID == 1)
+                            if (roleID == 1)
                                 dt_sys.ImportRow(dr);
                         }
                     }
@@ -123,8 +123,12 @@ namespace api.Services
                     {
                         dt.Load(reader);
                     }
-
-                    res.Data = dt.ConvertToList<RolePermission>();
+                    List<int> permissionIds = new List<int>();
+                    foreach(DataRow dr in dt.Rows)
+                    {
+                        permissionIds.Add((int)dr["PermissionID"]);
+                    }
+                    res.Data = permissionIds;
                 }
 
                 res.Result = AppConstant.RESULT_SUCCESS;

@@ -204,6 +204,11 @@ export class SettingComponent implements OnInit {
       this.selectedRoleIds.push(element.roleID);
     });
 
+    if(this.selectedRoleIds.some(role => role == 1)){
+      this.pop.showOkPopup({message: "Không thể xoá role Admin!"})
+      return;
+    }
+
     this.apiSetting.DeleteRoles(this.selectedRoleIds).subscribe({
       next: (res) => {
         if (res.result == '1') {
@@ -796,7 +801,6 @@ export class SettingComponent implements OnInit {
         next: (res) => {
           if (res.result == '1') {
             this.updateRoleForm.patchValue(res.data[0]);
-            console.log(this.updateRoleForm.value);
           } else {
             this.pop.showOkPopup({ message: res.message });
           }

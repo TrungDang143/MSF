@@ -662,6 +662,37 @@
     ]
   },
   {
+    "ContainingType": "api.Controllers.PermissionController",
+    "Method": "GetPermissionForUserbyRoleIds",
+    "RelativePath": "api/Permission/GetPermissionForUserbyRoleIds",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "UserID",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "RoleIds",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "api.Interface.BaseResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "api.Controllers.SignUpController",
     "Method": "SignUp",
     "RelativePath": "api/SignUp",

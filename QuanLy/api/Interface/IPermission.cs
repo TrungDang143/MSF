@@ -7,5 +7,6 @@ namespace api.Interface
     {
         public Task<BaseResponse> GetAllPermission(int roleID);
         public Task<BaseResponse> GetPermissionByRoleIds(GetPermissionByRoleIDDto inputDto, int roleID);
+        public Task<BaseResponse> GetPermissionForUserbyRoleIds(GetPermissionForUserbyRoleIdsInDto inputDto, int roleID);
     }
 }

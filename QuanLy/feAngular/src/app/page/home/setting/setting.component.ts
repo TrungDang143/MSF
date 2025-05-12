@@ -708,7 +708,7 @@ export class SettingComponent implements OnInit {
           this.mockupPermission(res.data);
 
           if (this.displayDialogUpdateRole) {
-            let permissionIds: [];
+            let permissionIds: number[];
             if (this.updateRoleForm.get('permissionIds')?.value) {
               permissionIds = this.updateRoleForm.get('permissionIds')?.value;
               this.mockupRolePermission(permissionIds);
@@ -720,7 +720,14 @@ export class SettingComponent implements OnInit {
                 .subscribe({
                   next: (res) => {
                     if (res.result == '1') {
-                      permissionIds = res.data;
+                      let data: {
+                        roleID: number, 
+                        roleName: string,
+                        permissionID: number,
+                        permissionName: string,
+                        description: string
+                      }[] = res.data
+                      permissionIds = data.map(permission => permission.permissionID);
                       this.mockupRolePermission(permissionIds);
                     } else {
                       this.pop.showOkPopup({ message: res.message });

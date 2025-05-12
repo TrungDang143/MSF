@@ -193,11 +193,14 @@ export class ListAccountsComponent implements OnInit {
         if (res.result == '1') {
           this.listRole = res.data;
 
-          let userRoleIds: [] = this.detailAccountForm.get('userRoleIds')?.value;
+          let userRoleIds: [] =
+            this.detailAccountForm.get('userRoleIds')?.value;
           this.listRoles = this.listRole.filter((role) => {
             return !userRoleIds.some((ur) => ur == role.roleID);
           });
-          this.selectedRoles = this.listRole.filter(role => {return userRoleIds.some(ur => ur == role.roleID)})
+          this.selectedRoles = this.listRole.filter((role) => {
+            return userRoleIds.some((ur) => ur == role.roleID);
+          });
         }
       },
       error: (err) => {
@@ -486,7 +489,6 @@ export class ListAccountsComponent implements OnInit {
     this.detailAccountForm.reset();
   }
   showDialogDetail() {
-    this.isChangedRole = false;
     this.displayDetail = true;
     this.closeDialogCreateUser();
     this.detailAccountForm.reset();
@@ -604,8 +606,6 @@ export class ListAccountsComponent implements OnInit {
   isAllRolePermissionsSelected: boolean = false;
   isAllCatelorySelected: boolean = false;
 
-  permissionSelected: TreeNode[] = [];
-
   addRoleForUser() {
     this.pop.showYesNoPopup({
       message: 'Bạn có chắc chắn muốn chỉnh sửa role của user?',
@@ -618,7 +618,13 @@ export class ListAccountsComponent implements OnInit {
   }
   refreshUserRole() {
     this.getRole_filter();
-    this.getPermissionByRoleIds(this.detailAccountForm.get('userRoleIds')?.value)
+    this.getPermissionByRoleIds(
+      this.detailAccountForm.get('userRoleIds')?.value
+    );
+    this.getUserPermission(
+      this.detailAccountForm.get('userID')?.value,
+      this.detailAccountForm.get('userRoleIds')?.value
+    );
   }
 
   getPermissionByRoleIds(roleIds: number[]) {
@@ -639,7 +645,8 @@ export class ListAccountsComponent implements OnInit {
             }
 
             grouped.get(item.roleID)?.permissions.push({
-              label: item.description,
+              label:
+                item.description || item.permissionName || 'Unnamed Permission',
               data: {
                 permissionID: item.permissionID,
                 description: item.description,
@@ -671,502 +678,150 @@ export class ListAccountsComponent implements OnInit {
       },
     });
   }
-  toggleAllCatelory() {
-    // if (this.isAllCatelorySelected) {
-    //   this.isAllUserSelected = true;
-    //   this.isAllRoleSelected = true;
-    //   this.isAllPermissionSelected = true;
-    //   this.isAllContentSelected = true;
-    //   this.isAllSystemSelected = true;
-    //   this.isAllCatelorySelected = true;
-    //   this.toggleAllDetail(
-    //     this.permission_User,
-    //     this.permission_User_Selected,
-    //     true
-    //   );
-    //   this.toggleAllDetail(
-    //     this.permission_Role,
-    //     this.permission_Role_Selected,
-    //     true
-    //   );
-    //   this.toggleAllDetail(
-    //     this.permission_Permission,
-    //     this.permission_Permission_Selected,
-    //     true
-    //   );
-    //   this.toggleAllDetail(
-    //     this.permission_Content,
-    //     this.permission_Content_Selected,
-    //     true
-    //   );
-    //   this.toggleAllDetail(
-    //     this.permission_System,
-    //     this.permission_System_Selected,
-    //     true
-    //   );
-    //   this.permissionSelected = [
-    //     ...this.permission_User_Selected,
-    //     ...this.permission_Role_Selected,
-    //     ...this.permission_Permission_Selected,
-    //     ...this.permission_Content_Selected,
-    //     ...this.permission_System_Selected,
-    //   ];
-    // } else {
-    //   this.isAllUserSelected = false;
-    //   this.isAllRoleSelected = false;
-    //   this.isAllPermissionSelected = false;
-    //   this.isAllContentSelected = false;
-    //   this.isAllSystemSelected = false;
-    //   this.toggleAllDetail(
-    //     this.permission_User,
-    //     this.permission_User_Selected,
-    //     false
-    //   );
-    //   this.toggleAllDetail(
-    //     this.permission_Role,
-    //     this.permission_Role_Selected,
-    //     false
-    //   );
-    //   this.toggleAllDetail(
-    //     this.permission_Permission,
-    //     this.permission_Permission_Selected,
-    //     false
-    //   );
-    //   this.toggleAllDetail(
-    //     this.permission_Content,
-    //     this.permission_Content_Selected,
-    //     false
-    //   );
-    //   this.toggleAllDetail(
-    //     this.permission_System,
-    //     this.permission_System_Selected,
-    //     false
-    //   );
-    //   this.permissionSelected.length = 0;
-    // }
-  }
-  toggleAllDetail(
-    nodes: TreeNode[],
-    nodesSelected: TreeNode[],
-    isChecked: boolean
-  ) {
-    nodesSelected.length = 0;
 
-    if (isChecked) {
-      nodes.forEach((node) => this.checkRecursive(node, nodesSelected));
+  toggleAllCatelory() {
+    let roleIds = this.selectedRoles.map((role) => role.roleID);
+    if (this.isAllCatelorySelected) {
+      roleIds.forEach((roleID) => {
+        this.toggleAllPermissionNodes(
+          this.rolePermissionsByRoleID[roleID],
+          this.selectedRolePermissionsByRoleID[roleID],
+          true
+        );
+        console.log(
+          '1',
+          typeof this.selectedRolePermissionsByRoleID[roleID],
+          this.selectedRolePermissionsByRoleID[roleID]
+        );
+      });
+    } else {
+      roleIds.forEach((roleID) => {
+        this.toggleAllPermissionNodes(
+          this.rolePermissionsByRoleID[roleID],
+          this.selectedRolePermissionsByRoleID[roleID],
+          false
+        );
+        console.log(
+          '2',
+          typeof this.selectedRolePermissionsByRoleID[roleID],
+          this.selectedRolePermissionsByRoleID[roleID]
+        );
+      });
     }
+  }
+  private toggleAllPermissionNodes(
+    nodes: TreeNode[],
+    selectedNodes: TreeNode[],
+    isSelected: boolean
+  ): void {
+    nodes.forEach((node) => {
+      if (isSelected) {
+        if (!selectedNodes.includes(node)) {
+          selectedNodes.push(node);
+        }
+      } else {
+        const index = selectedNodes.indexOf(node);
+        if (index > -1) {
+          selectedNodes.splice(index, 1);
+        }
+      }
+
+      if (node.children && node.children.length > 0) {
+        this.toggleAllPermissionNodes(node.children, selectedNodes, isSelected);
+      }
+    });
     this.onCatelorySelectionChange();
   }
 
-  checkRecursive(node: TreeNode, selectedList: TreeNode[]) {
-    selectedList.push(node);
-    if (node.children) {
-      node.children.forEach((child) =>
-        this.checkRecursive(child, selectedList)
-      );
-    }
-  }
-
-  // getAllCateloryNodes(nodes: TreeNode[]): TreeNode[] {
-  //   let result: TreeNode[] = [];
-  //   for (let node of nodes) {
-  //     result.push(node);
-  //     if (node.children) {
-  //       result = result.concat(this.getAllCateloryNodes(node.children));
-  //     }
-  //   }
-  //   return result;
-  // }
-  getAllDetailNodes(nodes: TreeNode[]): TreeNode[] {
-    let result: TreeNode[] = [];
-    for (let node of nodes) {
-      result.push(node);
-      if (node.children) {
-        result = result.concat(this.getAllDetailNodes(node.children));
-      }
-    }
-    return result;
-  }
-
   onCatelorySelectionChange() {
-    // this.isAllCatelorySelected =
-    //   this.isAllContentSelected &&
-    //   this.isAllPermissionSelected &&
-    //   this.isAllRoleSelected &&
-    //   this.isAllSystemSelected &&
-    //   this.isAllUserSelected;
-  }
-
-  onDetailSelectionChange() {
-    // switch (showDetailPermission) {
-    //   case 1: {
-    //     const allNodeCount = this.getAllDetailNodes(
-    //       this.permission_User
-    //     ).length;
-    //     const selectedCount = this.permission_User_Selected.length;
-    //     this.isAllUserSelected = selectedCount === allNodeCount;
-    //     break;
-    //   }
-    //   case 2: {
-    //     const allNodeCount = this.getAllDetailNodes(
-    //       this.permission_Role
-    //     ).length;
-    //     const selectedCount = this.permission_Role_Selected.length;
-    //     this.isAllRoleSelected = selectedCount === allNodeCount;
-    //     break;
-    //   }
-    //   case 3: {
-    //     const allNodeCount = this.getAllDetailNodes(
-    //       this.permission_Permission
-    //     ).length;
-    //     const selectedCount = this.permission_Permission_Selected.length;
-    //     this.isAllPermissionSelected = selectedCount === allNodeCount;
-    //     break;
-    //   }
-    //   case 4: {
-    //     const allNodeCount = this.getAllDetailNodes(
-    //       this.permission_Content
-    //     ).length;
-    //     const selectedCount = this.permission_Content_Selected.length;
-    //     this.isAllContentSelected = selectedCount === allNodeCount;
-    //     break;
-    //   }
-    //   case 5: {
-    //     const allNodeCount = this.getAllDetailNodes(
-    //       this.permission_System
-    //     ).length;
-    //     const selectedCount = this.permission_System_Selected.length;
-    //     this.isAllSystemSelected = selectedCount === allNodeCount;
-    //     break;
-    //   }
-    //   default: {
-    //     break;
-    //   }
-    // }
-    // this.onCatelorySelectionChange();
+    this.isAllCatelorySelected =
+      Object.keys(this.rolePermissionsByRoleID).length ===
+      Object.keys(this.selectedRolePermissionsByRoleID).length;
   }
 
   showPermission() {
     this.displayPopupPermission = true;
     this.refreshUserRole();
-    // this.permission_User.length = 0;
-    // this.permission_Role.length = 0;
-    // this.permission_Content.length = 0;
-    // this.permission_Permission.length = 0;
-    // this.permission_System.length = 0;
-
-    // this.permission_User_Selected.length = 0;
-    // this.permission_Role_Selected.length = 0;
-    // this.permission_Content_Selected.length = 0;
-    // this.permission_Permission_Selected.length = 0;
-    // this.permission_System_Selected.length = 0;
-
-    // this.showDetailPermission = 0;
-    // this.isAllUserSelected = false;
-    // this.isAllRoleSelected = false;
-    // this.isAllPermissionSelected = false;
-    // this.isAllContentSelected = false;
-    // this.isAllSystemSelected = false;
-    // this.isAllCatelorySelected = false;
-
-    this.permissionSelected.length = 0;
+    this.onCatelorySelectionChange();
   }
 
-  mockupUserPermission(permissionIds: number[]) {
-    //   const permissionGroups = [
-    //     {
-    //       nodes: this.permission_User,
-    //       selected: this.permission_User_Selected,
-    //     },
-    //     {
-    //       nodes: this.permission_Role,
-    //       selected: this.permission_Role_Selected,
-    //     },
-    //     {
-    //       nodes: this.permission_Permission,
-    //       selected: this.permission_Permission_Selected,
-    //     },
-    //     {
-    //       nodes: this.permission_Content,
-    //       selected: this.permission_Content_Selected,
-    //     },
-    //     {
-    //       nodes: this.permission_System,
-    //       selected: this.permission_System_Selected,
-    //     },
-    //   ];
-    //   this.toggleAllPermissionByIds(permissionGroups, permissionIds);
-    //   this.updateParentSelection(
-    //     this.permission_User,
-    //     this.permission_User_Selected
-    //   );
-    //   this.updateParentSelection(
-    //     this.permission_Role,
-    //     this.permission_Role_Selected
-    //   );
-    //   this.updateParentSelection(
-    //     this.permission_Permission,
-    //     this.permission_Permission_Selected
-    //   );
-    //   this.updateParentSelection(
-    //     this.permission_Content,
-    //     this.permission_Content_Selected
-    //   );
-    //   this.updateParentSelection(
-    //     this.permission_System,
-    //     this.permission_System_Selected
-    //   );
-    //   for (let i = 1; i <= 5; i++) {
-    //     this.onDetailSelectionChange(i);
-    //   }
+  getUserPermission(userID: number, roleIds: number[]) {
+    this.apiPermission
+      .GetPermissionForUserByRoleIds(userID, roleIds)
+      .subscribe({
+        next: (res) => {
+          if (res.result == '1') {
+            this.fillSelectedRolePermissions(res.data);
+            //this.mockupUserPermission(roleIds)
+          } else {
+            this.pop.showSysErr();
+            console.log(res.message);
+          }
+        },
+        error: (err) => {
+          this.pop.showSysErr();
+          console.log(err);
+        },
+      });
+  }
+  fillSelectedRolePermissions(
+    payload: { roleID: number; permissionIds: number[] }[]
+  ) {
+    payload.forEach((rolePermission) => {
+      const { roleID, permissionIds } = rolePermission;
+
+      const nodes = this.rolePermissionsByRoleID[roleID];
+      if (!nodes) return;
+
+      const matchedNodes: TreeNode[] = [];
+
+      this.findMatchingPermissionNodes(nodes, permissionIds, matchedNodes);
+
+      this.selectedRolePermissionsByRoleID[roleID] = matchedNodes;
+    });
   }
 
-  mockupPermission(data: any) {
-    // this.permission_User = [
-    //   {
-    //     label: 'User',
-    //     data: 'permission_User',
-    //     expanded: true,
-    //     children: this.convertToTreeNodes(data.permission_User),
-    //   },
-    // ];
-    // this.permission_Role = [
-    //   {
-    //     label: 'Role',
-    //     data: 'permission_Role',
-    //     expanded: true,
-    //     children: this.convertToTreeNodes(data.permission_Role),
-    //   },
-    // ];
-    // this.permission_Content = [
-    //   {
-    //     label: 'Content',
-    //     data: 'permission_Content',
-    //     expanded: true,
-    //     children: this.convertToTreeNodes(data.permission_Content),
-    //   },
-    // ];
-    // this.permission_Permission = [
-    //   {
-    //     label: 'Permission',
-    //     data: 'permission_Permission',
-    //     expanded: true,
-    //     children: this.convertToTreeNodes(data.permission_Permission),
-    //   },
-    // ];
-    // this.permission_System = [
-    //   {
-    //     label: 'Admin',
-    //     data: 'permission_System',
-    //     expanded: true,
-    //     children: this.convertToTreeNodes(data.permission_System),
-    //   },
-    // ];
-  }
+  private findMatchingPermissionNodes(
+    nodes: TreeNode[],
+    permissionIds: number[],
+    matchedNodes: TreeNode[]
+  ): void {
+    nodes.forEach((node) => {
+      if (permissionIds.includes(node.data?.permissionID)) {
+        matchedNodes.push(node);
+      }
 
-  isChangedRole = false;
+      if (node.children && node.children.length > 0) {
+        this.findMatchingPermissionNodes(
+          node.children,
+          permissionIds,
+          matchedNodes
+        );
+
+        const allChildrenSelected = node.children.every((child) =>
+          matchedNodes.includes(child)
+        );
+
+        if (allChildrenSelected && !matchedNodes.includes(node)) {
+          matchedNodes.push(node);
+        }
+      }
+    });
+  }
 
   //detail user
   //show permission cua user
   userPermission() {
     this.showPermission();
-
-    // this.apiPermission.getAllPermission().subscribe({
-    //   next: (res) => {
-    //     if (res.result == '1') {
-    //       this.showPermission();
-    //       this.mockupPermission(res.data);
-
-    //       if (!this.isChangedRole) {
-    //         if (this.detailAccountForm.get('permissionIds')?.value) {
-    //           let permissionIds: [] =
-    //             this.detailAccountForm.get('permissionIds')?.value;
-    //           this.mockupUserPermission(permissionIds);
-    //         } else {
-    //           //lay tat ca quyen (role + extend)
-    //           this.apiAccount
-    //             .GetAllUserPermission(this.userIdSeleted)
-    //             .subscribe({
-    //               next: (res) => {
-    //                 if (res.result == '1') {
-    //                   let permissionIds: [] = res.data;
-
-    //                   this.mockupUserPermission(permissionIds);
-    //                 } else {
-    //                   this.pop.showOkPopup({ message: res.message });
-    //                 }
-    //               },
-    //               error: (err) => {
-    //                 this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
-    //                 console.log(err);
-    //               },
-    //             });
-    //         }
-    //       } else {
-    //         this.apiPermission
-    //           .getPermissionByRoleID(this.userIdSeleted)
-    //           .subscribe({
-    //             next: (res) => {
-    //               if (res.result == '1') {
-    //                 let permissionIds: [] = res.data;
-    //                 this.mockupUserPermission(permissionIds);
-    //               } else {
-    //                 this.pop.showOkPopup({ message: res.message });
-    //               }
-    //             },
-    //             error: (err) => {
-    //               this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
-    //               console.log(err);
-    //             },
-    //           });
-    //       }
-
-    //       this.getPermission(this.cateloryPermission[0]);
-    //     } else {
-    //       this.pop.showOkPopup({ message: res.message });
-    //     }
-    //   },
-    //   error: (err) => {
-    //     this.pop.showOkPopup({
-    //       header: 'Lỗi',
-    //       message: 'Không thể kết nối với server!',
-    //     });
-    //     this.displayPopupPermission = false;
-    //     console.log(err);
-    //   },
-    // });
-  }
-
-  convertToTreeNodes(data: any[]): TreeNode[] {
-    return data.map((perm) => ({
-      label: perm.description,
-      data: perm,
-      key: perm.permissionID.toString(),
-      leaf: true,
-    }));
-  }
-
-  toggleAllPermissionByIds(
-    permissionGroups: { nodes: TreeNode[]; selected: TreeNode[] }[],
-    selectedIds: number[]
-  ) {
-    for (let group of permissionGroups) {
-      this.markSelectedNodes(group.nodes, selectedIds, group.selected);
-    }
-  }
-
-  private markSelectedNodes(
-    nodes: TreeNode[],
-    selectedIds: number[],
-    selectedList: TreeNode[]
-  ) {
-    for (let node of nodes) {
-      this.markNodeRecursive(node, selectedIds, selectedList);
-    }
-  }
-
-  private markNodeRecursive(
-    node: TreeNode,
-    selectedIds: number[],
-    selectedList: TreeNode[]
-  ) {
-    const id = node.data?.permissionID;
-    if (id && selectedIds.includes(id)) {
-      selectedList.push(node);
-    }
-
-    if (node.children) {
-      for (let child of node.children) {
-        this.markNodeRecursive(child, selectedIds, selectedList);
-      }
-    }
-  }
-
-  updateParentSelection(nodes: TreeNode[], selectedNodes: TreeNode[]) {
-    nodes.forEach((node) => {
-      if (node.children && node.children.length > 0) {
-        // Gọi đệ quy cho node con trước
-        this.updateParentSelection(node.children, selectedNodes);
-
-        const allChildrenSelected = node.children.every((child) =>
-          selectedNodes.includes(child)
-        );
-
-        if (allChildrenSelected && !selectedNodes.includes(node)) {
-          selectedNodes.push(node);
-        }
-
-        const someChildrenSelected = node.children.some((child) =>
-          selectedNodes.includes(child)
-        );
-
-        if (
-          !allChildrenSelected &&
-          someChildrenSelected &&
-          !selectedNodes.includes(node)
-        ) {
-          // Nếu bạn muốn hiển thị trạng thái "một phần được chọn" thì xử lý ở đây (tuỳ chọn)
-          // PrimeNG không hỗ trợ trạng thái "indeterminate" khi dùng [(selection)] nên có thể bỏ qua
-        }
-      }
-    });
   }
 
   updateUserPermission() {
-    console.log(this.selectedRolePermissionsByRoleID);
-
-    const payload: { RoleID: number; PermissionID: number }[] = [];
-
-    Object.entries(this.selectedRolePermissionsByRoleID).forEach(
-      ([roleID, treeNodes]) => {
-        treeNodes.forEach((node) => {
-          if (node.data?.PermissionID) {
-            payload.push({
-              RoleID: Number(roleID),
-              PermissionID: node.data.PermissionID,
-            });
-          }
-        });
-      }
-    );
-
-    const jsonPayload = JSON.stringify(payload);
-    console.log(jsonPayload);
-    this.apiAccount.UpdateUserRoles(this.userIdSeleted, jsonPayload).subscribe({
-      next: (res) => {
-        if (res.result == '1') {
-          this.pop.showOkPopup({ message: res.message });
-        } else {
-          this.pop.showOkPopup({ message: res.message });
-        }
-      },
-      error: (err) => {
-        this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
-        console.log(err);
-      },
+    Object.keys(this.selectedRolePermissionsByRoleID).forEach((roleID) => {
+      const selectedRoleNode = this.selectedRolePermissionsByRoleID[+roleID]
+            .map((role_permission) => role_permission.data.permissionID);
+      console.log(roleID, selectedRoleNode);
     });
-    // this.permissionSelected = [
-    //   ...this.permission_User_Selected,
-    //   ...this.permission_Role_Selected,
-    //   ...this.permission_Permission_Selected,
-    //   ...this.permission_Content_Selected,
-    //   ...this.permission_System_Selected,
-    // ];
-    // const ids: number[] = [];
-    // this.permissionSelected.forEach((node) => {
-    //   if (node.leaf && node.data?.permissionID) {
-    //     ids.push(node.data.permissionID);
-    //   }
-    // });
-    // if (this.detailAccountForm.get('roleID')?.value == 1) {
-    //   this.pop.showOkPopup({
-    //     message: 'Không thể chỉnh sửa quyền của role Admin!!',
-    //   });
-    //   return;
-    // }
-    // this.detailAccountForm.patchValue({ permissionIds: ids });
-    // this.displayPopupPermission = false;
-    // this.detailAccountForm.markAsDirty();
+    
   }
   ///end show userrole
 
@@ -1198,7 +853,6 @@ export class ListAccountsComponent implements OnInit {
   });
 
   showDialogCreateUser() {
-    this.isChangedRole = false;
     this.displayPopupCreateUser = true;
     this.closeDialogDetail();
     this.createAccountForm.reset();
@@ -1235,15 +889,15 @@ export class ListAccountsComponent implements OnInit {
   }
 
   changeRole() {
-    if (this.displayDetail) {
-      if (this.detailAccountForm.get('roleID')?.value == 1) {
-        this.pop.showOkPopup({ message: 'Không thể set role Admin cho user!' });
-        this.detailAccountForm.get('roleID')?.reset();
-      }
-    }
-    this.createAccountForm.get('permissionIds')?.setValue([]);
-    this.detailAccountForm.get('permissionIds')?.setValue([]);
-    this.isChangedRole = true;
+    // if (this.displayDetail) {
+    //   if (this.detailAccountForm.get('roleID')?.value == 1) {
+    //     this.pop.showOkPopup({ message: 'Không thể set role Admin cho user!' });
+    //     this.detailAccountForm.get('roleID')?.reset();
+    //   }
+    // }
+    // this.createAccountForm.get('permissionIds')?.setValue([]);
+    // this.detailAccountForm.get('permissionIds')?.setValue([]);
+    // this.isChangedRole = true;
   }
 
   createUserPermission() {

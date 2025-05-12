@@ -646,6 +646,7 @@
             [showSourceControls]="false"
             [showTargetControls]="false"
             [responsive]="false"
+            (onFocus)="getPermissionByRoleIds()"
           >
             <ng-template #sourceHeader>
               <div class="header-picklist">
@@ -712,7 +713,7 @@
                 [value]="rolePermissionsByRoleID[selectedRoleID]"
                 selectionMode="checkbox"
                 [(selection)]="selectedRolePermissionsByRoleID[selectedRoleID]"
-                (selectionChange)="onDetailSelectionChange()"
+                (selectionChange)="onCatelorySelectionChange()"
                 [propagateSelectionUp]="true"
                 [propagateSelectionDown]="true"
               >

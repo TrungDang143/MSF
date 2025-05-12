@@ -33,5 +33,13 @@ namespace api.Controllers
             int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
             return await _permission.GetPermissionByRoleIds(inputDto, roleID);
         }
+
+        [HasPermission("view_permissions")]
+        [HttpGet("GetPermissionForUserbyRoleIds")]
+        public async Task<BaseResponse> GetPermissionForUserbyRoleIds([FromQuery] GetPermissionForUserbyRoleIdsInDto inputDto)
+        {
+            int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
+            return await _permission.GetPermissionForUserbyRoleIds(inputDto, roleID);
+        }
     }
 }

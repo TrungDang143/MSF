@@ -18,7 +18,6 @@ namespace api.Services
             {
                 using( SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
                 using( SqlCommand cmd = new SqlCommand("sp_GetPermissionByRoleIds", conn))
-                using( SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                 {
                     await conn.OpenAsync();
                     cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -93,17 +92,16 @@ namespace api.Services
             if (inputDto.RoleIds == null || inputDto.RoleIds.Count <= 0)
             {
                 res.Result = AppConstant.RESULT_ERROR;
-                res.Message = "Không thể lấy permission của role!";
+                res.Message = "Không thể lấy permission của user!";
                 return res;
             }
             else
             {
-
                 roleIds = string.Join(",", inputDto.RoleIds.Distinct());
                 if(roleIds.Length < 1)
                 {
                     res.Result = AppConstant.RESULT_ERROR;
-                    res.Message = "Không thể lấy permission của role!";
+                    res.Message = "Không thể lấy permission của user!";
                     return res;
                 }
             }
@@ -123,16 +121,71 @@ namespace api.Services
                     {
                         dt.Load(reader);
                     }
-                    List<int> permissionIds = new List<int>();
-                    foreach(DataRow dr in dt.Rows)
-                    {
-                        permissionIds.Add((int)dr["PermissionID"]);
-                    }
-                    res.Data = permissionIds;
+
+                    res.Data = dt.ConvertToList<RolePermission>();
                 }
 
                 res.Result = AppConstant.RESULT_SUCCESS;
                 res.Message = "Get permission thanh cong";
+            }
+            catch (Exception ex)
+            {
+                res.Result = AppConstant.RESULT_SYSTEM_ERROR;
+                res.Message = ex.Message;
+            }
+
+            return res;
+        }
+
+        public async Task<BaseResponse> GetPermissionForUserbyRoleIds(GetPermissionForUserbyRoleIdsInDto inputDto, int roleID)
+        {
+            var res = new BaseResponse();
+            string roleIds = inputDto.RoleIds;
+            if (string.IsNullOrWhiteSpace(roleIds))
+            {
+                res.Result = AppConstant.RESULT_ERROR;
+                res.Message = "Không thể lấy permission của role!";
+                return res;
+            }
+
+            try
+            {
+                List<GetPermissionForUserbyRoleIdsOutDto> model = new List<GetPermissionForUserbyRoleIdsOutDto>();
+
+                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                using (SqlCommand cmd = new SqlCommand("sp_GetPermissionForUserbyRoleIds", conn))
+                {
+                    await conn.OpenAsync();
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@userID", inputDto.UserID);
+                    cmd.Parameters.AddWithValue("@roleIds", Utils.DbNullIfNull(roleIds));
+                    cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
+
+                    DataTable dt = new DataTable();
+                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    {
+                        dt.Load(reader);
+                    }
+
+                    foreach (DataRow dr in dt.Rows)
+                    {
+                        int _roleID = int.Parse(dr[0].ToString());
+                        List<int> _permissionIds = string.IsNullOrWhiteSpace(dr[1].ToString()) 
+                                                    ? new List<int>()
+                                                    : dr[1].ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => int.Parse(s.Trim())).ToList(); ;
+                        
+                        var rolePermission = new GetPermissionForUserbyRoleIdsOutDto()
+                        {
+                            RoleID = _roleID,
+                            PermissionIds = _permissionIds
+                        };
+                        model.Add(rolePermission);
+                    }
+                    res.Data = model;
+                }
+
+                res.Result = AppConstant.RESULT_SUCCESS;
+                res.Message = "Get permission cua user thanh cong";
             }
             catch (Exception ex)
             {

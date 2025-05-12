@@ -537,12 +537,25 @@ BEGIN
 
 END;
 ----------------------------------------------------------------------------------------------------
-create procedure sp_GetUserByUserID
-    @UserID VARCHAR(100)
+create procedure sp_GetDetailUserByUserID
+    @UserID int
 AS
 BEGIN
-
-   SELECT top 1 * FROM Users WHERE (UserID = @UserID)
+	begin try
+		SELECT top 1 u.Username, u.FullName, u.Email, u.Avatar, u.DateOfBirth, u.Gender, st.StatusName, STRING_AGG(r.RoleName, ', ') as Roles, 
+		u.CreatedAt, u.UpdatedAt, u.FacebookID, u.GoogleID, u.PhoneNumber, u.Address, u.LockTime, u.RemainTime, u.otp, u.IsExternalAvatar 
+		FROM Users u with (nolock)
+		inner join Status st with (nolock) on st.StatusID = u.Status
+		left join Genders gd with (nolock) on gd.GenderID = u.Gender
+		left join UserRole ur with (nolock) on ur.UserID = u.UserID
+		left join Role r		with (nolock) on r.RoleID = ur.RoleID
+		WHERE (u.UserID = @UserID)
+		group by u.Username, u.FullName, u.Email, u.Avatar, u.DateOfBirth, u.Gender, st.StatusName,
+		u.CreatedAt, u.UpdatedAt, u.FacebookID, u.GoogleID, u.PhoneNumber, u.Address, u.LockTime, u.RemainTime, u.otp, u.IsExternalAvatar 
+	end try
+	begin catch
+		throw;
+	end catch
 
 END;
 ----------------------------------------------------------------------------------------------------
@@ -1433,6 +1446,42 @@ EXEC sp_GetAccount
 
 SELECT @total AS TotalRows;
 ----------------------------------------------------------------------------------------------------
+create proc sp_GetPermissionForUserbyRoleIds
+	@userID int,
+	@roleIds varchar(max) null,
+	@isAdmin bit
+as
+begin
+	begin try
+
+		if (@roleIds is null)
+		begin
+			return
+		end
+
+		;WITH RoleIDList AS (
+			SELECT DISTINCT TRY_CAST(value AS INT) AS RoleID
+			FROM STRING_SPLIT(@roleIds, ',')
+			WHERE TRIM(value) <> ''
+			  AND TRY_CAST(value AS INT) IS NOT NULL
+		)
+
+        SELECT
+            rp.RoleID,
+            rp.PermissionID
+        FROM 
+            RolePermission rp with (nolock)
+			inner join UserRole ur with (nolock) ON ur.RoleID = rp.RoleID and ur.UserID = @userID and rp.RoleID IN (SELECT RoleID FROM RoleIDList)
+			inner join Permission p with (nolock) on rp.PermissionID = p.PermissionID
+			left join DenyUserRolePermission dp with (nolock) on dp.PermissionID = rp.PermissionID
+        WHERE 
+			@isAdmin = 1 OR p.PermissionName NOT LIKE 'admin.%'
+			and dp.PermissionID is null
+	end try
+	begin catch
+		throw;
+	end catch
+end
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------

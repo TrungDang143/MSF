@@ -10,7 +10,7 @@ namespace api.Interface
         public Task<BaseResponse> GetUserInfo(GetUserInfoInDto inputDto);
         public Task<BaseResponse> GetDetailUserInfo(GetDetailUserInfoInDto inputDto);
         public Task<BaseResponse> UpdateUser(UpdateUserDto inputDto, string? username, int? roleID);
-        public Task<BaseResponse> DeleteUser(DeleteUserDto inputDto);
+        public Task<BaseResponse> DeleteUser(DeleteUserDto inputDto, int userID);
         public Task<BaseResponse> CreateUser(CreateUserDto inputDto, int roleID);
         public Task<BaseResponse> GetAllUserPermission(GetAllUserPermissionDto inputDto, int roleID);
         public Task<BaseResponse> GetRole(GetRoleDto inputDto);
@@ -21,6 +21,6 @@ namespace api.Interface
         public Task<BaseResponse> ChangeMyPassword(ChangeMyPasswordDto inputDto);
         public BaseResponse LoginUser(LoginUserDto inputDto, string? username);
         public Task<BaseResponse> LogoutUser(LogoutUserDto inputDto, string? username);
-        public Task<BaseResponse> UpdateUserRoles(UpdateUserRolesDto inputDto, int roleID);
+        public Task<BaseResponse> UpdateUserRoles(UpdateUserRolesDto inputDto, int userID, int roleID);
     }
 }

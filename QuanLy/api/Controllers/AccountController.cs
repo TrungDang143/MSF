@@ -73,7 +73,8 @@ namespace api.Controllers
         [HttpGet("DeleteUser")]
         public async Task<BaseResponse> DeleteUser([FromQuery] DeleteUserDto inputDto)
         {
-            return await _account.DeleteUser(inputDto);
+            int.TryParse(User.FindFirst("userID")?.Value, out int userID);
+            return await _account.DeleteUser(inputDto, userID);
         }
 
         [HasPermission("view_permissions")]
@@ -83,14 +84,6 @@ namespace api.Controllers
             int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
             return await _account.GetAllUserPermission(inputDto, roleID);
         }
-
-        //[HasPermission("assign_user_permissions")]
-        //[HttpPost("UpdateUserPermission")]
-        //public BaseResponse UpdateUserPermission([FromBody] UpdateUserPermissionDto inputDto)
-        //{
-        //    int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
-        //    return await _account.UpdateUserPermission(inputDto, roleID);
-        //}
 
         [HasPermission("create_users")]
         [HttpGet("GetRoleGenderStatus")]
@@ -152,8 +145,9 @@ namespace api.Controllers
         [HttpPost("UpdateUserRoles")]
         public async Task<BaseResponse> UpdateUserRoles([FromBody] UpdateUserRolesDto inputDto)
         {
+            int.TryParse(User.FindFirst("userID")?.Value, out int userID);
             int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
-            return await _account.UpdateUserRoles(inputDto, roleID);
+            return await _account.UpdateUserRoles(inputDto, userID, roleID);
         }
     }
 }

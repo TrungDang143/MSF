@@ -112,30 +112,35 @@ namespace api.Services
             return res;
         }
 
-        public async Task<BaseResponse> DeleteUser(DeleteUserDto inputDto)
+        public async Task<BaseResponse> DeleteUser(DeleteUserDto inputDto, int userID)
         {
             var res = new BaseResponse();
-
-            try
+            if (userID == inputDto.UserID)
             {
-                using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                using (SqlCommand cmd = new SqlCommand("sp_DeleteUser", conn))
-                {
-                    await conn.OpenAsync();
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
-
-                    await cmd.ExecuteNonQueryAsync();
-                }
-
-                res.Result = AppConstant.RESULT_SUCCESS;
-                res.Message = "Xoa thanh cong";
-            }
-            catch (Exception ex)
-            {
+                res.Message = "Không thể xoá chính bạn!";
                 res.Result = AppConstant.RESULT_ERROR;
-                res.Message = ex.Message;
             }
+            else
+                try
+                {
+                    using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                    using (SqlCommand cmd = new SqlCommand("sp_DeleteUser", conn))
+                    {
+                        await conn.OpenAsync();
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
+
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+
+                    res.Result = AppConstant.RESULT_SUCCESS;
+                    res.Message = "Xoá user thành công";
+                }
+                catch (Exception ex)
+                {
+                    res.Result = AppConstant.RESULT_SYSTEM_ERROR;
+                    res.Message = ex.Message;
+                }
 
             return res;
         }
@@ -820,30 +825,32 @@ namespace api.Services
             return res;
         }
 
-        public async Task<BaseResponse> UpdateUserRoles(UpdateUserRolesDto inputDto, int roleID)
+        public async Task<BaseResponse> UpdateUserRoles(UpdateUserRolesDto inputDto, int userID, int roleID)
         {
             var res = new BaseResponse();
-            if (roleID != 1)
+            if (userID == inputDto.UserID)
             {
-                res.Message = "Không thể đăng xuất chính bạn!";
+                res.Message = "Không thể chỉnh sửa vai trò của chính bạn!";
                 res.Result = AppConstant.RESULT_ERROR;
             }
             else
                 try
                 {
-                    //using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
-                    //using (SqlCommand cmd = new SqlCommand("sp_LogoutUser", conn))
-                    //{
-                    //    await conn.OpenAsync();
+                    using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
+                    using (SqlCommand cmd = new SqlCommand("sp_UpdateUserRoles", conn))
+                    {
+                        await conn.OpenAsync();
 
-                    //    cmd.CommandType = CommandType.StoredProcedure;
-                    //    cmd.Parameters.AddWithValue("@Username", inputDto.username);
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@UserID", inputDto.UserID);
+                        cmd.Parameters.AddWithValue("@RolePermissionsJson", inputDto.DeniedRolePermissionIdsJson);
+                        cmd.Parameters.AddWithValue("@isAdmin", roleID == 1 ? true : false);
 
-                    //    await cmd.ExecuteNonQueryAsync();
+                        await cmd.ExecuteNonQueryAsync();
 
-                    //    res.Message = "Logout user thành công!";
-                    //    res.Result = AppConstant.RESULT_SUCCESS;
-                    //}
+                        res.Message = "Cập nhận vai trò thành công!";
+                        res.Result = AppConstant.RESULT_SUCCESS;
+                    }
                 }
                 catch (Exception ex)
                 {

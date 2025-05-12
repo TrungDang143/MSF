@@ -76,6 +76,7 @@ namespace api.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
+                new Claim("userID", userID.ToString()),
                 new Claim(ClaimTypes.Role, roleID.ToString()),
                 new Claim("permissions", string.Join(",", permissionNames)),
                 new Claim("isAdminLogin", isAdminLogin.ToString()),

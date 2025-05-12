@@ -646,7 +646,8 @@
             [showSourceControls]="false"
             [showTargetControls]="false"
             [responsive]="false"
-            (onFocus)="getPermissionByRoleIds()"
+            (onMoveToSource)="addRoleForUser()"
+            (onMoveToTarget)="addRoleForUser()"
           >
             <ng-template #sourceHeader>
               <div class="header-picklist">
@@ -664,7 +665,7 @@
           </p-picklist>
         </div>
         <div class="action-btn">
-          <p-button (click)="addRoleForUser()" raised="true"
+          <p-button (click)="handleAddRoleForUser()" raised="true" [disabled]="!hasPermission('assign_user_permissions')"
             >Thêm role</p-button
           >
           <p-button
@@ -729,11 +730,12 @@
             <p-button
               (click)="
                 this.displayDetail == true
-                  ? updateUserPermission()
+                  ? handleUpdateUserPermission()
                   : this.displayPopupCreateUser == true
                   ? addUserPermission()
                   : null
               "
+              [disabled]="!hasPermission('assign_user_permissions')"
               >Xác nhận</p-button
             >
           </div>

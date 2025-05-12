@@ -119,8 +119,9 @@ export class AccountService {
     return this.http.get(environment.baseUrl + "Account/LogoutUser", {params})
   }
 
-  UpdateUserRoles(userID: number, rolePermissions: any):Observable<any>{
-    const body = {userID, rolePermissions}
+  UpdateUserRoles(userID: number, rolePermissions: {roleID: number, unSelectPermissionIds: number[]}[]):Observable<any>{
+    let deniedRolePermissionIdsJson = JSON.stringify(rolePermissions)
+    const body = {userID, deniedRolePermissionIdsJson}
     return this.http.post(environment.baseUrl + "Account/UpdateUserRoles", body)
   }
 }

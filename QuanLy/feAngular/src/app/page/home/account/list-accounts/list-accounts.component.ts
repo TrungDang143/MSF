@@ -34,7 +34,7 @@ import { Table, TableModule } from 'primeng/table';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { TreeModule } from 'primeng/tree';
-import { ScrollerOptions, TreeNode } from 'primeng/api';
+import { MessageService, ScrollerOptions, TreeNode } from 'primeng/api';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PermissionService } from '../../../../services/permission.service';
 import { PasswordModule } from 'primeng/password';
@@ -57,6 +57,9 @@ import {
 } from 'primeng/autocomplete';
 import { PaginatorState } from 'primeng/paginator';
 import { PaginatorModule } from 'primeng/paginator';
+import { ToastModule } from 'primeng/toast';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-list-accounts',
@@ -91,9 +94,11 @@ import { PaginatorModule } from 'primeng/paginator';
     PanelModule,
     AutoCompleteModule,
     PaginatorModule,
+    ToastModule,
   ],
   templateUrl: './list-accounts.component.html',
   styleUrl: './list-accounts.component.css',
+  providers: [MessageService],
 })
 export class ListAccountsComponent implements OnInit {
   constructor(
@@ -101,7 +106,8 @@ export class ListAccountsComponent implements OnInit {
     private pop: PopupService,
     private authService: AuthService,
     private apiPermission: PermissionService,
-    private router: Router
+    private router: Router,
+    private showToast: MessageService
   ) {}
 
   userIdSeleted: number = 0;
@@ -154,12 +160,42 @@ export class ListAccountsComponent implements OnInit {
   hasPermission(permission: string): boolean {
     return this.authService.hasPermission(permission);
   }
+  menuExport: MenuItem[] | undefined;
 
   ngOnInit(): void {
     this.filterAccountForm.reset();
     this.rowsPerPageOptions = [5, 10, 20];
     this.loadUserLazy();
     this.getPasswordRule();
+
+    this.menuExport = [
+      {
+        label: 'Nhập/xuất file excel',
+        items: [
+          {
+            label: 'Nhập user từ file',
+            icon: 'pi pi-file-import',
+            command: () => {
+              this.importFile();
+            },
+          },
+          {
+            label: 'Xuất file (trang hiện tại)',
+            icon: 'pi pi-file-export',
+            command: () => {
+              this.exportPage();
+            },
+          },
+          {
+            label: 'Xuất file (toàn bộ)',
+            icon: 'pi pi-file-export',
+            command: () => {
+              this.exportAll();
+            },
+          },
+        ],
+      },
+    ];
   }
   isMe(username?: string): boolean {
     if (username) return this.authService.getUser() == username;
@@ -191,14 +227,13 @@ export class ListAccountsComponent implements OnInit {
   first: number = 0;
   rows: number = 10;
 
-  getRole_filter() {
+  getRole_filter(currentRoleIds: number[]) {
     this.apiAccount.GetRole().subscribe({
       next: (res) => {
         if (res.result == '1') {
           this.listRole = res.data;
 
-          let userRoleIds: [] =
-            this.detailAccountForm.get('userRoleIds')?.value;
+          let userRoleIds: number[] = currentRoleIds;
           this.listRoles = this.listRole.filter((role) => {
             return !userRoleIds.some((ur) => ur == role.roleID);
           });
@@ -254,7 +289,9 @@ export class ListAccountsComponent implements OnInit {
           if (res.result == '1') {
             this.listUser = res.data.users;
             this.totalRows = res.totalRows;
-            this.getRole_filter();
+            this.getRole_filter(
+              this.detailAccountForm.get('userRoleIds')?.value
+            );
           } else if (res.result == '0') {
             this.pop.showOkPopup({ message: res.message });
           } else {
@@ -294,6 +331,7 @@ export class ListAccountsComponent implements OnInit {
     username: new FormControl({ value: '', disabled: true }),
     email: new FormControl({ value: '', disabled: true }),
     fullName: new FormControl(null, [
+      Validators.required,
       Validators.minLength(5),
       Validators.maxLength(100),
     ]),
@@ -387,12 +425,12 @@ export class ListAccountsComponent implements OnInit {
         message: 'Vui lòng kiểm tra lại thông tin user!',
       });
       this.detailAccountForm.markAllAsTouched();
-      Object.keys(this.detailAccountForm.controls).forEach((key) => {
-        const controlErrors = this.detailAccountForm.get(key)?.errors;
-        if (controlErrors) {
-          console.log(`Lỗi ở '${key}':`, controlErrors);
-        }
-      });
+      // Object.keys(this.detailAccountForm.controls).forEach((key) => {
+      //   const controlErrors = this.detailAccountForm.get(key)?.errors;
+      //   if (controlErrors) {
+      //     console.log(`Lỗi ở '${key}':`, controlErrors);
+      //   }
+      // });
       return;
     } else {
       this.pop.showYesNoPopup({
@@ -402,7 +440,7 @@ export class ListAccountsComponent implements OnInit {
           this.acceptUpdate();
         },
         onReject: () => {
-          console.log('huy');
+          console.log('huy update user');
         },
       });
     }
@@ -422,7 +460,7 @@ export class ListAccountsComponent implements OnInit {
 
     if (!this.isMe()) {
       this.apiAccount
-        .UpdateUser(this.detailAccountForm.getRawValue())
+        .UpdateUserInfo(this.detailAccountForm.getRawValue())
         .subscribe({
           next: (res) => {
             if (res.result == '1') {
@@ -501,10 +539,10 @@ export class ListAccountsComponent implements OnInit {
 
   ///delete
   deleteUser(userID: number) {
-    if (this.isMe()){
+    if (this.isMe()) {
       this.pop.showOkPopup({
-        message: "Không thể xoá chính mình!"
-      })
+        message: 'Không thể xoá chính mình!',
+      });
       return;
     }
     this.pop.showYesNoPopup({
@@ -621,39 +659,52 @@ export class ListAccountsComponent implements OnInit {
     this.pop.showYesNoPopup({
       message: 'Bạn có chắc chắn muốn chỉnh sửa role của user?',
       onAccept: () => {
-        this.addRoleForUser(true)
+        this.addRoleForUser(
+          this.detailAccountForm.get('userRoleIds')?.value,
+          true
+        );
       },
     });
   }
-  addRoleForUser(isNoChange?: boolean) {
+
+  //isnochange la them bot quyen
+  addRoleForUser(currentRoleIds: number[], isNoChange?: boolean) {
     let roleIds: number[] = [];
     this.selectedRoles.forEach((role) => roleIds.push(role.roleID));
 
-    let oldRoleIds: number[] = this.detailAccountForm.get('userRoleIds')?.value;
-    let newRoleIds: number[] = roleIds.filter(
-      (roleID) => !oldRoleIds.includes(roleID)
-    );
-    this.getPermissionByRoleIds(roleIds, newRoleIds);
+    if (currentRoleIds && currentRoleIds.length > 0) {
+      let oldRoleIds: number[] = currentRoleIds;
+      let newRoleIds: number[] = roleIds.filter(
+        (roleID) => !oldRoleIds.includes(roleID)
+      );
+
+      this.getPermissionByRoleIds(roleIds, false, newRoleIds);
+    } else {
+      this.getPermissionByRoleIds(roleIds, true, roleIds);
+    }
     this.onCatelorySelectionChange();
 
-    if (this.isMe()){
+    if (this.isMe()) {
       this.pop.showOkPopup({
-        message: "Không thể chỉnh sửa vai trò của chính mình!"
-      })
+        message: 'Không thể chỉnh sửa vai trò của chính mình!',
+      });
       return;
     }
-    if(isNoChange)
-      this.updateUserPermission();
+    if (isNoChange) this.updateUserPermission();
   }
 
-  refreshUserRole() {
-    this.getRole_filter();
-    this.getPermissionByRoleIds(
-      this.detailAccountForm.get('userRoleIds')?.value
-    );
+  refreshUserRole(currentRoleIds: number[], isCreateUser: boolean) {
+    this.resetValuePermissionForm();
+    this.getRole_filter(currentRoleIds);
+
+    this.getPermissionByRoleIds(currentRoleIds, isCreateUser);
   }
 
-  getPermissionByRoleIds(roleIds: number[], newRoleIds?: number[]) {
+  getPermissionByRoleIds(
+    roleIds: number[],
+    isCreateUser: boolean,
+    newRoleIds?: number[]
+  ) {
     this.apiPermission.GetPermissionByRoleIds(roleIds).subscribe({
       next: (res) => {
         if (res.result == '1') {
@@ -701,7 +752,7 @@ export class ListAccountsComponent implements OnInit {
             );
           });
         }
-        if(newRoleIds){
+        if (newRoleIds) {
           newRoleIds.forEach((roleID: number) => {
             this.toggleAllPermissionNodes(
               this.rolePermissionsByRoleID[roleID],
@@ -709,12 +760,15 @@ export class ListAccountsComponent implements OnInit {
               true
             );
           });
+          this.onCatelorySelectionChange();
         }
 
-        this.getUserPermission(
-          this.detailAccountForm.get('userID')?.value,
-          this.detailAccountForm.get('userRoleIds')?.value
-        );
+        if (!isCreateUser) {
+          this.getUserPermission(
+            this.detailAccountForm.get('userID')?.value,
+            this.detailAccountForm.get('userRoleIds')?.value
+          );
+        }
       },
       error: (err: any) => {
         this.pop.showSysErr();
@@ -805,14 +859,26 @@ export class ListAccountsComponent implements OnInit {
 
   showPermission() {
     this.displayPopupPermission = true;
-    this.refreshUserRole();
+    if (this.displayPopupCreateUser == true) this.refreshUserRole([], true);
+    else
+      this.refreshUserRole(
+        this.detailAccountForm.get('userRoleIds')?.value,
+        false
+      );
     this.onCatelorySelectionChange();
   }
-  closePermision(){
+  closePermision() {
     this.displayPopupPermission = false;
-    this.viewDetail(this.userIdSeleted)
+    if (this.displayDetail == true) this.viewDetail(this.userIdSeleted);
   }
-
+  resetValuePermissionForm() {
+    this.rolePermissionsByRoleID = {};
+    this.selectedRolePermissionsByRoleID = {};
+    this.selectedRoleID = 0;
+    this.userRoles = [];
+    this.listRoles = [];
+    this.selectedRoles = [];
+  }
   getUserPermission(userID: number, roleIds: number[]) {
     this.apiPermission
       .GetPermissionForUserByRoleIds(userID, roleIds)
@@ -883,56 +949,63 @@ export class ListAccountsComponent implements OnInit {
     this.showPermission();
   }
 
-  handleUpdateUserPermission(){
-    if (this.isMe()){
+  handleUpdateUserPermission() {
+    if (this.isMe()) {
       this.pop.showOkPopup({
-        message: "Không thể chỉnh sửa vai trò của chính mình!"
-      })
+        message: 'Không thể chỉnh sửa vai trò của chính mình!',
+      });
       return;
     }
 
     this.pop.showYesNoPopup({
-      message: "Chắc chắn muốn cập nhật vai trò của user này?",
-      onAccept: () =>{
+      message: 'Chắc chắn muốn cập nhật vai trò của user này?',
+      onAccept: () => {
         this.updateUserPermission();
-      }
-    })
+      },
+    });
   }
   updateUserPermission() {
-    let payload: {roleID: number, unSelectPermissionIds: number[]}[] = []
+    let payload: { roleID: number; unSelectPermissionIds: number[] }[] = [];
 
     Object.keys(this.selectedRolePermissionsByRoleID).forEach((roleID) => {
-      let _roleID = Number(roleID)
-      const selectedRoleNode: number[] = this.selectedRolePermissionsByRoleID[_roleID]
-      .map((role_permission) => role_permission.data.permissionID);
+      let _roleID = Number(roleID);
+      const selectedRoleNode: number[] = this.selectedRolePermissionsByRoleID[
+        _roleID
+      ].map((role_permission) => role_permission.data.permissionID);
 
-      const roleNode = this.rolePermissionsByRoleID[_roleID]?.[0]?.children!
-      .map((role_permission) => role_permission.data.permissionID);
+      const roleNode = this.rolePermissionsByRoleID[
+        _roleID
+      ]?.[0]?.children!.map(
+        (role_permission) => role_permission.data.permissionID
+      );
 
-      let unSelectedRoleNode: number[] = []
-      roleNode.forEach(perrmissionID => {
-        if(!selectedRoleNode.includes(perrmissionID)){
-          unSelectedRoleNode.push(perrmissionID)
+      let unSelectedRoleNode: number[] = [];
+      roleNode.forEach((perrmissionID) => {
+        if (!selectedRoleNode.includes(perrmissionID)) {
+          unSelectedRoleNode.push(perrmissionID);
         }
-      })
+      });
 
-      payload.push({roleID: _roleID, unSelectPermissionIds: unSelectedRoleNode})
+      payload.push({
+        roleID: _roleID,
+        unSelectPermissionIds: unSelectedRoleNode,
+      });
     });
     this.apiAccount.UpdateUserRoles(this.userIdSeleted, payload).subscribe({
-      next: res =>{
-        if(res.result == '1'){
-          this.pop.showOkPopup({message: res.message})
+      next: (res) => {
+        if (res.result == '1') {
+          this.pop.showOkPopup({ message: res.message });
           this.closePermision();
-        }else{
+        } else {
           this.pop.showSysErr();
-          console.log(res.message)
+          console.log(res.message);
         }
       },
-      error: err=>{
+      error: (err) => {
         this.pop.showSysErr();
-          console.log(err)
-      }
-    })
+        console.log(err);
+      },
+    });
   }
   ///end show userrole
 
@@ -950,17 +1023,26 @@ export class ListAccountsComponent implements OnInit {
       Validators.required,
       this.passwordRulesValidator(),
     ]),
-    fullName: new FormControl(null, [Validators.maxLength(100)]),
-    phoneNumber: new FormControl(null, [Validators.maxLength(15)]),
+    fullName: new FormControl(null, [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(100),
+    ]),
+    phoneNumber: new FormControl(null, [
+      Validators.minLength(10),
+      Validators.maxLength(15),
+    ]),
     avatar: new FormControl(null),
     dateOfBirth: new FormControl(null),
     gender: new FormControl(null),
-    address: new FormControl(null, [Validators.maxLength(100)]),
+    address: new FormControl(null, [
+      Validators.minLength(10),
+      Validators.maxLength(100),
+    ]),
     status: new FormControl(null, [Validators.required]),
     googleID: new FormControl(null),
     facebookID: new FormControl(null),
-    roleID: new FormControl(null, [Validators.required]),
-    permissionIds: new FormControl(''),
+    rolePermissions: new FormControl(''),
   });
 
   showDialogCreateUser() {
@@ -975,13 +1057,11 @@ export class ListAccountsComponent implements OnInit {
   createUserPopup() {
     this.closeDialogDetail();
 
-    this.apiAccount.GetRoleGenderStatus().subscribe({
+    this.apiAccount.GetGenderStatus().subscribe({
       next: (res) => {
         if (res.result == '1') {
           this.createAccountForm.reset();
-          this.listRole_Create = res.data.listRole.filter(
-            (role: any) => role.roleID != 1
-          );
+
           this.listGender_Create = res.data.listGender;
           this.listStatus_Create = res.data.listStatus;
 
@@ -999,101 +1079,76 @@ export class ListAccountsComponent implements OnInit {
     });
   }
 
-  changeRole() {
-    // if (this.displayDetail) {
-    //   if (this.detailAccountForm.get('roleID')?.value == 1) {
-    //     this.pop.showOkPopup({ message: 'Không thể set role Admin cho user!' });
-    //     this.detailAccountForm.get('roleID')?.reset();
-    //   }
-    // }
-    // this.createAccountForm.get('permissionIds')?.setValue([]);
-    // this.detailAccountForm.get('permissionIds')?.setValue([]);
-    // this.isChangedRole = true;
+  showNewUserPermission() {
+    this.displayPopupPermission = true;
+    this.refreshUserRole([], true);
+    this.onCatelorySelectionChange();
   }
 
-  createUserPermission() {
-    // this.apiPermission.getAllPermission().subscribe({
-    //   next: (res) => {
-    //     if (res.result == '1') {
-    //       this.showPermission();
-    //       this.mockupPermission(res.data);
-    //       if (this.createAccountForm.get('roleID')?.value) {
-    //         this.apiPermission
-    //           .getPermissionByRoleID(
-    //             this.createAccountForm.get('roleID')?.value
-    //           )
-    //           .subscribe({
-    //             next: (res) => {
-    //               if (res.result == '1') {
-    //                 let rolePermissionIds: [] = res.data;
-    //                 let lastSetPermissionIds = this.createAccountForm.get(
-    //                   'permissionIds'
-    //                 )?.value as number[];
-    //                 console.log(this.createAccountForm.get('permissionIds'));
-    //                 let permissionIds: number[];
-    //                 if (lastSetPermissionIds) {
-    //                   permissionIds = [
-    //                     ...new Set([
-    //                       ...rolePermissionIds,
-    //                       ...lastSetPermissionIds,
-    //                     ]),
-    //                   ];
-    //                 } else {
-    //                   permissionIds = [...rolePermissionIds];
-    //                 }
-    //                 this.mockupUserPermission(permissionIds);
-    //               } else {
-    //                 this.pop.showOkPopup({ message: res.message });
-    //               }
-    //             },
-    //             error: (err) => {
-    //               this.pop.showOkPopup({ message: 'Lỗi kết nối server!' });
-    //               console.log(err);
-    //             },
-    //           });
-    //       } else {
-    //         this.displayPopupPermission = false;
-    //         this.pop.showOkPopup({ message: 'Vui lòng chọn Role trước!' });
-    //       }
-    //       this.getPermission(this.cateloryPermission[0]);
-    //     } else {
-    //       this.pop.showOkPopup({ message: res.message });
-    //     }
-    //   },
-    //   error: (err) => {
-    //     this.pop.showOkPopup({
-    //       header: 'Lỗi',
-    //       message: 'Không thể kết nối với server!',
-    //     });
-    //     this.displayPopupPermission = false;
-    //     console.log(err);
-    //   },
-    // });
-  }
-
-  addUserPermission() {
-    // this.permissionSelected = [
-    //   ...this.permission_User_Selected,
-    //   ...this.permission_Role_Selected,
-    //   ...this.permission_Permission_Selected,
-    //   ...this.permission_Content_Selected,
-    //   ...this.permission_System_Selected,
-    // ];
-    // const ids: number[] = [];
-    // this.permissionSelected.forEach((node) => {
-    //   if (node.leaf && node.data?.permissionID) {
-    //     ids.push(node.data.permissionID);
-    //   }
-    // });
-    // this.createAccountForm.patchValue({ permissionIds: ids });
-    // this.displayPopupPermission = false;
-  }
-
-  createUser() {
-    if (!this.createAccountForm.valid) {
-      this.pop.showOkPopup({ message: 'Kiểm tra lại thông tin user!' });
-      return;
+  handleAddNewUserRole() {
+    if (this.hasPermission('assign_user_permissions')) {
+      this.pop.showYesNoPopup({
+        message: 'Chắc chắn muốn thêm quyền cho user?',
+        onAccept: () => {
+          this.addNewUserRolePermission();
+          this.closePermision();
+        },
+      });
+    } else {
+      this.pop.showNoPermission();
     }
+  }
+
+  private addNewUserRolePermission() {
+    let payload: { roleID: number; unSelectPermissionIds: number[] }[] = [];
+
+    Object.keys(this.selectedRolePermissionsByRoleID).forEach((roleID) => {
+      let _roleID = Number(roleID);
+      const selectedRoleNode: number[] = this.selectedRolePermissionsByRoleID[
+        _roleID
+      ].map((role_permission) => role_permission.data.permissionID);
+
+      const roleNode = this.rolePermissionsByRoleID[
+        _roleID
+      ]?.[0]?.children!.map(
+        (role_permission) => role_permission.data.permissionID
+      );
+
+      let unSelectedRoleNode: number[] = [];
+      roleNode.forEach((perrmissionID) => {
+        if (!selectedRoleNode.includes(perrmissionID)) {
+          unSelectedRoleNode.push(perrmissionID);
+        }
+      });
+
+      payload.push({
+        roleID: _roleID,
+        unSelectPermissionIds: unSelectedRoleNode,
+      });
+    });
+
+    let json: string = JSON.stringify(payload);
+    this.createAccountForm.get('rolePermissions')?.setValue(json);
+  }
+
+  handleCreateUser() {
+    if (this.hasPermission('create_users')) {
+      if (!this.createAccountForm.valid) {
+        this.pop.showOkPopup({ message: 'Kiểm tra lại thông tin user!' });
+        this.createAccountForm.markAllAsTouched();
+        return;
+      }
+      this.pop.showYesNoPopup({
+        message: 'Chắc chắn muốn tạo user?',
+        onAccept: () => {
+          this.createUser();
+        },
+      });
+    } else {
+      this.pop.showNoPermission();
+    }
+  }
+  createUser() {
     if (this.disableBtnCreateUser) return;
     this.disableBtnCreateUser = true;
 
@@ -1381,4 +1436,88 @@ export class ListAccountsComponent implements OnInit {
     });
   }
   ///end menu account
+
+  ///start nhap xuat excel
+  importFile() {}
+
+  private exportUserExcel(userJson: Account[]): void {
+    const fileName = 'user_list';
+
+    const exportData = userJson.map((acc) => ({
+      'UserID': acc.userID,
+      'Tên người dùng': acc.username,
+      'Email': acc.email,
+      'Họ tên': acc.fullName,
+      'Vai trò': acc.roles,
+      'Trạng thái': acc.statusName,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const sheetName = 'list-user';
+    const workbook = { Sheets: { [sheetName]: worksheet }, SheetNames: [sheetName] };
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+
+      const columnWidths = [
+      { width: 15 },  
+      { width: 50 },   
+      { width: 55 },  
+      { width: 55 },  
+      { width: 55 },  
+      { width: 15 },  
+    ];
+
+    worksheet['!cols'] = columnWidths;
+
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
+    });
+
+    FileSaver.saveAs(blob, `${fileName}.xlsx`);
+
+    this.showToast.add({
+      severity: 'Thông báo',
+      summary: 'Info',
+      detail: 'Xuất file excel thành công!',
+      life: 2000,
+    });
+  }
+
+  exportPage() {
+    this.exportUserExcel(this.listUser);
+    console.log(this.listUser)
+  }
+
+  exportAll() {
+    let listUser: Account[] = [];
+    let filter: {
+      username?: string;
+      fullname?: string;
+      roleID?: number;
+      permissionID?: number;
+      pageSize?: number;
+      pageNumber?: number;
+    } = {
+      pageNumber: 1,
+      pageSize: this.totalRows,
+    };
+    this.apiAccount.GetAccounts(filter).subscribe({
+      next: (res) => {
+        if (res.result == '1') {
+          listUser = res.data;
+          this.exportUserExcel(listUser);
+        } else {
+          this.pop.showOkPopup({ message: 'Lỗi xuất file!' });
+          console.log(res.message);
+        }
+      },
+      error: (err) => {
+        this.pop.showSysErr();
+        console.log(err);
+      },
+    });
+  }
+  ///end nhap xuat excel
 }

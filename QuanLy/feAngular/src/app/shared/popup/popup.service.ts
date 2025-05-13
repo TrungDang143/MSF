@@ -46,4 +46,8 @@ export class PopupService {
     this.infoDialogSubject.next({header: "Lỗi", message: "Không thể kết nối tới Server!", icon: "pi pi-times-circle"});
   }
 
+  showNoPermission(){
+    this.infoDialogSubject.next({header: "Lỗi", message: "Bạn không có quyền thực hiện chức năng này!", icon: "pi pi-times-circle"});
+  }
+
 }

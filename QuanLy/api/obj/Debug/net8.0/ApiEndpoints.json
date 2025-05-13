@@ -176,32 +176,6 @@
   },
   {
     "ContainingType": "api.Controllers.AccountController",
-    "Method": "GetAllUserPermission",
-    "RelativePath": "api/Account/GetAllUserPermission",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "UserID",
-        "Type": "System.Int32",
-        "IsRequired": false
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "api.Interface.BaseResponse",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "api.Controllers.AccountController",
     "Method": "GetDetailUserInfo",
     "RelativePath": "api/Account/GetDetailUserInfo",
     "HttpMethod": "GET",
@@ -228,18 +202,12 @@
   },
   {
     "ContainingType": "api.Controllers.AccountController",
-    "Method": "GetRole",
-    "RelativePath": "api/Account/GetRole",
+    "Method": "GetGenderStatus",
+    "RelativePath": "api/Account/GetGenderStatus",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [
-      {
-        "Name": "roleName",
-        "Type": "System.String",
-        "IsRequired": false
-      }
-    ],
+    "Parameters": [],
     "ReturnTypes": [
       {
         "Type": "api.Interface.BaseResponse",
@@ -254,12 +222,18 @@
   },
   {
     "ContainingType": "api.Controllers.AccountController",
-    "Method": "GetRoleGenderStatus",
-    "RelativePath": "api/Account/GetRoleGenderStatus",
+    "Method": "GetRole",
+    "RelativePath": "api/Account/GetRole",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "roleName",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": [
       {
         "Type": "api.Interface.BaseResponse",
@@ -331,8 +305,8 @@
   },
   {
     "ContainingType": "api.Controllers.AccountController",
-    "Method": "UpdateUser",
-    "RelativePath": "api/Account/UpdateUser",
+    "Method": "UpdateUserInfo",
+    "RelativePath": "api/Account/UpdateUserInfo",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -367,32 +341,6 @@
         "Name": "inputDto",
         "Type": "api.DTO.Account.UpdateUserRolesDto",
         "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "api.Interface.BaseResponse",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "api.Controllers.AccountController",
-    "Method": "GetUserInfo",
-    "RelativePath": "api/Account/userInfo",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "Username",
-        "Type": "System.String",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [

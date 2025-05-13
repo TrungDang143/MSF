@@ -28,6 +28,7 @@ import { Page404Service } from '../../../../services/page-404.service';
 import { PopupService } from '../../../../shared/popup/popup.service';
 import { AccountService } from '../../../../services/account.service';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { AuthService } from '../../../../shared/auth.service';
 
 @Component({
   selector: 'app-my-account',
@@ -55,7 +56,8 @@ export class MyAccountComponent implements OnInit {
     private http: HttpClient,
     private page404: Page404Service,
     private pop: PopupService,
-    private apiAccount: AccountService
+    private apiAccount: AccountService,
+    private apiAuth: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -63,9 +65,8 @@ export class MyAccountComponent implements OnInit {
   }
 
   getUserInfo() {
-    let username =
-      localStorage.getItem('user') ?? sessionStorage.getItem('user');
-    this.apiAccount.GetDetailUserInfoByUsername(username!).subscribe({
+    
+    this.apiAccount.GetDetailUserInfo(this.apiAuth.getUserID()).subscribe({
       next: (res) => {
         const data = res.data;
         this.genders = data.listGender;
@@ -94,16 +95,25 @@ export class MyAccountComponent implements OnInit {
     userID: new FormControl({ value: 0, disabled: true }),
     username: new FormControl({ value: '', disabled: true }),
     email: new FormControl({ value: '', disabled: true }),
-    fullName: new FormControl(null, [Validators.maxLength(100)]),
-    phoneNumber: new FormControl(null, [Validators.maxLength(15)]),
+    fullName: new FormControl(null, [Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(100),
+    ]),
+    phoneNumber: new FormControl(null, [
+      Validators.minLength(10),
+      Validators.maxLength(15),
+    ]),
     avatar: new FormControl(null),
     dateOfBirth: new FormControl(null),
     gender: new FormControl(null),
-    address: new FormControl(null, [Validators.maxLength(100)]),
+    address: new FormControl(null, [
+      Validators.minLength(10),
+      Validators.maxLength(100),
+    ]),
     status: new FormControl(null),
     googleID: new FormControl(null),
     facebookID: new FormControl(null),
-    roleID: new FormControl(null),
+    roles: new FormControl(null),
   });
 
   parseDateFromString(dateStr: string): Date {
@@ -117,11 +127,50 @@ export class MyAccountComponent implements OnInit {
     const yyyy = date.getFullYear();
     return `${yyyy}-${mm}-${dd}`;
   }
+  linkGG() {
+    if (
+      this.detailAccountForm.get('isGoogle')?.value &&
+      this.detailAccountForm.get('isGoogle')?.value == true
+    ) {
+      this.pop.showYesNoPopup({
+        message: 'Bạn chắc chắn muốn bỏ liên kết Google?',
+        onAccept: () => {
+          //todo: unlink gg
+        },
+      });
+    } else {
+      this.pop.showYesNoPopup({
+        message: 'Bạn chắc chắn muốn liên kết với Google?',
+        onAccept: () => {},
+      });
+    }
+  }
+  linkFB() {
+    if (
+      this.detailAccountForm.get('isFacebook')?.value &&
+      this.detailAccountForm.get('isFacebook')?.value == true
+    ) {
+      this.pop.showYesNoPopup({
+        message: 'Bạn chắc chắn muốn bỏ liên kết Facebook?',
+        onAccept: () => {
+          //todo: unlink fb
+        },
+      });
+    } else {
+      this.pop.showYesNoPopup({
+        message: 'Bạn chắc chắn muốn liên kết với Facebook?',
+        onAccept: () => {},
+      });
+    }
+  }
+
   save() {
     if (!this.detailAccountForm.valid) {
       this.pop.showOkPopup({
         message: 'Vui lòng kiểm tra lại thông tin user!',
       });
+      this.detailAccountForm.markAllAsTouched();
+      console.log(this.detailAccountForm.value)
       return;
     } else {
       this.pop.showYesNoPopup({
@@ -146,7 +195,7 @@ export class MyAccountComponent implements OnInit {
       let convertDate = this.formatDateToString(birht.value);
       this.detailAccountForm.patchValue({ dateOfBirth: convertDate });
     }
-    this.apiAccount.UpdateUser(this.detailAccountForm.getRawValue()).subscribe({
+    this.apiAccount.UpdateUserInfo(this.detailAccountForm.getRawValue()).subscribe({
       next: (res) => {
         if (res.result == '1') {
           this.pop.showOkPopup({ message: 'Cập nhật thành công!' });

@@ -1,95 +1,103 @@
 <div class="card">
-    <div class="filter" style="padding: 0; margin: 5px 0">
-      <p-panel
-        [toggleable]="true"
-        [expandIcon]="'pi pi-angle-up'"
-        [collapseIcon]="'pi pi-angle-down'"
-        [(collapsed)] = "collapsedChange"
-      >
+  <div class="filter" style="padding: 0; margin: 5px 0">
+    <p-panel
+      [toggleable]="true"
+      [expandIcon]="'pi pi-angle-up'"
+      [collapseIcon]="'pi pi-angle-down'"
+      [(collapsed)]="collapsedChange"
+    >
       <ng-template #header>
-        <div (click)="toggleFilterPanel()" style="width: 100%;">
-          <h3 style="margin: 5px;">Lọc nâng cao</h3>
+        <div (click)="toggleFilterPanel()" style="width: 100%">
+          <h3 style="margin: 5px">Lọc nâng cao</h3>
         </div>
       </ng-template>
       <ng-template #icons>
-        <div (click)="toggleFilterPanel()" style="display: flex; width: 60px; align-items: center;">
-          {{collapsedChange ? 'Hiện lọc' : 'Ẩn lọc'}} 
+        <div
+          (click)="toggleFilterPanel()"
+          style="display: flex; width: 60px; align-items: center"
+        >
+          {{ collapsedChange ? "Hiện lọc" : "Ẩn lọc" }}
         </div>
       </ng-template>
-        <form action="" method="get" [formGroup]="filterAccountForm">
-          <div class="filter-form">
-            <div class="filter-form-1">
-              <p-floatlabel variant="on">
-                <input
-                  pInputText
-                  id="search_username"
-                  formControlName="username"
-                  autocomplete="off"
-                />
-                <label for="search_username">Username hoặc email</label>
-              </p-floatlabel>
-            </div>
-            <div class="filter-form-2">
-              <p-floatlabel variant="on">
-                <input
-                  pInputText
-                  id="search_fullname"
-                  formControlName="fullname"
-                  autocomplete="off"
-                />
-                <label for="search_fullname">Họ tên</label>
-              </p-floatlabel>
-            </div>
-            <div class="filter-form-3">
-              <p-floatlabel variant="on">
-                <p-select 
+      <form action="" method="get" [formGroup]="filterAccountForm">
+        <div class="filter-form">
+          <div class="filter-form-1">
+            <p-floatlabel variant="on">
+              <input
+                pInputText
+                id="search_username"
+                formControlName="username"
+                autocomplete="off"
+              />
+              <label for="search_username">Username hoặc email</label>
+            </p-floatlabel>
+          </div>
+          <div class="filter-form-2">
+            <p-floatlabel variant="on">
+              <input
+                pInputText
+                id="search_fullname"
+                formControlName="fullname"
+                autocomplete="off"
+              />
+              <label for="search_fullname">Họ tên</label>
+            </p-floatlabel>
+          </div>
+          <div class="filter-form-3">
+            <p-floatlabel variant="on">
+              <p-select
                 id="search_role"
                 appendTo="body"
-                formControlName="roleID" 
-                [options]="listRole" 
-                optionLabel="roleName" 
+                formControlName="roleID"
+                [options]="listRole"
+                optionLabel="roleName"
                 optionValue="roleID"
                 [showClear]="true"
                 (onChange)="getPermission_filter()"
-                />
-                <label for="search_role" style="margin-left: 10px;">Chọn vai trò</label>
-              </p-floatlabel>
-            </div>
-            <div class="filter-form-4">
-              <p-floatlabel variant="on">
-                <p-select 
+              />
+              <label for="search_role" style="margin-left: 10px"
+                >Chọn vai trò</label
+              >
+            </p-floatlabel>
+          </div>
+          <div class="filter-form-4">
+            <p-floatlabel variant="on">
+              <p-select
                 id="search_permission"
                 appendTo="body"
-                formControlName="permissionID" 
-                [options]="listPermission" 
-                optionLabel="description" 
+                formControlName="permissionID"
+                [options]="listPermission"
+                optionLabel="description"
                 optionValue="permissionID"
                 [emptyMessage]="'Không có kết quả'"
-                [showClear]="true"/>
-                <label for="search_permission" style="margin-left: 10px;">Chọn quyền</label>
-              </p-floatlabel>
-            </div>
-            <div class="filter-form-action">
-              <button
-                pButton
-                type="button"
-                icon="pi pi-filter"
-                label="Lọc"
-                (click)="filter()"
-              ></button>
-              <button
-                pButton
-                type="button"
-                icon="pi pi-undo"
-                label="Làm mới"
-                severity="secondary"
-                (click)="refresh()"
-              ></button>
-            </div>
+                [showClear]="true"
+              />
+              <label for="search_permission" style="margin-left: 10px"
+                >Chọn quyền</label
+              >
+            </p-floatlabel>
           </div>
-        </form>
-      </p-panel>
+          <div class="filter-form-action">
+            <p-button
+              variant="outlined"
+              severity="success"
+              icon="pi pi-filter"
+              label="Lọc"
+              (click)="filter()"
+            ></p-button>
+            <p-button
+              variant="outlined"
+              severity="secondary"
+              icon="pi pi-undo"
+              label="Làm mới"
+              (click)="refresh()"
+            ></p-button>
+          </div>
+        </div>
+      </form>
+    </p-panel>
 
+    <div class="action-btn-area">
       <div class="action">
         <p-button
           severity="success"
@@ -98,1023 +106,1271 @@
           (click)="createUserPopup()"
         ></p-button>
         <p-button
+          variant="outlined"
           severity="secondary"
           label="Làm mới"
           icon="pi pi-undo"
           (click)="refresh()"
         ></p-button>
       </div>
+      <div class="action-export-excel">
+        <p-menu #menu [model]="menuExport" [popup]="true" />
+        <p-button
+          variant="outlined"
+          severity="success"
+          (click)="menu.toggle($event)"
+          icon="pi pi-file-excel"
+          label="Nhập/xuất file excel"
+        />
+      </div>
     </div>
 
-  <p-table
-    [value]="listUser"
-    [lazy]="true"
-    [paginator]="false"
-    [loading]="loading"
-    (onLazyLoad)="loadUserLazy()"
-    [resizableColumns]="true"
-    styleClass="p-datatable-gridlines custom-list-user-table"
-    [tableStyle]="{ 'min-width': '50rem' }"
-    [scrollable]="true"
-    scrollHeight="420px"
-  >
-    <ng-template #header>
-      <tr>
-        <th pFrozenColumn style="width: 80px">Action</th>
-        <th pResizableColumn>Username</th>
-        <th pResizableColumn>Họ tên</th>
-        <th pResizableColumn>Email</th>
-        <th pResizableColumn>Vai trò</th>
-        <th style="width: 100px">Trạng thái</th>
-      </tr>
-    </ng-template>
-    <ng-template #body let-user>
-      <tr>
-        <td pFrozenColumn style="text-align: center">
-          <p-menu
-            #menu
-            [model]="menuAccountActions"
-            [popup]="true"
-            appendTo="body"
-          />
-          <p-button
-            (click)="openMenuAction($event, menu, user.userID, user.username)"
-            icon="pi pi-list"
-            variant="outlined"
-            label="Action"
-          />
-        </td>
-
-        <td >
-          <div style="display: flex; justify-items: start; align-items: center;">
-            <img [alt]="'avatar'" src="{{ user.avatar }}" height="40px"width="40px" style="border-radius: 50%;"/>
-            <span style="margin-left: 5px;">{{ user.username }}</span>
-          </div>
-        </td>
-        <td>{{ user.fullName }}</td>
-        <td>{{ user.email }}</td>
-        <td>{{ user.roles }}</td>
-        <td>
-          <div style="width: fit-content; justify-self: center">
-            <p-message
-            severity="{{
-              user.statusName === 'Kích hoạt' ? 'success' : 'error'
-            }}"
-          >
-            <span>{{ user.statusName }}</span>
-          </p-message>
-          </div>
-          
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template #emptymessage>
-      <tr>
-        <td colspan="11" style="color: red; text-align: center">
-          Không có kết quả
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template #summary>
-      <p-paginator
-        (onPageChange)="onPageChange($event)"
-        [first]="first"
-        [totalRecords]="totalRows"
-        [rows]="rows"
-        [rowsPerPageOptions]="rowsPerPageOptions"
-        [appendTo]="body"
-        currentPageReportTemplate="Dòng {first} - {last} trên tổng số {totalRecords} records"
-        [showCurrentPageReport]="true"
-      />
-    </ng-template>
-  </p-table>
-</div>
-
-<p-dialog
-  header="Chi tiết tài khoản"
-  [(visible)]="displayDetail"
-  [modal]="true"
-  [style]="{ width: '85%', 'max-width': '1250px' }"
-  (onHide)="closeDialogDetail()"
->
-  <ng-template #content>
-    <form action method="post" [formGroup]="detailAccountForm">
-      <div *ngIf="!detailAccountForm">
-        <p style="color: red">Vui lòng thử lại</p>
-      </div>
-      <div *ngIf="detailAccountForm">
-        <div class="popup-detail">    
-          <div class="popup-cell fullname">
-            <p-floatlabel variant="on">
-              <input
-                pInputText
-                id="input_fullname"
-                formControlName="fullName"
-                autocomplete="off"
-              />
-              <label for="input_fullname">Fullname</label>
-            </p-floatlabel>
-            <div class="errMsg-area">
-              <div
-                class="errMsg"
-                *ngIf="
-                  detailAccountForm['controls']['fullName'].touched &&
-                  detailAccountForm['controls']['fullName'].errors
-                "
-              >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['fullName'].errors['required']
-                  "
-                  >Nhập tên đầy đủ của bạn.</small
-                >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['fullName'].errors[
-                      'minlength'
-                    ]
-                  "
-                  >Tên đăng nhập tối thiểu 5 ký tự.</small
-                >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['fullName'].errors[
-                      'maxlength'
-                    ]
-                  "
-                  >Tên đăng nhập tối đa 100 ký tự</small
-                >
-              </div>
-            </div>
-          </div>
-          <div class="popup-cell username">
-            <p-floatlabel variant="on">
-              <input
-                pInputText
-                id="input_username"
-                formControlName="username"
-                autocomplete="off"
-              />
-              <label for="input_username">Username</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-cell email">
-            <p-floatlabel variant="on">
-              <input
-                pInputText
-                id="input_email"
-                formControlName="email"
-                autocomplete="off"
-              />
-              <label for="input_email">Email</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-cell date">
-            <p-floatlabel variant="on">
-              <p-datepicker
-                formControlName="dateOfBirth"
-                inputId="input_date"
-                showIcon
-                iconDisplay="input"
-                dateFormat="dd/mm/yy"
-              />
-              <label for="input_date">Date of birth</label>
-            </p-floatlabel>
-            <div class="errMsg-area">
-              <div
-                class="errMsg"
-                *ngIf="
-                  detailAccountForm['controls']['dateOfBirth'].touched &&
-                  detailAccountForm['controls']['dateOfBirth'].errors
-                "
-              >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['dateOfBirth'].errors[
-                      'required'
-                    ]
-                  "
-                  >Chọn ngày sinh của bạn.</small
-                >
-              </div>
-            </div>
-          </div>
-          <div class="popup-cell gender">
-            <p-floatlabel variant="on">
-              <p-select
-                inputId="input_gender"
-                [options]="genders"
-                styleClass="w-full"
-                formControlName="gender"
-                optionLabel="genderName"
-                optionValue="genderID"
-              />
-              <label for="input_gender">Gender</label>
-            </p-floatlabel>
-            <div class="errMsg-area">
-              <div
-                class="errMsg"
-                *ngIf="
-                  detailAccountForm['controls']['gender'].touched &&
-                  detailAccountForm['controls']['gender'].errors
-                "
-              >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['gender'].errors['required']
-                  "
-                  >Chọn giới tính của bạn.</small
-                >
-              </div>
-            </div>
-          </div>
-          <div class="popup-cell address">
-            <p-floatlabel variant="on">
-              <input
-                pInputText
-                id="input_address"
-                formControlName="address"
-                autocomplete="off"
-              />
-              <label for="input_address">Address</label>
-            </p-floatlabel>
-            <div class="errMsg-area">
-              <div
-                class="errMsg"
-                *ngIf="
-                  detailAccountForm['controls']['address'].touched &&
-                  detailAccountForm['controls']['address'].errors
-                "
-              >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['address'].errors['required']
-                  "
-                  >Nhập địa chỉ của bạn.</small
-                >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['address'].errors['minlength']
-                  "
-                  >Địa chỉ tối thiểu 10 ký tự.</small
-                >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['address'].errors['maxlength']
-                  "
-                  >Địa chỉ tối đa 100 ký tự</small
-                >
-              </div>
-            </div>
-          </div>
-          <div class="popup-cell phone">
-            <p-floatlabel variant="on">
-              <input
-                pInputText
-                type="text"
-                inputmode="numeric"
-                pattern="[0-9]*"
-                maxlength="10"
-                formControlName="phoneNumber"
-              />
-              <label for="input_phone">Phone number</label>
-            </p-floatlabel>
-            <div class="errMsg-area">
-              <div
-                class="errMsg"
-                *ngIf="
-                  detailAccountForm['controls']['phoneNumber'].touched &&
-                  detailAccountForm['controls']['phoneNumber'].errors
-                "
-              >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['phoneNumber'].errors[
-                      'required'
-                    ]
-                  "
-                  >Nhập điện thoại của bạn.</small
-                >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['phoneNumber'].errors[
-                      'minlength'
-                    ]
-                  "
-                  >Điện thoại tối thiểu 10 ký tự.</small
-                >
-                <small
-                  *ngIf="
-                    detailAccountForm['controls']['phoneNumber'].errors[
-                      'maxlength'
-                    ]
-                  "
-                  >Điện thoại tối đa 15 ký tự</small
-                >
-              </div>
-            </div>
-          </div>
-          <div class="popup-cell avatar">
-            <img
-              src="{{ detailAccountForm.value.avatar }}"
-              alt="Image"
-              width="150px"
-              height="150px"
-              id="avatar"
+    <p-table
+      [value]="listUser"
+      [lazy]="true"
+      [paginator]="false"
+      [loading]="loading"
+      (onLazyLoad)="loadUserLazy()"
+      [resizableColumns]="true"
+      styleClass="p-datatable-gridlines custom-list-user-table"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      [scrollable]="true"
+      scrollHeight="420px"
+    >
+      <ng-template #header>
+        <tr>
+          <th pFrozenColumn style="width: 80px">Action</th>
+          <th pResizableColumn>Username</th>
+          <th pResizableColumn>Họ tên</th>
+          <th pResizableColumn>Email</th>
+          <th pResizableColumn>Vai trò</th>
+          <th style="width: 100px">Trạng thái</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-user>
+        <tr>
+          <td pFrozenColumn style="text-align: center">
+            <p-menu
+              #menu
+              [model]="menuAccountActions"
+              [popup]="true"
+              appendTo="body"
             />
-            <!-- <p-fileupload #fileUpload mode="basic" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" 
-              (onSelect)="selectAvatar($event)" chooseLabel="Chọn ảnh"/> -->
             <p-button
-              id="btn-change-avatar"
-              label="Thay thế"
-              (onClick)="changeAvatar()"
-            ></p-button>
-            <div class="errMsg-area" id="errMsg-avatar">
-              <div
-                class="errMsg"
-                *ngIf="!detailAccountForm.get('avatar')?.value"
-              >
-                <small>Chọn avatar.</small>
-              </div>
-            </div>
-          </div>
+              (click)="openMenuAction($event, menu, user.userID, user.username)"
+              icon="pi pi-list"
+              variant="outlined"
+              label="Action"
+            />
+          </td>
 
-          <div class="popup-cell detail-info">
-            <div class="create">
-              <p-message severity="success" styleClass="custom-detail-pmessage">
-                Thời gian tạo: {{ detailAccountForm.get("createdAt")?.value }}
+          <td>
+            <div
+              style="display: flex; justify-items: start; align-items: center"
+            >
+              <img
+                [alt]="'avatar'"
+                src="{{ user.avatar }}"
+                height="40px"
+                width="40px"
+                style="border-radius: 50%"
+              />
+              <span style="margin-left: 5px">{{ user.username }}</span>
+            </div>
+          </td>
+          <td>{{ user.fullName }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.roles }}</td>
+          <td>
+            <div style="width: fit-content; justify-self: center">
+              <p-message
+                severity="{{
+                  user.statusName === 'Kích hoạt' ? 'success' : 'error'
+                }}"
+              >
+                <span>{{ user.statusName }}</span>
               </p-message>
             </div>
-            <div class="update">
-              <p-message severity="success" styleClass="custom-detail-pmessage"
-                >Cập nhật gần nhất: {{ detailAccountForm.value.updatedAt }}</p-message
-              >
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="11" style="color: red; text-align: center">
+            Không có kết quả
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #summary>
+        <p-paginator
+          (onPageChange)="onPageChange($event)"
+          [first]="first"
+          [totalRecords]="totalRows"
+          [rows]="rows"
+          [rowsPerPageOptions]="rowsPerPageOptions"
+          [appendTo]="body"
+          currentPageReportTemplate="Dòng {first} - {last} trên tổng số {totalRecords} records"
+          [showCurrentPageReport]="true"
+        />
+      </ng-template>
+    </p-table>
+  </div>
+
+  <p-dialog
+    header="Chi tiết tài khoản"
+    [(visible)]="displayDetail"
+    [modal]="true"
+    [style]="{ width: '85%', 'max-width': '1250px' }"
+    (onHide)="closeDialogDetail()"
+  >
+    <ng-template #content>
+      <form action method="post" [formGroup]="detailAccountForm">
+        <div *ngIf="!detailAccountForm">
+          <p style="color: red">Vui lòng thử lại</p>
+        </div>
+        <div *ngIf="detailAccountForm">
+          <div class="popup-detail">
+            <div class="popup-cell fullname">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  id="input_fullname"
+                  formControlName="fullName"
+                  autocomplete="off"
+                />
+                <label for="input_fullname">Fullname</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    detailAccountForm['controls']['fullName'].touched &&
+                    detailAccountForm['controls']['fullName'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['fullName'].errors[
+                        'required'
+                      ]
+                    "
+                    >Nhập tên đầy đủ của bạn.</small
+                  >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['fullName'].errors[
+                        'minlength'
+                      ]
+                    "
+                    >Tên đăng nhập tối thiểu 5 ký tự.</small
+                  >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['fullName'].errors[
+                        'maxlength'
+                      ]
+                    "
+                    >Tên đăng nhập tối đa 100 ký tự</small
+                  >
+                </div>
+              </div>
             </div>
-            <div class="otp">
-              <p-message
-                severity="secondary"
-                styleClass="custom-detail-pmessage"
-                >OTP: {{ detailAccountForm.value.otp || "###" }}</p-message
-              >
+            <div class="popup-cell username">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  id="input_username"
+                  formControlName="username"
+                  autocomplete="off"
+                />
+                <label for="input_username">Username</label>
+              </p-floatlabel>
             </div>
-            <div class="locktime">
-              <p-message
-                severity="warn"
-                variant="outlined"
-                styleClass="custom-detail-pmessage"
-                >Bị khoá gần nhất:
-                {{ detailAccountForm.value.lockTime || "-" }}</p-message
-              >
+            <div class="popup-cell email">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  id="input_email"
+                  formControlName="email"
+                  autocomplete="off"
+                />
+                <label for="input_email">Email</label>
+              </p-floatlabel>
             </div>
-            <div class="remaintime">
-              <p-message
-                severity="warn"
-                variant="outlined"
-                styleClass="custom-detail-pmessage"
-                >Số lần thử còn lại:
-                {{ detailAccountForm.value.remainTime || "###" }}</p-message
-              >
+            <div class="popup-cell date">
+              <p-floatlabel variant="on">
+                <p-datepicker
+                  formControlName="dateOfBirth"
+                  inputId="input_date"
+                  showIcon
+                  iconDisplay="input"
+                  dateFormat="dd/mm/yy"
+                />
+                <label for="input_date">Ngày sinh</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    detailAccountForm['controls']['dateOfBirth'].touched &&
+                    detailAccountForm['controls']['dateOfBirth'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['dateOfBirth'].errors[
+                        'required'
+                      ]
+                    "
+                    >Chọn ngày sinh của bạn.</small
+                  >
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="popup-cell gg">
-            Liên kết với Google:
+            <div class="popup-cell gender">
+              <p-floatlabel variant="on">
+                <p-select
+                  inputId="input_gender"
+                  [options]="genders"
+                  styleClass="w-full"
+                  formControlName="gender"
+                  optionLabel="genderName"
+                  optionValue="genderID"
+                />
+                <label for="input_gender">Giới tính</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    detailAccountForm['controls']['gender'].touched &&
+                    detailAccountForm['controls']['gender'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['gender'].errors['required']
+                    "
+                    >Chọn giới tính của bạn.</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-cell address">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  id="input_address"
+                  formControlName="address"
+                  autocomplete="off"
+                />
+                <label for="input_address">Địa chỉ</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    detailAccountForm['controls']['address'].touched &&
+                    detailAccountForm['controls']['address'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['address'].errors[
+                        'required'
+                      ]
+                    "
+                    >Nhập địa chỉ của bạn.</small
+                  >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['address'].errors[
+                        'minlength'
+                      ]
+                    "
+                    >Địa chỉ tối thiểu 10 ký tự.</small
+                  >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['address'].errors[
+                        'maxlength'
+                      ]
+                    "
+                    >Địa chỉ tối đa 100 ký tự</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-cell phone">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  type="text"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="10"
+                  formControlName="phoneNumber"
+                />
+                <label for="input_phone">Số điện thoại</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    detailAccountForm['controls']['phoneNumber'].touched &&
+                    detailAccountForm['controls']['phoneNumber'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['phoneNumber'].errors[
+                        'required'
+                      ]
+                    "
+                    >Nhập điện thoại của bạn.</small
+                  >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['phoneNumber'].errors[
+                        'minlength'
+                      ]
+                    "
+                    >Điện thoại tối thiểu 10 ký tự.</small
+                  >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['phoneNumber'].errors[
+                        'maxlength'
+                      ]
+                    "
+                    >Điện thoại tối đa 15 ký tự</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-cell avatar">
+              <img
+                src="{{ detailAccountForm.value.avatar }}"
+                alt="Image"
+                width="150px"
+                height="150px"
+                id="avatar"
+              />
+              <!-- <p-fileupload #fileUpload mode="basic" chooseIcon="pi pi-upload" accept="image/*" maxFileSize="1000000" 
+              (onSelect)="selectAvatar($event)" chooseLabel="Chọn ảnh"/> -->
+              <p-button
+                id="btn-change-avatar"
+                label="Thay thế"
+                (onClick)="changeAvatar()"
+              ></p-button>
+              <div class="errMsg-area" id="errMsg-avatar">
+                <div
+                  class="errMsg"
+                  *ngIf="!detailAccountForm.get('avatar')?.value"
+                >
+                  <small>Chọn avatar.</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="popup-cell detail-info">
+              <div class="create">
+                <p-message
+                  severity="success"
+                  styleClass="custom-detail-pmessage"
+                >
+                  Thời gian tạo: {{ detailAccountForm.get("createdAt")?.value }}
+                </p-message>
+              </div>
+              <div class="update">
+                <p-message
+                  severity="success"
+                  styleClass="custom-detail-pmessage"
+                  >Cập nhật gần nhất:
+                  {{ detailAccountForm.value.updatedAt }}</p-message
+                >
+              </div>
+              <div class="otp">
+                <p-message
+                  severity="secondary"
+                  styleClass="custom-detail-pmessage"
+                  >OTP: {{ detailAccountForm.value.otp || "###" }}</p-message
+                >
+              </div>
+              <div class="locktime">
+                <p-message
+                  severity="warn"
+                  variant="outlined"
+                  styleClass="custom-detail-pmessage"
+                  >Bị khoá gần nhất:
+                  {{ detailAccountForm.value.lockTime || "-" }}</p-message
+                >
+              </div>
+              <div class="remaintime">
+                <p-message
+                  severity="warn"
+                  variant="outlined"
+                  styleClass="custom-detail-pmessage"
+                  >Số lần thử còn lại:
+                  {{ detailAccountForm.value.remainTime || "###" }}</p-message
+                >
+              </div>
+            </div>
+            <div class="popup-cell gg">
+              Liên kết với Google:
               <div class="social-login">
                 <p-button
-                  label="{{detailAccountForm.get('isGoogle')?.value && detailAccountForm.get('isGoogle')?.value == true ? 'Đã liên kết' : 'Liên kết với Google'}}"
+                  label="{{
+                    detailAccountForm.get('isGoogle')?.value &&
+                    detailAccountForm.get('isGoogle')?.value == true
+                      ? 'Đã liên kết'
+                      : 'Liên kết với Google'
+                  }}"
                   icon="pi pi-google"
                   styleClass="p-button-rounded p-button-secondary google-btn"
                   (click)="linkGG()"
                 >
                 </p-button>
               </div>
-          </div>
-          <div class="popup-cell fb">
-            Liên kết với Facebook:
+            </div>
+            <div class="popup-cell fb">
+              Liên kết với Facebook:
               <div class="social-login">
                 <p-button
-                  label="{{detailAccountForm.get('isFacebook')?.value && detailAccountForm.get('isFacebook')?.value == true ? 'Đã liên kết' : 'Liên kết với Facebook'}}"
+                  label="{{
+                    detailAccountForm.get('isFacebook')?.value &&
+                    detailAccountForm.get('isFacebook')?.value == true
+                      ? 'Đã liên kết'
+                      : 'Liên kết với Facebook'
+                  }}"
                   icon="pi pi-facebook"
                   styleClass="p-button-rounded p-button-secondary facebook-btn"
                   (click)="linkFB()"
                 >
                 </p-button>
               </div>
-          </div>
+            </div>
 
-          <div class="popup-cell role">
-            <p-message severity="success" styleClass="custom-detail-pmessage"
+            <div class="popup-cell role">
+              <p-message severity="success" styleClass="custom-detail-pmessage"
                 >Vai trò: {{ detailAccountForm.value.roles }}</p-message
               >
-          </div>
-          <div class="popup-cell status">
-            <p-floatlabel variant="on">
-              <p-select
-                inputId="input_status"
-                [options]="status"
-                styleClass="w-full"
-                formControlName="status"
-                optionLabel="statusName"
-                optionValue="statusID"
-                appendTo="body"
-              />
-              <label for="input_status">Status</label>
-            </p-floatlabel>
-            <div class="errMsg-area">
-              <div
-                class="errMsg"
-                *ngIf="
-                  detailAccountForm['controls']['status'].touched &&
-                  detailAccountForm['controls']['status'].errors
-                "
-              >
-                <small
+            </div>
+            <div class="popup-cell status">
+              <p-floatlabel variant="on">
+                <p-select
+                  inputId="input_status"
+                  [options]="status"
+                  styleClass="w-full"
+                  formControlName="status"
+                  optionLabel="statusName"
+                  optionValue="statusID"
+                  appendTo="body"
+                />
+                <label for="input_status">Status</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
                   *ngIf="
-                    detailAccountForm['controls']['status'].errors['required']
+                    detailAccountForm['controls']['status'].touched &&
+                    detailAccountForm['controls']['status'].errors
                   "
-                  >Chọn status của bạn.</small
                 >
+                  <small
+                    *ngIf="
+                      detailAccountForm['controls']['status'].errors['required']
+                    "
+                    >Chọn status của bạn.</small
+                  >
+                </div>
               </div>
             </div>
-          </div>
-          <div class="popup-cell action-btn">
-            <p-button
-              label="Save"
-              icon="pi pi-check"
-              iconPos="right"
-              (onClick)="save()"
-              [disabled]="
-                !detailAccountForm.touched || !hasPermission('edit_users')
-              "
-            />
-            <p-button
-              label="Cancel"
-              icon="pi pi-times"
-              iconPos="right"
-              (onClick)="closeDialogDetail()"
-            />
-          </div>
-          <div class="popup-cell setting-btn">
-            <p-button
-              [disabled]="!hasPermission('delete_users')"
-              label="Delete"
-              icon="pi pi-trash"
-              iconPos="right"
-              (onClick)="deleteUser(detailAccountForm.get('userID')?.value)"
-              severity="danger"
-            />
-            <p-button
-              [disabled]="!hasPermission('view_permissions')"
-              label="Phân quyền"
-              icon="pi pi-shield"
-              iconPos="right"
-              (onClick)="
-                this.displayDetail == true
-                  ? userPermission()
-                  : this.displayPopupCreateUser == true
-                  ? createUserPermission()
-                  : null
-              "
-              severity="success"
-            />
+            <div class="popup-cell action-btn">
+              <p-button
+                label="Save"
+                icon="pi pi-check"
+                iconPos="right"
+                (onClick)="save()"
+                [disabled]="
+                  !detailAccountForm.touched || !hasPermission('edit_users')
+                "
+              />
+              <p-button
+                label="Cancel"
+                icon="pi pi-times"
+                iconPos="right"
+                (onClick)="closeDialogDetail()"
+              />
+            </div>
+            <div class="popup-cell setting-btn">
+              <p-button
+                [disabled]="!hasPermission('delete_users')"
+                label="Delete"
+                icon="pi pi-trash"
+                iconPos="right"
+                (onClick)="deleteUser(detailAccountForm.get('userID')?.value)"
+                severity="danger"
+              />
+              <p-button
+                [disabled]="!hasPermission('view_permissions')"
+                label="Phân quyền"
+                icon="pi pi-shield"
+                iconPos="right"
+                (onClick)="
+                  this.displayDetail == true
+                    ? userPermission()
+                    : this.displayPopupCreateUser == true
+                    ? showNewUserPermission()
+                    : null
+                "
+                severity="success"
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </form>
-  </ng-template>
-</p-dialog>
+      </form>
+    </ng-template>
+  </p-dialog>
 
-<p-dialog
-  header="Thay đổi Avatar"
-  [(visible)]="displayPopupAvatar"
-  [modal]="true"
-  [style]="{ width: '800px', height: '600px' }"
->
-  <div class="popup-avatar">
-    <input
-      #avatarInput
-      type="file"
-      (change)="fileChangeEvent($event)"
-      accept=".jpg,.jpeg,.png"
-    />
+  <p-dialog
+    header="Thay đổi Avatar"
+    [(visible)]="displayPopupAvatar"
+    [modal]="true"
+    [style]="{ width: '800px', height: '600px' }"
+  >
+    <div class="popup-avatar">
+      <input
+        #avatarInput
+        type="file"
+        (change)="fileChangeEvent($event)"
+        accept=".jpg,.jpeg,.png"
+      />
 
-    <image-cropper
-      [imageChangedEvent]="imageChangedEvent"
-      [maintainAspectRatio]="true"
-      [aspectRatio]="1 / 1"
-      [resizeToWidth]="200"
-      [roundCropper]="true"
-      [output]="'base64'"
-      format="png"
-      (imageCropped)="imageCropped($event)"
-      (imageLoaded)="imageLoaded()"
-      (cropperReady)="cropperReady()"
-      (loadImageFailed)="loadImageFailed()"
-      style="height: 400px"
-    ></image-cropper>
+      <image-cropper
+        [imageChangedEvent]="imageChangedEvent"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="1 / 1"
+        [resizeToWidth]="200"
+        [roundCropper]="true"
+        [output]="'base64'"
+        format="png"
+        (imageCropped)="imageCropped($event)"
+        (imageLoaded)="imageLoaded()"
+        (cropperReady)="cropperReady()"
+        (loadImageFailed)="loadImageFailed()"
+        style="height: 400px"
+      ></image-cropper>
 
-    <p-button [disabled]="fileSizeError" (click)="submitToServer()"
-      >Xác nhận</p-button
-    >
-    <div class="errMsg-area">
-      <div class="errMsg" *ngIf="fileSizeError">
-        <small>Kích thước ảnh vượt quá giới hạn cho phép (tối đa 3MB).</small>
+      <p-button [disabled]="fileSizeError" (click)="submitToServer()"
+        >Xác nhận</p-button
+      >
+      <div class="errMsg-area">
+        <div class="errMsg" *ngIf="fileSizeError">
+          <small>Kích thước ảnh vượt quá giới hạn cho phép (tối đa 3MB).</small>
+        </div>
       </div>
     </div>
-  </div>
-</p-dialog>
+  </p-dialog>
 
-<p-dialog
-  header="User role"
-  [(visible)]="displayPopupPermission"
-  [modal]="true"
-  [style]="{ width: '800px', height: '600px' }"
->
-  <p-tabs value="0">
-    <p-tablist>
-      <p-tab value="0">Chọn role</p-tab>
-      <p-tab value="1">Thay đổi quyền của role</p-tab>
-    </p-tablist>
-    <p-tabpanels>
-      <p-tabpanel value="0">
-        <div class="user-role">
-          <p-picklist
-            [source]="listRoles"
-            [target]="selectedRoles"
-            [sourceStyle]="{ height: '500px' }"
-            [targetStyle]="{ height: '100px' }"
-            breakpoint="1400px"
-            [showSourceControls]="false"
-            [showTargetControls]="false"
-            [responsive]="false"
-            (onMoveToSource)="addRoleForUser()"
-            (onMoveToTarget)="addRoleForUser()"
-          >
-            <ng-template #sourceHeader>
-              <div class="header-picklist">
-                <h3>Danh sách role</h3>
-              </div>
-            </ng-template>
-            <ng-template #targetHeader class="header-picklist">
-              <div class="header-picklist">
-                <h3>Role đã chọn</h3>
-              </div>
-            </ng-template>
-            <ng-template let-item #item>
-              {{ item.roleName }}
-            </ng-template>
-          </p-picklist>
-        </div>
-        <div class="action-btn">
-          <p-button (click)="handleAddRoleForUser()" raised="true" [disabled]="!hasPermission('assign_user_permissions')"
-            >Thêm role</p-button
-          >
-          <p-button
-            (click)="refreshUserRole()"
-            severity="secondary"
-            raised="true"
-            >Reset</p-button
-          >
-        </div>
-      </p-tabpanel>
-      <p-tabpanel value="1">
-        <div
-          class="popup-permission"
-          *ngIf="userRoles && userRoles.length > 0; else noRole"
-        >
-          <div class="header-overview-permission">
-            <p-checkbox
-              [(ngModel)]="isAllCatelorySelected"
-              (onChange)="toggleAllCatelory()"
-              binary="true"
-              inputId="allCatelorySelected"
+  <p-dialog
+    header="User role"
+    [(visible)]="displayPopupPermission"
+    [modal]="true"
+    [style]="{ width: '800px', height: '600px' }"
+  >
+    <p-tabs value="0">
+      <p-tablist>
+        <p-tab value="0">Chọn role</p-tab>
+        <p-tab value="1">Thay đổi quyền của role</p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="0">
+          <div class="user-role">
+            <p-picklist
+              [source]="listRoles"
+              [target]="selectedRoles"
+              [sourceStyle]="{ height: '500px' }"
+              [targetStyle]="{ height: '100px' }"
+              breakpoint="1400px"
+              [showSourceControls]="false"
+              [showTargetControls]="false"
+              [responsive]="false"
+              (onMoveToSource)="
+                addRoleForUser(
+                  displayPopupCreateUser == true
+                    ? detailAccountForm.get('userRoleIds')?.value
+                    : []
+                )
+              "
+              (onMoveToTarget)="
+                addRoleForUser(
+                  displayPopupCreateUser == true
+                    ? detailAccountForm.get('userRoleIds')?.value
+                    : []
+                )
+              "
             >
-            </p-checkbox>
-            <label for="allCatelorySelected" style="margin-left: 2px"
-              >Cấp tất cả quyền của các role</label
-            >
-          </div>
-          <div class="header-detail-permission"></div>
-          <div class="overview-permission">
-            <ul class="catelory-permission">
-              <li *ngFor="let role of selectedRoles">
-                <p-button
-                  [label]="role.roleName"
-                  severity="secondary"
-                  styleClass="catelory-permission-btn"
-                  (click)="selectedRoleID = role.roleID"
-                />
-              </li>
-            </ul>
-          </div>
-          <div class="detail-permission">
-            <div
-              *ngIf="rolePermissionsByRoleID[selectedRoleID]; else chooseRole"
-            >
-              <p-tree
-                [value]="rolePermissionsByRoleID[selectedRoleID]"
-                selectionMode="checkbox"
-                [(selection)]="selectedRolePermissionsByRoleID[selectedRoleID]"
-                (selectionChange)="onCatelorySelectionChange()"
-                [propagateSelectionUp]="true"
-                [propagateSelectionDown]="true"
-              >
-              </p-tree>
-            </div>
-            <ng-template #chooseRole>
-              <div style="width: fit-content; justify-self: center">
-                <p-message severity="error">Role không có quyền nào!</p-message>
-              </div>
-            </ng-template>
+              <ng-template #sourceHeader>
+                <div class="header-picklist">
+                  <h3>Danh sách role</h3>
+                </div>
+              </ng-template>
+              <ng-template #targetHeader class="header-picklist">
+                <div class="header-picklist">
+                  <h3>Role đã chọn</h3>
+                </div>
+              </ng-template>
+              <ng-template let-item #item>
+                {{ item.roleName }}
+              </ng-template>
+            </p-picklist>
           </div>
           <div class="action-btn">
             <p-button
               (click)="
                 this.displayDetail == true
-                  ? handleUpdateUserPermission()
+                  ? handleAddRoleForUser()
                   : this.displayPopupCreateUser == true
-                  ? addUserPermission()
+                  ? handleAddNewUserRole()
                   : null
               "
+              raised="true"
               [disabled]="!hasPermission('assign_user_permissions')"
-              >Xác nhận</p-button
+              >Thêm role</p-button
+            >
+            <p-button
+              (click)="
+                refreshUserRole(
+                  detailAccountForm.get('userRoleIds')?.value,
+                  false
+                )
+              "
+              severity="secondary"
+              raised="true"
+              >Reset</p-button
             >
           </div>
-        </div>
-        <ng-template #noRole>
-          <div style="width: fit-content; justify-self: center">
-            <p-message severity="error">User không có role!</p-message>
-          </div>
-        </ng-template>
-      </p-tabpanel>
-    </p-tabpanels>
-  </p-tabs>
-</p-dialog>
-
-<p-dialog
-  header="Tạo user mới"
-  [(visible)]="displayPopupCreateUser"
-  [modal]="true"
-  [style]="{ width: '85%' }"
-  (onHide)="closeDialogCreateUser()"
->
-  <ng-template #content>
-    <form
-      action
-      method="post"
-      [formGroup]="createAccountForm"
-      autocomplete="off"
-    >
-      <div *ngIf="!createAccountForm">
-        <p style="color: red">Vui lòng thử lại</p>
-      </div>
-      <div *ngIf="createAccountForm">
-        <div class="popup-create-user">
-          <div class="popup-create-user-cell userID">
-            <p-floatlabel variant="on">
-              <input
-                pInputText
-                id="input_fullname"
-                formControlName="fullName"
-                autocomplete="off"
-              />
-              <label for="input_fullname">Fullname</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-create-user-cell username">
-            <p-floatlabel variant="on">
-              <input
-                #usernameInput
-                pInputText
-                id="input_username"
-                formControlName="username"
-                autocomplete="off"
-              />
-              <label for="input_username">Username</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-create-user-cell email">
-            <p-floatlabel variant="on">
-              <input
-                #emailInput
-                pInputText
-                id="input_email"
-                formControlName="email"
-                autocomplete="off"
-              />
-              <label for="input_email">Email</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-create-user-cell password">
-            <p-floatlabel variant="on">
-              <p-password
-                formControlName="password"
-                autocomplete="new-password"
-                appendTo="body"
-                [toggleMask]="true"
-                promptLabel="Nhập mật khẩu"
-                weakLabel="Độ bảo mật: Thấp"
-                mediumLabel="Độ bảo mật: Trung bình"
-                strongLabel="Độ bảo mật: Cao"
+        </p-tabpanel>
+        <p-tabpanel value="1">
+          <div
+            class="popup-permission"
+            *ngIf="userRoles && userRoles.length > 0; else noRole"
+          >
+            <div class="header-overview-permission">
+              <p-checkbox
+                [(ngModel)]="isAllCatelorySelected"
+                (onChange)="toggleAllCatelory()"
+                binary="true"
+                inputId="allCatelorySelected"
               >
-                <ng-template #footer>
-                  <p-divider />
-                  <ul class="rule-password">
-                    <li
-                      *ngFor="let item of passwordRules"
-                      [ngClass]="
-                        !passwordErrors_createAccount.hasOwnProperty(
-                          item.settingKey
-                        ) && !passwordDirtied_createAccount
-                          ? ''
-                          : passwordErrors_createAccount[item.settingKey]
-                          ? 'rule-password detail-fail'
-                          : 'rule-password detail-pass'
-                      "
-                    >
-                      <i
+              </p-checkbox>
+              <label for="allCatelorySelected" style="margin-left: 2px"
+                >Cấp tất cả quyền của các role</label
+              >
+            </div>
+            <div class="header-detail-permission"></div>
+            <div class="overview-permission">
+              <ul class="catelory-permission">
+                <li *ngFor="let role of selectedRoles">
+                  <p-button
+                    [label]="role.roleName"
+                    severity="secondary"
+                    styleClass="catelory-permission-btn"
+                    (click)="selectedRoleID = role.roleID"
+                  />
+                </li>
+              </ul>
+            </div>
+            <div class="detail-permission">
+              <div
+                *ngIf="rolePermissionsByRoleID[selectedRoleID]; else chooseRole"
+              >
+                <p-tree
+                  [value]="rolePermissionsByRoleID[selectedRoleID]"
+                  selectionMode="checkbox"
+                  [(selection)]="
+                    selectedRolePermissionsByRoleID[selectedRoleID]
+                  "
+                  (selectionChange)="onCatelorySelectionChange()"
+                  [propagateSelectionUp]="true"
+                  [propagateSelectionDown]="true"
+                >
+                </p-tree>
+              </div>
+              <ng-template #chooseRole>
+                <div style="width: fit-content; justify-self: center">
+                  <p-message severity="error"
+                    >Role không có quyền nào!</p-message
+                  >
+                </div>
+              </ng-template>
+            </div>
+            <div class="action-btn">
+              <p-button
+                (click)="
+                  this.displayDetail == true
+                    ? handleUpdateUserPermission()
+                    : this.displayPopupCreateUser == true
+                    ? handleAddNewUserRole()
+                    : null
+                "
+                [disabled]="!hasPermission('assign_user_permissions')"
+                >Xác nhận</p-button
+              >
+            </div>
+          </div>
+          <ng-template #noRole>
+            <div style="width: fit-content; justify-self: center">
+              <p-message severity="error">User không có role!</p-message>
+            </div>
+          </ng-template>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </p-dialog>
+
+  <p-dialog
+    header="Tạo user mới"
+    [(visible)]="displayPopupCreateUser"
+    [modal]="true"
+    [style]="{ width: '85%' }"
+    (onHide)="closeDialogCreateUser()"
+  >
+    <ng-template #content>
+      <form
+        action
+        method="post"
+        [formGroup]="createAccountForm"
+        autocomplete="off"
+      >
+        <div *ngIf="!createAccountForm">
+          <p style="color: red">Vui lòng thử lại</p>
+        </div>
+        <div *ngIf="createAccountForm">
+          <div class="popup-create-user">
+            <div class="popup-create-user-cell fullname">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  id="input_fullname"
+                  formControlName="fullName"
+                  autocomplete="off"
+                />
+                <label for="input_fullname">Fullname</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    createAccountForm['controls']['fullName'].touched &&
+                    createAccountForm['controls']['fullName'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['fullName'].errors[
+                        'required'
+                      ]
+                    "
+                    >Nhập tên đầy đủ của bạn.</small
+                  >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['fullName'].errors[
+                        'minlength'
+                      ]
+                    "
+                    >Tên đăng nhập tối thiểu 5 ký tự.</small
+                  >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['fullName'].errors[
+                        'maxlength'
+                      ]
+                    "
+                    >Tên đăng nhập tối đa 100 ký tự</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-create-user-cell username">
+              <p-floatlabel variant="on">
+                <input
+                  #usernameInput
+                  pInputText
+                  id="input_username"
+                  formControlName="username"
+                  autocomplete="off"
+                />
+                <label for="input_username">Username</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    createAccountForm['controls']['username'].touched &&
+                    createAccountForm['controls']['username'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['username'].errors[
+                        'required'
+                      ]
+                    "
+                    >Nhập tên tên đăng nhập.</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-create-user-cell email">
+              <p-floatlabel variant="on">
+                <input
+                  #emailInput
+                  pInputText
+                  id="input_email"
+                  formControlName="email"
+                  autocomplete="off"
+                />
+                <label for="input_email">Email</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    createAccountForm['controls']['email'].touched &&
+                    createAccountForm['controls']['email'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['email'].errors['required']
+                    "
+                    >Nhập tên tên email.</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-create-user-cell password">
+              <p-floatlabel variant="on">
+                <p-password
+                  formControlName="password"
+                  autocomplete="new-password"
+                  appendTo="body"
+                  [toggleMask]="true"
+                  promptLabel="Nhập mật khẩu"
+                  weakLabel="Độ bảo mật: Thấp"
+                  mediumLabel="Độ bảo mật: Trung bình"
+                  strongLabel="Độ bảo mật: Cao"
+                >
+                  <ng-template #footer>
+                    <p-divider />
+                    <ul class="rule-password">
+                      <li
+                        *ngFor="let item of passwordRules"
                         [ngClass]="
                           !passwordErrors_createAccount.hasOwnProperty(
                             item.settingKey
                           ) && !passwordDirtied_createAccount
                             ? ''
                             : passwordErrors_createAccount[item.settingKey]
-                            ? 'pi pi-times text-danger'
-                            : 'pi pi-check text-success'
+                            ? 'rule-password detail-fail'
+                            : 'rule-password detail-pass'
                         "
-                      ></i>
-                      {{ item.description }}
-                    </li>
-                  </ul>
-                </ng-template>
-              </p-password>
-              <label for="input_password">Password</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-create-user-cell date">
-            <p-floatlabel variant="on">
-              <p-datepicker
-                formControlName="dateOfBirth"
-                inputId="input_date"
-                showIcon
-                iconDisplay="input"
-                dateFormat="dd/mm/yy"
-                appendTo="body"
-              />
-              <label for="input_date">Date of birth</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-create-user-cell gender">
-            <p-floatlabel variant="on">
-              <p-select
-                inputId="input_gender"
-                [options]="listGender_Create"
-                styleClass="w-full"
-                formControlName="gender"
-                optionLabel="genderName"
-                optionValue="genderID"
-              />
-              <label for="input_gender">Gender</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-create-user-cell address">
-            <p-floatlabel variant="on">
-              <input
-                pInputText
-                id="input_address"
-                formControlName="address"
-                autocomplete="off"
-              />
-              <label for="input_address">Address</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-create-user-cell phone">
-            <p-floatlabel variant="on">
-              <input
-                pInputText
-                type="text"
-                inputmode="numeric"
-                pattern="[0-9]*"
-                maxlength="10"
-                formControlName="phoneNumber"
-              />
-
-              <label for="input_phone">Phone number</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-create-user-cell avatar">
-            <img
-              [src]="
-                createAccountForm.get('avatar')?.value ||
-                'avatar/default-avatar.jpg'
-              "
-              alt="Image"
-              width="150px"
-              height="150px"
-            />
-            <p-button label="Thay thế" (onClick)="changeAvatar()"></p-button>
-
-            <div class="errMsg-area" id="errMsg-avatar">
-              <div
-                class="errMsg"
-                *ngIf="!createAccountForm.get('avatar')?.value"
-              >
-                <small>Chọn avatar.</small>
-              </div>
+                      >
+                        <i
+                          [ngClass]="
+                            !passwordErrors_createAccount.hasOwnProperty(
+                              item.settingKey
+                            ) && !passwordDirtied_createAccount
+                              ? ''
+                              : passwordErrors_createAccount[item.settingKey]
+                              ? 'pi pi-times text-danger'
+                              : 'pi pi-check text-success'
+                          "
+                        ></i>
+                        {{ item.description }}
+                      </li>
+                    </ul>
+                  </ng-template>
+                </p-password>
+                <label for="input_password">Mật khẩu</label>
+              </p-floatlabel>
             </div>
-          </div>
-
-          <div class="popup-create-user-cell role">
-            <p-floatlabel variant="on">
-              <p-select
-                inputId="input_role"
-                [options]="listRole_Create"
-                styleClass="w-full"
-                formControlName="roleID"
-                optionLabel="roleName"
-                optionValue="roleID"
-                appendTo="body"
-                (onChange)="changeRole()"
-              />
-              <label for="input_role">Role</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-create-user-cell status">
-            <p-floatlabel variant="on">
-              <p-select
-                inputId="input_status"
-                [options]="listStatus_Create"
-                styleClass="w-full"
-                formControlName="status"
-                optionLabel="statusName"
-                optionValue="statusID"
-                appendTo="body"
-              />
-              <label for="input_status">Status</label>
-            </p-floatlabel>
-          </div>
-          <div class="popup-create-user-cell action-btn">
-            <p-button
-              label="Tạo mới"
-              icon="pi pi-check"
-              iconPos="right"
-              (onClick)="createUser()"
-              [disabled]="!hasPermission('create_users')"
-            />
-            <p-button
-              label="Cancel"
-              icon="pi pi-times"
-              iconPos="right"
-              (onClick)="closeDialogCreateUser()"
-            />
-          </div>
-          <div class="popup-create-user-cell setting-btn">
-            <p-button
-              [disabled]="!hasPermission('view_permissions')"
-              label="Phân quyền"
-              icon="pi pi-shield"
-              iconPos="right"
-              (onClick)="createUserPermission()"
-              severity="success"
-            />
-          </div>
-        </div>
-      </div>
-    </form>
-  </ng-template>
-</p-dialog>
-
-<p-dialog
-  header="Đổi mật khẩu"
-  [(visible)]="displayChangePassword"
-  [modal]="true"
-  [style]="{ width: '400px', height: '420px' }"
-  (onHide)="closeDialogChangePassword()"
->
-  <form action="" method="post" [formGroup]="changePasswordForm">
-    <div class="popup-change-password">
-      <div class="user-info-cell" *ngIf="!isMe()">
-        <h3>User: {{ userNameSeleted }}</h3>
-      </div>
-      <div class="old-password-cell" *ngIf="isMe()">
-        <p-floatlabel variant="in">
-          <p-password
-            formControlName="oldPassword"
-            autocomplete="off"
-            [toggleMask]="true"
-            [feedback]="false"
-          >
-          </p-password>
-          <label for="input_password">Mật khẩu cũ</label>
-        </p-floatlabel>
-        <div class="errMsg-area">
-          <div
-            class="errMsg"
-            *ngIf="
-              changePasswordForm['controls']['oldPassword'].touched &&
-              changePasswordForm['controls']['oldPassword'].errors
-            "
-          >
-            <small
-              *ngIf="
-                changePasswordForm['controls']['oldPassword'].errors['required']
-              "
-              >Nhập mật khẩu cũ của bạn.</small
-            >
-          </div>
-        </div>
-      </div>
-      <div class="new-password-cell">
-        <p-floatlabel variant="in">
-          <p-password
-            formControlName="newPassword"
-            autocomplete="off"
-            appendTo="body"
-            [toggleMask]="true"
-            promptLabel="Nhập mật khẩu"
-            weakLabel="Độ bảo mật: Thấp"
-            mediumLabel="Độ bảo mật: Trung bình"
-            strongLabel="Độ bảo mật: Cao"
-          >
-            <ng-template #footer>
-              <p-divider />
-              <ul class="rule-password">
-                <li
-                  *ngFor="let item of passwordRules"
-                  [ngClass]="
-                    !passwordDirtied_changePassword
-                      ? ''
-                      : passwordErrors_changePassword[item.settingKey]
-                      ? 'rule-password detail-fail'
-                      : 'rule-password detail-pass'
+            <div class="popup-create-user-cell date">
+              <p-floatlabel variant="on">
+                <p-datepicker
+                  formControlName="dateOfBirth"
+                  inputId="input_date"
+                  showIcon
+                  iconDisplay="input"
+                  dateFormat="dd/mm/yy"
+                  appendTo="body"
+                />
+                <label for="input_date">Ngày sinh</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    createAccountForm['controls']['dateOfBirth'].touched &&
+                    createAccountForm['controls']['dateOfBirth'].errors
                   "
                 >
-                  <i
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['dateOfBirth'].errors[
+                        'required'
+                      ]
+                    "
+                    >Chọn ngày sinh của bạn.</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-create-user-cell gender">
+              <p-floatlabel variant="on">
+                <p-select
+                  inputId="input_gender"
+                  [options]="listGender_Create"
+                  styleClass="w-full"
+                  formControlName="gender"
+                  optionLabel="genderName"
+                  optionValue="genderID"
+                />
+                <label for="input_gender">Giới tính</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    createAccountForm['controls']['gender'].touched &&
+                    createAccountForm['controls']['gender'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['gender'].errors['required']
+                    "
+                    >Chọn giới tính của bạn.</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-create-user-cell address">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  id="input_address"
+                  formControlName="address"
+                  autocomplete="off"
+                />
+                <label for="input_address">Địa chỉ</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    createAccountForm['controls']['address'].touched &&
+                    createAccountForm['controls']['address'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['address'].errors[
+                        'required'
+                      ]
+                    "
+                    >Nhập địa chỉ của bạn.</small
+                  >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['address'].errors[
+                        'minlength'
+                      ]
+                    "
+                    >Địa chỉ tối thiểu 10 ký tự.</small
+                  >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['address'].errors[
+                        'maxlength'
+                      ]
+                    "
+                    >Địa chỉ tối đa 100 ký tự</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-create-user-cell phone">
+              <p-floatlabel variant="on">
+                <input
+                  pInputText
+                  type="text"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="10"
+                  formControlName="phoneNumber"
+                />
+
+                <label for="input_phone">Số điện thoại</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    createAccountForm['controls']['phoneNumber'].touched &&
+                    createAccountForm['controls']['phoneNumber'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['phoneNumber'].errors[
+                        'required'
+                      ]
+                    "
+                    >Nhập điện thoại của bạn.</small
+                  >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['phoneNumber'].errors[
+                        'minlength'
+                      ]
+                    "
+                    >Điện thoại tối thiểu 10 ký tự.</small
+                  >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['phoneNumber'].errors[
+                        'maxlength'
+                      ]
+                    "
+                    >Điện thoại tối đa 15 ký tự</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-create-user-cell avatar">
+              <img
+                [src]="
+                  createAccountForm.get('avatar')?.value ||
+                  'avatar/default-avatar.jpg'
+                "
+                alt="Image"
+                width="150px"
+                height="150px"
+              />
+              <p-button label="Thay thế" (onClick)="changeAvatar()"></p-button>
+
+              <div class="errMsg-area" id="errMsg-avatar">
+                <div
+                  class="errMsg"
+                  *ngIf="!createAccountForm.get('avatar')?.value"
+                >
+                  <small>Chọn avatar.</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="popup-create-user-cell status">
+              <p-floatlabel variant="on">
+                <p-select
+                  inputId="input_status"
+                  [options]="listStatus_Create"
+                  styleClass="w-full"
+                  formControlName="status"
+                  optionLabel="statusName"
+                  optionValue="statusID"
+                  appendTo="body"
+                />
+                <label for="input_status">Status</label>
+              </p-floatlabel>
+              <div class="errMsg-area">
+                <div
+                  class="errMsg"
+                  *ngIf="
+                    createAccountForm['controls']['status'].touched &&
+                    createAccountForm['controls']['status'].errors
+                  "
+                >
+                  <small
+                    *ngIf="
+                      createAccountForm['controls']['status'].errors['required']
+                    "
+                    >Chọn status của bạn.</small
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="popup-create-user-cell action-btn">
+              <p-button
+                label="Tạo mới"
+                icon="pi pi-check"
+                iconPos="right"
+                (onClick)="handleCreateUser()"
+                [disabled]="!hasPermission('create_users')"
+              />
+              <p-button
+                label="Cancel"
+                icon="pi pi-times"
+                iconPos="right"
+                (onClick)="closeDialogCreateUser()"
+              />
+            </div>
+            <div class="popup-create-user-cell setting-btn">
+              <p-button
+                [disabled]="!hasPermission('view_permissions')"
+                label="Phân quyền"
+                icon="pi pi-shield"
+                iconPos="right"
+                (onClick)="showNewUserPermission()"
+                severity="success"
+              />
+            </div>
+          </div>
+        </div>
+      </form>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    header="Đổi mật khẩu"
+    [(visible)]="displayChangePassword"
+    [modal]="true"
+    [style]="{ width: '400px', height: '420px' }"
+    (onHide)="closeDialogChangePassword()"
+  >
+    <form action="" method="post" [formGroup]="changePasswordForm">
+      <div class="popup-change-password">
+        <div class="user-info-cell" *ngIf="!isMe()">
+          <h3>User: {{ userNameSeleted }}</h3>
+        </div>
+        <div class="old-password-cell" *ngIf="isMe()">
+          <p-floatlabel variant="in">
+            <p-password
+              formControlName="oldPassword"
+              autocomplete="off"
+              [toggleMask]="true"
+              [feedback]="false"
+            >
+            </p-password>
+            <label for="input_password">Mật khẩu cũ</label>
+          </p-floatlabel>
+          <div class="errMsg-area">
+            <div
+              class="errMsg"
+              *ngIf="
+                changePasswordForm['controls']['oldPassword'].touched &&
+                changePasswordForm['controls']['oldPassword'].errors
+              "
+            >
+              <small
+                *ngIf="
+                  changePasswordForm['controls']['oldPassword'].errors[
+                    'required'
+                  ]
+                "
+                >Nhập mật khẩu cũ của bạn.</small
+              >
+            </div>
+          </div>
+        </div>
+        <div class="new-password-cell">
+          <p-floatlabel variant="in">
+            <p-password
+              formControlName="newPassword"
+              autocomplete="off"
+              appendTo="body"
+              [toggleMask]="true"
+              promptLabel="Nhập mật khẩu"
+              weakLabel="Độ bảo mật: Thấp"
+              mediumLabel="Độ bảo mật: Trung bình"
+              strongLabel="Độ bảo mật: Cao"
+            >
+              <ng-template #footer>
+                <p-divider />
+                <ul class="rule-password">
+                  <li
+                    *ngFor="let item of passwordRules"
                     [ngClass]="
                       !passwordDirtied_changePassword
                         ? ''
                         : passwordErrors_changePassword[item.settingKey]
-                        ? 'pi pi-times text-danger'
-                        : 'pi pi-check text-success'
+                        ? 'rule-password detail-fail'
+                        : 'rule-password detail-pass'
                     "
-                  ></i>
-                  {{ item.description }}
-                </li>
-              </ul>
-            </ng-template>
-          </p-password>
-          <label for="input_password">Mật khẩu mới</label>
-        </p-floatlabel>
-        <div class="errMsg-area">
-          <div
-            class="errMsg"
-            *ngIf="
-              !changePasswordForm.get('newPassword')?.valid &&
-              passwordDirtied_changePassword
+                  >
+                    <i
+                      [ngClass]="
+                        !passwordDirtied_changePassword
+                          ? ''
+                          : passwordErrors_changePassword[item.settingKey]
+                          ? 'pi pi-times text-danger'
+                          : 'pi pi-check text-success'
+                      "
+                    ></i>
+                    {{ item.description }}
+                  </li>
+                </ul>
+              </ng-template>
+            </p-password>
+            <label for="input_password">Mật khẩu mới</label>
+          </p-floatlabel>
+          <div class="errMsg-area">
+            <div
+              class="errMsg"
+              *ngIf="
+                !changePasswordForm.get('newPassword')?.valid &&
+                passwordDirtied_changePassword
+              "
+            >
+              <small>Nhập mật khẩu theo quy tắc.</small>
+            </div>
+          </div>
+        </div>
+        <div class="confirm-password-cell">
+          <p-floatlabel variant="in">
+            <p-password
+              formControlName="confirmNewPassword"
+              autocomplete="off"
+              [toggleMask]="true"
+              [feedback]="false"
+            >
+            </p-password>
+            <label for="input_password">Xác nhận mật khẩu</label>
+          </p-floatlabel>
+          <div class="errMsg-area">
+            <div
+              class="errMsg"
+              *ngIf="changePasswordForm.errors?.['passwordMismatch'] && changePasswordForm.get('confirmNewPassword')?.touched"
+            >
+              <small>Mật khẩu nhập lại không khớp.</small>
+            </div>
+          </div>
+        </div>
+        <div class="action-btn-cell">
+          <p-button
+            label="Save"
+            icon="pi pi-check"
+            iconPos="right"
+            (onClick)="handleChangePassword()"
+            [disabled]="
+              !changePasswordForm.dirty ||
+              !changePasswordForm.valid ||
+              !hasPermission('edit_users')
             "
-          >
-            <small>Nhập mật khẩu theo quy tắc.</small>
-          </div>
+          />
+          <p-button
+            label="Cancel"
+            icon="pi pi-times"
+            iconPos="right"
+            (onClick)="closeDialogChangePassword()"
+          />
         </div>
       </div>
-      <div class="confirm-password-cell">
-        <p-floatlabel variant="in">
-          <p-password
-            formControlName="confirmNewPassword"
-            autocomplete="off"
-            [toggleMask]="true"
-            [feedback]="false"
-          >
-          </p-password>
-          <label for="input_password">Xác nhận mật khẩu</label>
-        </p-floatlabel>
-        <div class="errMsg-area">
-          <div
-            class="errMsg"
-            *ngIf="changePasswordForm.errors?.['passwordMismatch'] && changePasswordForm.get('confirmNewPassword')?.touched"
-          >
-            <small>Mật khẩu nhập lại không khớp.</small>
-          </div>
-        </div>
-      </div>
-      <div class="action-btn-cell">
-        <p-button
-          label="Save"
-          icon="pi pi-check"
-          iconPos="right"
-          (onClick)="handleChangePassword()"
-          [disabled]="
-            !changePasswordForm.dirty ||
-            !changePasswordForm.valid ||
-            !hasPermission('edit_users')
-          "
-        />
-        <p-button
-          label="Cancel"
-          icon="pi pi-times"
-          iconPos="right"
-          (onClick)="closeDialogChangePassword()"
-        />
-      </div>
-    </div>
-  </form>
-</p-dialog>
+    </form>
+  </p-dialog>
+</div>
+
+<p-toast />

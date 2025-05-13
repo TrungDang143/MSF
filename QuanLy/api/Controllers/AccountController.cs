@@ -21,12 +21,6 @@ namespace api.Controllers
             _tokenService = tokenService;
         }
 
-        [HttpGet("userInfo")]
-        public async Task<BaseResponse> GetUserInfo([FromQuery] GetUserInfoInDto inputDto)
-        {
-            return await _account.GetUserInfo(inputDto);
-        }
-
         [HasPermission("view_users")]
         [HttpGet("GetAccounts")]
         public async Task<BaseResponse> GetAccounts([FromQuery]GetAccountsDto inputDto)
@@ -34,30 +28,20 @@ namespace api.Controllers
             return await _account.GetAccounts(inputDto);
         }
 
-        [HasPermission("view_users")]
         [HttpGet("GetRole")]
         public async Task<BaseResponse> GetRole([FromQuery]GetRoleDto inputDto)
         {
             return await _account.GetRole(inputDto);
         }
 
-        //[HasPermission("view_users")]
-        //[HttpGet("GetRoleByPaging")]
-        //public async Task<BaseResponse> GetRoleByPaging([FromQuery] GetRoleDto inputDto)
-        //{
-        //    return await _account.GetRoleByPaging(inputDto);
-        //}
-
-        [HasPermission("edit_users")]
         [HttpGet("GetDetailUserInfo")]
         public async Task<BaseResponse> GetDetailUserInfo([FromQuery] GetDetailUserInfoInDto inputDto)
         {
             return await _account.GetDetailUserInfo(inputDto);
         }
 
-        [HasPermission("edit_users")]
-        [HttpPost("UpdateUser")]
-        public async Task<BaseResponse> UpdateUser([FromBody] UpdateUserDto inputDto)
+        [HttpPost("UpdateUserInfo")]
+        public async Task<BaseResponse> UpdateUserInfo([FromBody] UpdateUserDto inputDto)
         {
             if (!ModelState.IsValid)
             {
@@ -66,7 +50,7 @@ namespace api.Controllers
 
             string? username = User.Identity?.Name;
             int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
-            return await _account.UpdateUser(inputDto, username, roleID);
+            return await _account.UpdateUserInfo(inputDto, username, roleID);
         }
 
         [HasPermission("delete_users")]
@@ -77,25 +61,21 @@ namespace api.Controllers
             return await _account.DeleteUser(inputDto, userID);
         }
 
-        [HasPermission("view_permissions")]
-        [HttpGet("GetAllUserPermission")]
-        public async Task<BaseResponse> GetAllUserPermission([FromQuery] GetAllUserPermissionDto inputDto)
-        {
-            int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
-            return await _account.GetAllUserPermission(inputDto, roleID);
-        }
-
         [HasPermission("create_users")]
-        [HttpGet("GetRoleGenderStatus")]
-        public async Task<BaseResponse> GetRoleGenderStatus()
+        [HttpGet("GetGenderStatus")]
+        public async Task<BaseResponse> GetGenderStatus()
         {
-            return await _account.GetRoleGenderStatus();
+            return await _account.GetGenderStatus();
         }
 
         [HasPermission("create_users")]
         [HttpPost("CreateUser")]
         public async Task<BaseResponse> CreateUser([FromBody]CreateUserDto inputDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return AppConstant.INVALID_MODEL();
+            }
             int.TryParse(User.FindFirst(ClaimTypes.Role)?.Value, out int roleID);
             return await _account.CreateUser(inputDto, roleID);
         }
@@ -131,10 +111,10 @@ namespace api.Controllers
 
         [HasPermission("admin.login_users")]
         [HttpGet("LoginUser")]
-        public BaseResponse LoginUser([FromQuery] LoginUserDto inputDto)
+        public async Task<BaseResponse> LoginUser([FromQuery] LoginUserDto inputDto)
         {
             string? username = User.Identity?.Name;
-            string token = _tokenService.GenerateToken(inputDto.username, true);
+            string token = await _tokenService.GenerateToken(inputDto.username, true);
 
             inputDto.token = token;
 

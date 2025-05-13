@@ -18,6 +18,34 @@
             />
             <label for="input_fullname">Fullname</label>
           </p-floatlabel>
+          <div class="errMsg-area">
+            <div
+              class="errMsg"
+              *ngIf="
+                detailAccountForm['controls']['fullName'].touched &&
+                detailAccountForm['controls']['fullName'].errors
+              "
+            >
+              <small
+                *ngIf="
+                  detailAccountForm['controls']['fullName'].errors['required']
+                "
+                >Nhập tên đầy đủ của bạn.</small
+              >
+              <small
+                *ngIf="
+                  detailAccountForm['controls']['fullName'].errors['minlength']
+                "
+                >Tên đăng nhập tối thiểu 5 ký tự.</small
+              >
+              <small
+                *ngIf="
+                  detailAccountForm['controls']['fullName'].errors['maxlength']
+                "
+                >Tên đăng nhập tối đa 100 ký tự</small
+              >
+            </div>
+          </div>
         </div>
         <div class="popup-cell username">
           <p-floatlabel variant="on">
@@ -51,8 +79,26 @@
               dateFormat="dd/mm/yy"
               appendTo="body"
             />
-            <label for="input_date">Date of birth</label>
+            <label for="input_date">Ngày sinh</label>
           </p-floatlabel>
+          <div class="errMsg-area">
+            <div
+              class="errMsg"
+              *ngIf="
+                detailAccountForm['controls']['dateOfBirth'].touched &&
+                detailAccountForm['controls']['dateOfBirth'].errors
+              "
+            >
+              <small
+                *ngIf="
+                  detailAccountForm['controls']['dateOfBirth'].errors[
+                    'required'
+                  ]
+                "
+                >Chọn ngày sinh của bạn.</small
+              >
+            </div>
+          </div>
         </div>
         <div class="popup-cell gender">
           <p-floatlabel variant="on">
@@ -64,8 +110,24 @@
               optionLabel="genderName"
               optionValue="genderID"
             />
-            <label for="input_gender">Gender</label>
+            <label for="input_gender">Giới tính</label>
           </p-floatlabel>
+          <div class="errMsg-area">
+            <div
+              class="errMsg"
+              *ngIf="
+                detailAccountForm['controls']['gender'].touched &&
+                detailAccountForm['controls']['gender'].errors
+              "
+            >
+              <small
+                *ngIf="
+                  detailAccountForm['controls']['gender'].errors['required']
+                "
+                >Chọn giới tính của bạn.</small
+              >
+            </div>
+          </div>
         </div>
         <div class="popup-cell address">
           <p-floatlabel variant="on">
@@ -89,8 +151,42 @@
               formControlName="phoneNumber"
             />
 
-            <label for="input_phone">Phone number</label>
+            <label for="input_phone">Số điện thoại</label>
           </p-floatlabel>
+          <div class="errMsg-area">
+            <div
+              class="errMsg"
+              *ngIf="
+                detailAccountForm['controls']['phoneNumber'].touched &&
+                detailAccountForm['controls']['phoneNumber'].errors
+              "
+            >
+              <small
+                *ngIf="
+                  detailAccountForm['controls']['phoneNumber'].errors[
+                    'required'
+                  ]
+                "
+                >Nhập điện thoại của bạn.</small
+              >
+              <small
+                *ngIf="
+                  detailAccountForm['controls']['phoneNumber'].errors[
+                    'minlength'
+                  ]
+                "
+                >Điện thoại tối thiểu 10 ký tự.</small
+              >
+              <small
+                *ngIf="
+                  detailAccountForm['controls']['phoneNumber'].errors[
+                    'maxlength'
+                  ]
+                "
+                >Điện thoại tối đa 15 ký tự</small
+              >
+            </div>
+          </div>
         </div>
         <div class="popup-cell avatar">
           <img
@@ -110,11 +206,18 @@
         </div>
         <div class="popup-cell role-status">
           <p-message severity="success" styleClass="p-message"
-            >Role: {{ detailAccountForm.value.roleID }}</p-message
+            >Role: {{ detailAccountForm.value.roles }}</p-message
           >
-          <p-message severity="success" styleClass="p-message"
-            >Status: {{ detailAccountForm.value.statusName }}</p-message
+          <p-message
+            severity="{{
+              detailAccountForm.value.status == 1 ? 'success' : 'error'
+            }}"
+            styleClass="p-message"
           >
+            <span>Status: {{
+               detailAccountForm.value.status == 1 ? "Kích hoạt" : "Vô hiệu hoá"
+            }}</span>
+          </p-message>
         </div>
 
         <div class="popup-cell gg">
@@ -136,6 +239,7 @@
                 icon="pi pi-google"
                 class="p-button-rounded p-button-secondary google-btn"
                 styleClass="google-btn"
+                (click)="linkGG()"
               >
               </p-button>
             </div>
@@ -160,6 +264,7 @@
                 icon="pi pi-facebook"
                 class="p-button-rounded p-button-secondary facebook-btn"
                 styleClass="facebook-btn"
+                (click)="linkFB()"
               >
               </p-button>
             </div>
@@ -208,7 +313,8 @@
       style="height: 400px"
     ></image-cropper>
     <p-button [disabled]="fileSizeError" (click)="submitToServer()"
-      >Xác nhận</p-button>
+      >Xác nhận</p-button
+    >
     <div class="errMsg-area">
       <div class="errMsg" *ngIf="fileSizeError">
         <small>Kích thước ảnh vượt quá giới hạn cho phép (tối đa 3MB).</small>

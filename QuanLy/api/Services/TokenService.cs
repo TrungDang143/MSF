@@ -64,21 +64,28 @@ namespace api.Services
                 return false;
             }
         }
-        public string GenerateToken(string username, bool isAdminLogin)
+
+        private class UserTokenInfo
+        {
+            public List<string> Permissions { get; set; } = new();
+            public int RoleID { get; set; }
+        }
+
+        public async Task<string> GenerateToken(string username, bool isAdminLogin)
         {
             var jwtSettings = _config.GetSection("Jwt");
             var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
             int userID = GetUserIDByUsername(username);
-             
-            GetUserInfoForToken(userID, out List<string> permissionNames, out int roleID);
+
+            UserTokenInfo data = await GetUserInfoForToken(userID);
 
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
                 new Claim("userID", userID.ToString()),
-                new Claim(ClaimTypes.Role, roleID.ToString()),
-                new Claim("permissions", string.Join(",", permissionNames)),
+                new Claim(ClaimTypes.Role, data.RoleID.ToString()),
+                new Claim("permissions", string.Join(",", data.Permissions)),
                 new Claim("isAdminLogin", isAdminLogin.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
@@ -159,32 +166,34 @@ namespace api.Services
         /// </summary>
         /// <param name="userID"></param>
         /// <returns></returns>
-        private void GetUserInfoForToken(int userID, out List<string> listPermission, out int roleID)
+        private async Task<UserTokenInfo> GetUserInfoForToken(int userID)
         {
-            listPermission = new List<string>();
-            roleID = 0;
+            var listPermission = new List<string>();
+            int roleID = 0;
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(AppConstant.CONNECTION_STRING))
                 {
-                    conn.Open();
-
+                    await conn.OpenAsync();
 
                     using (SqlCommand cmd = new SqlCommand("sp_GetAllPermissionsForUser", conn))
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@UserID", userID);
                         cmd.Parameters.AddWithValue("@isAdmin", true);
 
                         DataTable dt = new DataTable();
-                        adapter.Fill(dt);
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                        {
+                            dt.Load(reader);
+                        }
 
                         foreach (DataRow dr in dt.Rows)
                         {
                             listPermission.Add(dr[2].ToString());
-                            string role = dr[0].ToString();
-                            if (int.Parse(role) == 1)
+
+                            if (int.TryParse(dr[0].ToString(), out int parsedRoleId) && parsedRoleId == 1)
                             {
                                 roleID = 1;
                             }
@@ -194,9 +203,17 @@ namespace api.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
+
+            UserTokenInfo dataOut = new UserTokenInfo()
+            {
+                Permissions = listPermission,
+                RoleID = roleID
+            };
+            return dataOut;
         }
+
 
         public async Task<bool> IsValidUser(string username, bool isAdminLogin = false)
         {

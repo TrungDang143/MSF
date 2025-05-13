@@ -28,7 +28,6 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       if (error.status === 403) {
-        console.log('day roi');
         pop.showOkPopup({message: "Bạn không có quyền truy cập chức năng này!"})
         return EMPTY;
       }

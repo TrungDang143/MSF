@@ -12,7 +12,7 @@ export class AccountService {
 
   constructor(private http: HttpClient) { }
 
-  GetAccounts(filter?: any): Observable<any>{
+  GetAccounts(filter?: {username?: string, fullname?: string, roleID?: number, permissionID?: number, pageSize?: number, pageNumber?: number}): Observable<any>{
     const url = environment.baseUrl + "Account/GetAccounts"
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     let params = new HttpParams();
@@ -53,14 +53,8 @@ export class AccountService {
     return this.http.get(url, { headers, params});
   }
 
-  GetDetailUserInfoByUsername(username: string): Observable<any>{
-    const url = environment.baseUrl + "Account/userInfo"
-    const params = new HttpParams().set('Username', username)
-    return this.http.get(url, { params});
-  }
-
-  UpdateUser(userInfo: any): Observable<any>{
-    const url = environment.baseUrl + "Account/UpdateUser";
+  UpdateUserInfo(userInfo: any): Observable<any>{
+    const url = environment.baseUrl + "Account/UpdateUserInfo";
     return this.http.post(url, userInfo);
   }
 
@@ -70,18 +64,8 @@ export class AccountService {
     return this.http.get(url, {params})
   }
 
-  GetAllUserPermission(userID: number): Observable<any>{
-    const params = new HttpParams().set('userID', userID)
-    return this.http.get(environment.baseUrl + "Account/GetAllUserPermission", {params})
-  }
-
-  // UpdateUserPermission(userID: number, permissionIDs: number[]): Observable<any>{
-  //   const body = {userID: userID, permissionIds: permissionIDs};
-  //   return this.http.post(environment.baseUrl + "Account/UpdateUserPermission", body, {headers: environment.headers})
-  // }
-
-  GetRoleGenderStatus(): Observable<any>{
-    return this.http.get(environment.baseUrl + "Account/GetRoleGenderStatus");
+  GetGenderStatus(): Observable<any>{
+    return this.http.get(environment.baseUrl + "Account/GetGenderStatus");
   }
 
   CreateUser(userInfo: any): Observable<any>{

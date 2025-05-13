@@ -21,12 +21,12 @@ namespace api.Controllers
         }
 
         [HttpPost]
-        public BaseResponse Login([FromBody] LoginInputDto inputDto)
+        public async Task<BaseResponse> Login([FromBody] LoginInputDto inputDto)
         {
             var res =  _login.Login(inputDto);
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
-                string token = _tokenService.GenerateToken(inputDto.UsernameOrEmail, false);
+                string token = await _tokenService.GenerateToken(inputDto.UsernameOrEmail, false);
                 res.Data = new
                 {
                     token
@@ -36,13 +36,13 @@ namespace api.Controllers
         }
 
         [HttpPost("login-with-facebook")]
-        public BaseResponse FBLogin([FromBody] FindUserByFBIDDto inputDto)
+        public async Task<BaseResponse> FBLogin([FromBody] FindUserByFBIDDto inputDto)
         {
             var res = _login.FindUserByFBID(inputDto);
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
                 string username = res.Data.ToString();
-                string token = _tokenService.GenerateToken(username, false);
+                string token = await _tokenService.GenerateToken(username, false);
                 res.Data = new
                 {
                     token
@@ -52,13 +52,13 @@ namespace api.Controllers
         }
 
         [HttpPost("login-with-google")]
-        public BaseResponse GGLogin([FromBody] FindUserByGGIDDto inputDto)
+        public async Task<BaseResponse> GGLogin([FromBody] FindUserByGGIDDto inputDto)
         {
             var res = _login.FindUserByGGID(inputDto).Result;
             if (res.Result == AppConstant.RESULT_SUCCESS)
             {
                 string username = res.Data.ToString();
-                string token = _tokenService.GenerateToken(username, false);
+                string token = await _tokenService.GenerateToken(username, false);
                 res.Data = new
                 {
                     token

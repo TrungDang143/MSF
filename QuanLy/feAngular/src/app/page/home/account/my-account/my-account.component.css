@@ -120,20 +120,12 @@
   background-color: #db4437 !important;
   border: none;
   color: white;
-
-  &:hover {
-    background-color: #c23321;
-  }
 }
 
 ::ng-deep .facebook-btn {
   background-color: #4267b2 !important;
   border: none;
   color: white;
-
-  &:hover {
-    background-color: #37589b;
-  }
 }
 
 .popup-cell {

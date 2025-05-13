@@ -84,8 +84,9 @@ export class LoginComponent implements AfterViewInit, OnInit {
     if (this.loginForm.invalid) {
       this.pop.showOkPopup({
         message:
-          'Kiểm tra lại thông tin đăng nhập: ' + this.getInvalidControl(),
+          'Kiểm tra lại thông tin đăng nhập!',
       });
+      this.loginForm.markAllAsTouched();
       this.loadCaptcha();
       //this.focusInvalidControl();
       return;
@@ -147,21 +148,21 @@ export class LoginComponent implements AfterViewInit, OnInit {
     });
   }
 
-  getInvalidControl(): string {
-    const invalidControl = Object.keys(this.loginForm.controls).find(
-      (key) => this.loginForm.controls[key].invalid
-    );
+  // getInvalidControl(): string {
+  //   const invalidControl = Object.keys(this.loginForm.controls).find(
+  //     (key) => this.loginForm.controls[key].invalid
+  //   );
 
-    if (invalidControl) {
-      const element = document.getElementById(invalidControl);
-      if (element) {
-        // element.focus();
-        return element.id;
-      }
-    }
+  //   if (invalidControl) {
+  //     const element = document.getElementById(invalidControl);
+  //     if (element) {
+  //       // element.focus();
+  //       return element.id;
+  //     }
+  //   }
 
-    return '###';
-  }
+  //   return '###';
+  // }
 
   // focusInvalidControl() {
   //   const invalidControl = Object.keys(this.loginForm.controls).find(

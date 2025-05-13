@@ -72,10 +72,12 @@ export class AuthService {
         : payload.permissions.split(',')
       : [];
     const isAdminLogin = payload.isAdminLogin;
+    const userID = payload.userID;
     const storage = rememberMe ? localStorage : sessionStorage;
 
     storage.setItem('token', token);
     storage.setItem('user', username);
+    storage.setItem('userID', userID);
     storage.setItem('role', role);
     storage.setItem('isAdminLogin', isAdminLogin);
     storage.setItem('permissions', JSON.stringify(permissions));
@@ -83,6 +85,10 @@ export class AuthService {
 
   getUser(): string {
     return localStorage.getItem('user') || sessionStorage.getItem('user') || '';
+  }
+
+  getUserID(): number {
+    return Number(localStorage.getItem('userID') || sessionStorage.getItem('userID') || 0);
   }
 
   getRole(): string {
